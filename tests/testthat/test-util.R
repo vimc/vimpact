@@ -9,7 +9,7 @@ test_that("null-or-value works", {
 
 test_that("not_if_finite works", {
   expect_true(not_is_finite(NaN))
-  expect_true(not_is_finite("c"))
+  expect_false(not_is_finite(1L))
   expect_true(not_is_finite(Inf))
   expect_true(not_is_finite(-Inf))
 })
