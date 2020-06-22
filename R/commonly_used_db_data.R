@@ -44,13 +44,13 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
   
   ## 1. touchstone specification 
   ## which coverage touchstone to use - given touchstone name, use the latest version touchstone
-  touchstone_cov <- get_touchstone(touchstone_cov)
+  touchstone_cov <- get_touchstone(con, touchstone_cov)
   
   ## which demographic touchstone to use
   if (is.null(touchstone_pop)) {
     touchstone_pop <- touchstone_cov
   } else {
-    touchstone_pop <- get_touchstone(touchstone_pop)
+    touchstone_pop <- get_touchstone(con, touchstone_pop)
   }
   
   
@@ -59,7 +59,7 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
   print("Extracted interpolated population.")
   
   ## select minimal needed coverage data from the db
-  cov_sets <- DBI::dbGetQuery(con, sprintf("SELECT scenario_type, disease, coverage_set.id AS coverage_set, vaccine, activity_type, gavi_support_level, 
+  cov_sets <- DBI::dbGetQuery(con, sprintf("SELECT scenario_type, disease, coverage_set.id AS coverage_set, vaccine, activity_type, gavi_support_level 
                               FROM scenario
                               JOIN scenario_coverage_set
                               ON scenario_coverage_set.scenario = scenario.id
@@ -67,7 +67,7 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
                               ON coverage_set.id = scenario_coverage_set.coverage_set
                               JOIN scenario_description
                               ON scenario_description.id = scenario.scenario_description
-                              WHERE touchstone = $1
+                              WHERE scenario.touchstone = $1
                               AND scenario_type IN %s
                               AND gavi_support_level IN %s
                               AND vaccine NOT IN %s",
@@ -76,9 +76,9 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
                               jenner:::sql_in(vaccine_to_ignore)), touchstone_cov)
   
   cov <- DBI::dbGetQuery(con, sprintf("SELECT coverage_set, country, year, age_from, age_to, gender.name AS gender, gavi_support, target, coverage 
-                                      coverage 
+                                      FROM coverage 
                                       JOIN gender ON gender.id = gender
-                                      WHERE coverage_set.id IN %s
+                                      WHERE coverage_set IN %s
                                       AND coverage > 0
                                       AND year IN %s", 
                                       jenner:::sql_in(cov_sets$coverage_set, text_item = FALSE),
@@ -130,13 +130,13 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
   cov2$fvps_adjusted <- ifelse(cov2$fvps_source > cov2$value, cov2$value, cov2$fvps_source)
   cov2$coverage_adjusted <- cov2$fvps_adjusted / cov2$value
   
-  names(cov2) <- c("vaccine", "activity_type", "country", "year", "gender", "age", 
+  names(cov2) <- c("country", "year", "gender", "age", "scenario_type", "disease", "vaccine", "activity_type",
                    "gavi_support_level", "age_from", "age_to", "gavi_support", "target_source", 
                    "coverage_source", "delivery_id", "cohort_size", "delivery_population", "fvps_source", "fvps_adjusted", 
-                   "coverage_adjusted", "disease")
-  cov2 <- cov2[c("delivery_id", "country", "disease", "vaccine", "activity_type", "gavi_support_level", "year", "gavi_support", "gender", "age",  
-                 "target_source", "coverage_source",  "cohort_size", "delivery_population", "fvps_source", "fvps_adjusted", 
-                 "coverage_adjusted")]
+                   "coverage_adjusted")
+  cov2 <- cov2[c("delivery_id", "country", "disease", "scenario_type","vaccine", "activity_type", "gavi_support_level", "year", 
+                 "gavi_support", "gender", "age", "target_source", "coverage_source",  "cohort_size", "delivery_population", 
+                 "fvps_source", "fvps_adjusted", "coverage_adjusted")]
   print("Transformed coverage data.")
   return(cov2[order(cov2$delivery_id), ])
   ### this function gives differnet fvps_adjusted comparing to fix_coverage_fvps()

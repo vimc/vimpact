@@ -11,7 +11,8 @@ extract_vaccination_history(
   year_min = 2000,
   year_max = 2100,
   vaccine_to_ignore = c("DTP3", "HepB_BD_home"),
-  gavi_support_levels = c("with", "bestminus")
+  gavi_support_levels = c("with", "bestminus"),
+  scenario_type = "default"
 )
 }
 \arguments{
