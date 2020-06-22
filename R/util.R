@@ -19,12 +19,13 @@ not_is_finite <- function(x) {
 }
 
 set_as_na <- function(x) {
-  x <-NA
+  x <- NA
 }
 
 '%!in%' <- function(x,y)!('%in%'(x,y))
 
-grepv <- function(patterns, value, is_and = TRUE) {
+##
+grepv <- function(patterns, value) {
   stopifnot(length(patterns) >= 1)
   j <- rep(0, length(value))
   
@@ -32,10 +33,10 @@ grepv <- function(patterns, value, is_and = TRUE) {
     j <- j + grepl(i, value)
   }
   
-  if(is_and) {
-    v <- j == length(patterns)
-  } else {
-    v <- j >= 1
+  v <- j == length(patterns)
+  
+  if(!all(v)) {
+    ("not sure yet what to return when not all patterns exits.")
   }
   return(v)
 }
