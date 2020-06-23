@@ -2,6 +2,10 @@
   if (is.null(a)) b else a
 }
 
+data_frame <- function(...){
+  data.frame(..., stringsAsFactors = FALSE)
+}
+  
 read_sql <- function(filename) {
   paste(readLines(filename), collapse = "\n")
 }

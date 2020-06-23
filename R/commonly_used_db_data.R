@@ -40,11 +40,19 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
   
   ### This function converts input coverage data to be dis-aggregated by gender and age
   ### i.e. input data by country, year and age
-  message("Converting input coverage data......")
   
   ## 1. touchstone specification 
   ## which coverage touchstone to use - given touchstone name, use the latest version touchstone
-  touchstone_cov <- get_touchstone(con, touchstone_cov)
+  if(grepl("-", touchstone_cov)){
+    tmp <- DBI::dbGetQuery(con, "SELECT * FROM touchstone WHERE id = $1", touchstone_cov)
+    if(nrow(tmp) == 1L){
+      print("user defined touchstone version is used.")
+    } else {
+      stop("User defined touchstone dose not exist.")
+    }
+  } else {
+    touchstone_cov <- get_touchstone(con, touchstone_cov)
+  }
   
   ## which demographic touchstone to use
   if (is.null(touchstone_pop)) {
@@ -53,9 +61,12 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
     touchstone_pop <- get_touchstone(con, touchstone_pop)
   }
   
+  message("Converting input coverage data......")
   
+  # extract interpolated population
   p_int_pop <- get_population(con, touchstone_pop = touchstone_pop, demographic_statistic = 'int_pop', 
                               year_ = year_min:year_max, gender = c('Male', 'Female', 'Both'))
+  
   print("Extracted interpolated population.")
   
   ## select minimal needed coverage data from the db
@@ -71,9 +82,9 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
                               AND scenario_type IN %s
                               AND gavi_support_level IN %s
                               AND vaccine NOT IN %s",
-                              jenner:::sql_in(scenario_type),
-                              jenner:::sql_in(gavi_support_levels), 
-                              jenner:::sql_in(vaccine_to_ignore)), touchstone_cov)
+                                           jenner:::sql_in(scenario_type),
+                                           jenner:::sql_in(gavi_support_levels), 
+                                           jenner:::sql_in(vaccine_to_ignore)), touchstone_cov)
   
   cov <- DBI::dbGetQuery(con, sprintf("SELECT coverage_set, country, year, age_from, age_to, gender.name AS gender, gavi_support, target, coverage 
                                       FROM coverage 
@@ -89,6 +100,7 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
   
   print("Extracted raw coverage data...")
   
+  ## transform coverage data
   cov <- unique(cov) # this is needed as we used to create multiple coverage_sets for MCV1 and DTP3 for LiST model
   cov$activity_id <- seq_along(cov$vaccine) # attach an id to avoid combining national target population from multiple sias
   
