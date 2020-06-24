@@ -1,18 +1,42 @@
-## todo: export this function
-recipe_template <- function(template_version, method){
+##'Generate impact recipe template
+##'
+##' @title Impact recipe template
+##'
+##' @param template_version version can be any VIMC model run - e.g. 201710, 201910
+##' @param method method can be any VIMC impact methods - method0, method1, method2a, method2b
+##' @export
+recipe_template <- function(template_version = "201710", method){
   assert_method(method)
   recipe <- assert_version(method, template_version)
   recipe <- read_csv(file.path("inst/recipe", method, recipe))
-  if(!dir.exists(method)){
-    dir.create(method)
+
+  if (!dir.exists("recipe")){
+    dir.create("recipe")
   }
-  write.csv(recipe, file.path(method,"impact_recipe.csv"), row.names = FALSE)
-  print(paste("Generated impact recipe template - ", method, "/impact_recipe.csv", sep = ""))
+  write.csv(recipe, file.path("recipe", method,"impact_recipe.csv"), row.names = FALSE)
+  man <- file(file.path("recipe", "impact_recipe_man.txt"))
+  writeLines(paste("## touchstone \n",
+                   "touchstone lists touchstone_name, or touchstone_version if specific version applies. \n",
+                   "## modelling_group \n",
+                   "use montagu modelling_group naming conventions \n",
+                   "## disease \n",
+                   "use montagu disease naming conventions \n",
+                   "## focal \n
+                   focal scenario in the form of <scenario_type>:<vaccine1>-<activity_type1>,<vaccine2>-<activity_type2> \n",
+                   "NO spacing is allowed \n",
+                   "## baseline \n",
+                   "baseline scenario provided similarly to focal \n",
+                   "## burden_outcome \n",
+                   "burden outcomes. Use '*' when the model is using simplified deaths and cases definitions. Otherwise, list burden outcomes in the form of\n",
+                   "<deaths_outcome1>,<deaths_outcome2>,<deaths_outcome3>;<cases_outcome1>,<cases_outcome2>,<cases_outcome3> \n",
+                   "NO spacing is allowed. DO NOT provide dalys, as dalys will be added in automatically."), man)
+  print("Generated impact recipe template in directory recipe/.")
 }
+
 
 get_meta_from_recipe <- function(default_recipe = TRUE, method = "method0", recipe_version = "201710", recipe = NULL, con){
   
-  if(default_recipe){
+  if (default_recipe){
     assert_method(method)
     recipe <- assert_version(method, recipe_version)
     recipe <- read_csv(file.path("inst/recipe", method, recipe))
@@ -39,7 +63,7 @@ get_meta_from_recipe <- function(default_recipe = TRUE, method = "method0", reci
   burden_outcomes <- DBI::dbReadTable(con, "burden_outcome")
   
   meta <- NULL
-  for(i in seq_along(recipe[, 1])){
+  for (i in seq_along(recipe[, 1])){
     t <- recipe[i, ]
     t$touchstone <- ifelse(!grepl("-", t$touchstone), get_touchstone(con, t[["touchstone"]]), t$touchstone)
     
@@ -97,7 +121,7 @@ get_meta_from_recipe <- function(default_recipe = TRUE, method = "method0", reci
     
     scenario_id <- unique(meta_all$scenario_id)
     d2 <- NULL
-    for(j in scenario_id){
+    for (j in scenario_id){
       v <- meta_all[meta_all$scenario_id == j, ]
       v$vaccine <- NULL
       v$activity_type <- NULL
@@ -155,18 +179,10 @@ assert_recipe_format <- function(recipe){
   }
 }
 
-## grab burden outcomes
-grab_outcome <- function(x){
-  v <- unlist(strsplit(x, ";"))
-  deaths <- v[grepl("deaths", v)]
-  cases <- v[grepl("cases", v)]
-  list(deaths = unlist(strsplit(deaths, ",")),
-       cases = unlist(strsplit(cases, ",")))
-}
-
+## for matching vaccine delivery between the recipe and montagu
 order_vaccine_delivery <- function(a){
   t <- rep(NA, length(a))
-  for(i in seq_along(a)){
+  for (i in seq_along(a)){
     v <- unlist(strsplit(a[i], ","))
     t[i] <- paste(v[order(v)], collapse = ",")
   }
@@ -175,10 +191,10 @@ order_vaccine_delivery <- function(a){
 
 replace_burden_outcome <- function(burden_outcomes, a){
   t <- rep(NA, length(a))
-  for(i in seq_along(a)){
+  for (i in seq_along(a)){
     v <- unlist(strsplit(a[i], ";"))
     m <- rep(NA, length(v))
-    for(j in seq_along(v)){
+    for (j in seq_along(v)){
       v1 <- unlist(strsplit(v[j], ","))
       v1 <- burden_outcomes$id[match(v1, burden_outcomes$code)]
       m[j] <- paste(v1, collapse = ",")
