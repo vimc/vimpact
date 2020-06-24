@@ -9,27 +9,32 @@ recipe_template <- function(template_version = "201710", method){
   assert_method(method)
   recipe <- assert_version(method, template_version)
   recipe <- read_csv(file.path("inst/recipe", method, recipe))
-
+  
   if (!dir.exists("recipe")){
     dir.create("recipe")
   }
+  if (!dir.exists(paste0("recipe/", method))){
+    dir.create(paste0("recipe/", method))
+  }
   write.csv(recipe, file.path("recipe", method,"impact_recipe.csv"), row.names = FALSE)
-  man <- file(file.path("recipe", "impact_recipe_man.txt"))
-  writeLines(paste("## touchstone \n",
-                   "touchstone lists touchstone_name, or touchstone_version if specific version applies. \n",
-                   "## modelling_group \n",
-                   "use montagu modelling_group naming conventions \n",
-                   "## disease \n",
-                   "use montagu disease naming conventions \n",
-                   "## focal \n
-                   focal scenario in the form of <scenario_type>:<vaccine1>-<activity_type1>,<vaccine2>-<activity_type2> \n",
-                   "NO spacing is allowed \n",
-                   "## baseline \n",
-                   "baseline scenario provided similarly to focal \n",
-                   "## burden_outcome \n",
-                   "burden outcomes. Use '*' when the model is using simplified deaths and cases definitions. Otherwise, list burden outcomes in the form of\n",
-                   "<deaths_outcome1>,<deaths_outcome2>,<deaths_outcome3>;<cases_outcome1>,<cases_outcome2>,<cases_outcome3> \n",
-                   "NO spacing is allowed. DO NOT provide dalys, as dalys will be added in automatically."), man)
+  man <- file(file.path("recipe", "impact_recipe_man.md"))
+  writeLines(paste0("## touchstone \n",
+                    "touchstone lists touchstone_name, or touchstone_version if specific version applies. \n \n",
+                    "## modelling_group \n",
+                    "use montagu modelling_group naming conventions \n \n",
+                    "## disease \n",
+                    "use montagu disease naming conventions \n \n",
+                    "## focal \n",
+                    "focal scenario in the form of <scenario_type>:<vaccine1>-<activity_type1>,<vaccine2>-<activity_type2> \n",
+                    "NO spacing is allowed \n \n",
+                    "## baseline \n",
+                    "baseline scenario provided similarly to focal \n \n",
+                    "## burden_outcome \n",
+                    "burden outcomes. \n",
+                    "Use '*' when the model is using simplified deaths and cases definitions. Otherwise, list burden outcomes in the form of\n",
+                    "<deaths_outcome1>,<deaths_outcome2>,<deaths_outcome3>;<cases_outcome1>,<cases_outcome2>,<cases_outcome3> \n",
+                    "NO spacing is allowed. DO NOT provide dalys, as dalys will be added in automatically."), man)
+  close(man)
   print("Generated impact recipe template in directory recipe/.")
 }
 
@@ -87,7 +92,7 @@ get_meta_from_recipe <- function(default_recipe = TRUE, method = "method0", reci
       d$scenario_type[j] <- v[1]
       d$vaccine_delivery[j] <- ifelse(length(v) == 1L, "", v[-1])
     }
-
+    
     ## get all possible meta data
     ## make this a view, eventually
     ## given disease, touchstone, model, find all scenario, coverage_sets and burden_estimate_sets.
@@ -145,7 +150,7 @@ get_meta_from_recipe <- function(default_recipe = TRUE, method = "method0", reci
   }
   meta$vaccine_delivery[meta$scenario_type == "novac"] <- "no-vaccination"
   stopifnot(all(!is.na(meta$scenario)))
- meta 
+  meta 
 }
 
 ## checking impact calculation method parameter
