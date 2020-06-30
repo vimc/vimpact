@@ -30,8 +30,6 @@ get_touchstone <- function(con, touchstone_name){
 ##' @vaccine_to_ignore Ignore defined vaccines
 ##' @gavi_support_levels gavi support levels
 ##' @export
-## TODO: need to further attach scenario_type to the output
-## otherwise the function is not useful for covid-like touchstone where there are multiple scenario_types
 extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touchstone_pop = NULL, 
                                         year_min = 2000, year_max = 2100,
                                         vaccine_to_ignore = c("DTP3", "HepB_BD_home"),

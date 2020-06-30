@@ -150,6 +150,7 @@ get_meta_from_recipe <- function(default_recipe = TRUE, method = "method0", reci
   }
   meta$vaccine_delivery[meta$scenario_type == "novac"] <- "no-vaccination"
   stopifnot(all(!is.na(meta$scenario)))
+  meta$method <- method
   meta 
 }
 
