@@ -39,7 +39,7 @@ recipe_template <- function(template_version = "201710", method){
 }
 
 
-get_meta_from_recipe <- function(default_recipe = TRUE, method = "method0", recipe_version = "201710", recipe = NULL, con){
+get_meta_from_recipe <- function(default_recipe = TRUE, method = "method0", recipe_version = "201710", recipe = NULL, con, disease = NULL){
   
   if (default_recipe){
     assert_method(method)
@@ -53,6 +53,9 @@ get_meta_from_recipe <- function(default_recipe = TRUE, method = "method0", reci
     }
     assert_recipe_format(recipe)
     
+  }
+  if(!is.null(disease)){
+    recipe <- recipe[recipe$disease %in% disease, ]
   }
   recipe$focal <- gsub(";", ",", recipe$focal)
   recipe$baseline <- gsub(";", ",", recipe$baseline)

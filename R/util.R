@@ -44,3 +44,7 @@ grepv <- function(patterns, value) {
   }
   return(v)
 }
+
+assert_has_columns <- function(d, cols_must_have){
+  stopifnot(all(cols_must_have %in% names(d)))
+}

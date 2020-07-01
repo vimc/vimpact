@@ -19,6 +19,8 @@ get_population(
 
 \item{touchstone_pop}{Demography touchstone}
 
+\item{demographic_statistic}{Demographic statistic to extract}
+
 \item{gender}{Gender codes - "Male", "Female", "Both"}
 
 \item{country_}{All countries if NULL. Or specify a vector of countries}

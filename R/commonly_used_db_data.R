@@ -23,16 +23,18 @@ get_touchstone <- function(con, touchstone_name){
 ##' @title Generate target, fvps, coverage for a touchstone
 ##' 
 ##' @param con Datebase connection
-##' @touchstone_cov Coverage touchstone
-##' @touchstone_pop Demography touchstone
-##' @year_min extract data from year_min
-##' @year_max extract data to year_max
-##' @vaccine_to_ignore Ignore defined vaccines
-##' @gavi_support_levels gavi support levels
+##' @param touchstone_cov Coverage touchstone
+##' @param touchstone_pop Demography touchstone
+##' @param year_min extract data from year_min
+##' @param year_max extract data to year_max
+##' @param vaccine_to_ignore Ignore defined vaccines
+##' @param countries_to_extract extract data for specific countries
+##' @param gavi_support_levels gavi support levels
 ##' @export
 extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touchstone_pop = NULL, 
                                         year_min = 2000, year_max = 2100,
-                                        vaccine_to_ignore = c("DTP3", "HepB_BD_home"),
+                                        vaccine_to_ignore = c("DTP3", "HepB_BD_home", "none"),
+                                        countries_to_extract = NULL,
                                         gavi_support_levels = c("with", "bestminus"),
                                         scenario_type = "default") {
   
@@ -63,12 +65,28 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
   
   # extract interpolated population
   p_int_pop <- get_population(con, touchstone_pop = touchstone_pop, demographic_statistic = 'int_pop', 
-                              year_ = year_min:year_max, gender = c('Male', 'Female', 'Both'))
+                              year_ = year_min:year_max, gender = c('Male', 'Female', 'Both'), country_ = countries_to_extract)
   
   print("Extracted interpolated population.")
   
   ## select minimal needed coverage data from the db
-  cov_sets <- DBI::dbGetQuery(con, sprintf("SELECT scenario_type, disease, coverage_set.id AS coverage_set, vaccine, activity_type, gavi_support_level 
+  disease_vaccine_delivery <- DBI::dbGetQuery(con, paste(sprintf("SELECT DISTINCT disease, vaccine, activity_type, gavi_support_level 
+                                                 FROM scenario
+                                                 JOIN scenario_coverage_set
+                                                 ON scenario_coverage_set.scenario = scenario.id
+                                                 JOIN coverage_set
+                                                 ON coverage_set.id = scenario_coverage_set.coverage_set
+                                                 JOIN scenario_description
+                                                 ON scenario_description.id = scenario.scenario_description
+                                                 WHERE scenario.touchstone = $1
+                                                 AND gavi_support_level IN %s
+                                                 AND vaccine NOT IN %s", 
+                                                                 jenner:::sql_in(gavi_support_levels),
+                                                                 jenner:::sql_in(vaccine_to_ignore)), 
+                                                         "AND scenario_description NOT LIKE '%LiST%'"),
+                                              "201710gavi-5")
+  
+  cov_sets <- DBI::dbGetQuery(con, paste(sprintf("SELECT DISTINCT scenario_type, disease, coverage_set.id AS coverage_set, vaccine, activity_type, gavi_support_level 
                               FROM scenario
                               JOIN scenario_coverage_set
                               ON scenario_coverage_set.scenario = scenario.id
@@ -80,18 +98,34 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
                               AND scenario_type IN %s
                               AND gavi_support_level IN %s
                               AND vaccine NOT IN %s",
-                                           jenner:::sql_in(scenario_type),
-                                           jenner:::sql_in(gavi_support_levels), 
-                                           jenner:::sql_in(vaccine_to_ignore)), touchstone_cov)
-  
+                                                 jenner:::sql_in(scenario_type),
+                                                 jenner:::sql_in(gavi_support_levels), 
+                                                 jenner:::sql_in(vaccine_to_ignore)),
+                                         "AND scenario_description NOT LIKE '%LiST%'"),
+                              touchstone_cov)
+  if(nrow(cov_sets) == 0L){
+    # this is not a model run touchstone, need to extract coverage set directly
+    cov_sets2 <- DBI::dbGetQuery(con, "SELECT coverage_set.id AS coverage_set, vaccine, activity_type, gavi_support_level
+                                FROM coverage_set
+                                WHERE touchstone = $1
+                                AND gavi_support_level != 'none'", touchstone_cov)
+    cov_sets2 <- merge_by_common_cols(disease_vaccine_delivery, cov_sets2, all.x = TRUE)
+    cov_sets2$scenario_type <- "default"
+    cov_sets <- cov_sets2[names(cov_sets)]
+  }
+  country_ <- ifelse(is.null(countries_to_extract), 
+                     "", 
+                     sprintf("AND country IN %s", jenner:::sql_in(countries_to_extract, text_item = TRUE)))
   cov <- DBI::dbGetQuery(con, sprintf("SELECT coverage_set, country, year, age_from, age_to, gender.name AS gender, gavi_support, target, coverage 
                                       FROM coverage 
                                       JOIN gender ON gender.id = gender
                                       WHERE coverage_set IN %s
                                       AND coverage > 0
-                                      AND year IN %s", 
+                                      AND year IN %s
+                                      %s",
                                       jenner:::sql_in(cov_sets$coverage_set, text_item = FALSE),
-                                      jenner:::sql_in(year_min:year_max, text_item = FALSE)))
+                                      jenner:::sql_in(year_min:year_max, text_item = FALSE),
+                                      country_))
   
   cov <- merge_by_common_cols(cov_sets, cov)
   cov$coverage_set <- NULL
@@ -148,6 +182,9 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
                  "gavi_support", "gender", "age", "target_source", "coverage_source",  "cohort_size", "delivery_population", 
                  "fvps_source", "fvps_adjusted", "coverage_adjusted")]
   print("Transformed coverage data.")
+  
+  country_id <- DBI::dbReadTable(con, "country")
+  cov2$country_nid <- country_id$nid[match(cov2$country, country_id$id)]
   return(cov2[order(cov2$delivery_id), ])
   ### this function gives differnet fvps_adjusted comparing to fix_coverage_fvps()
   ### I am sure this function is more accurate, as fix_coverage_fvps() is a bit buggy here
@@ -163,7 +200,7 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
 ##' 
 ##' @param con Datebase connection
 ##' @param touchstone_pop Demography touchstone
-##' @demographic_statistic Demographic statistic to extract
+##' @param demographic_statistic Demographic statistic to extract
 ##' @param gender Gender codes - "Male", "Female", "Both"
 ##' @param country_ All countries if NULL. Or specify a vector of countries
 ##' @param year_ All years if NULL. Or specify a vector of years

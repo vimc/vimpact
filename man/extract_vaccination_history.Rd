@@ -10,13 +10,28 @@ extract_vaccination_history(
   touchstone_pop = NULL,
   year_min = 2000,
   year_max = 2100,
-  vaccine_to_ignore = c("DTP3", "HepB_BD_home"),
+  vaccine_to_ignore = c("DTP3", "HepB_BD_home", "none"),
+  countries_to_extract = NULL,
   gavi_support_levels = c("with", "bestminus"),
   scenario_type = "default"
 )
 }
 \arguments{
 \item{con}{Datebase connection}
+
+\item{touchstone_cov}{Coverage touchstone}
+
+\item{touchstone_pop}{Demography touchstone}
+
+\item{year_min}{extract data from year_min}
+
+\item{year_max}{extract data to year_max}
+
+\item{vaccine_to_ignore}{Ignore defined vaccines}
+
+\item{countries_to_extract}{extract data for specific countries}
+
+\item{gavi_support_levels}{gavi support levels}
 }
 \description{
 Replace jenner:::fix_covreage_fvps() function
