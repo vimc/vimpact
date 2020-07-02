@@ -1,4 +1,5 @@
 docs
 .Rproj.user
+.Renviron
 .Rhistory
 .DS_Store
