@@ -68,7 +68,7 @@ extract_test_data <- function(con){
   data[["burdens"]] <- DBI::dbGetQuery(con, sprintf("SELECT * FROM burden_estimate WHERE burden_estimate_set IN %s",
                                                     jenner:::sql_in(burden_sets, text_item = FALSE)))
   
-  data[["country"]] <- DBI::dbGetQuery(con, sprintf("SELECT * id, nid FROM country WHERE id IN %s",
+  data[["country"]] <- DBI::dbGetQuery(con, sprintf("SELECT id, nid FROM country WHERE id IN %s",
                                                     jenner:::sql_in(countries)))
   
   if(!dir.exists("tests/test_data")){
