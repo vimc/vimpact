@@ -58,7 +58,7 @@ extract_test_data <- function(con){
   data[["coverage_set"]] <- cov_sets
   
   data[["coverage"]] <- DBI::dbGetQuery(con, sprintf("SELECT * FROM coverage
-                                        WHERE coverage_set IN %s", jenner:::sql_in(cov_sets, text_item = FALSE)))
+                                        WHERE coverage_set IN %s", jenner:::sql_in(cov_sets$id, text_item = FALSE)))
   
   ###2. extract interpolated population estimates
   data[["population"]] <- get_population(con, touchstone_pop = touch, demographic_statistic = "int_pop", gender = c("Male", "Female", "Both"), 
