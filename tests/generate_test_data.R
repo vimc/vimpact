@@ -20,8 +20,8 @@ extract_test_data <- function(con){
   touchstone <- "201710gavi"
   countries <- c("PAK", "IND", "NGA", "ETH")
   vaccination_years <- 2000:2030
-  diseases <- c("YF", "HepB")
-  models <- c("IC-Garske","IC-Hallett")
+  diseases <- c("YF", "Measles")
+  models <- c("IC-Garske", "LSHTM-Jit")
   default_recipe <- TRUE
   recipe_version <- "201710"
   
