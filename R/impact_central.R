@@ -1,116 +1,11 @@
-## get burden estimates for each impact recipe
-# example d <- get_raw_impact(con, meta1, burden_outcome = "deaths", is_under5 = FALSE, vaccination_years_of_interest = 2000:2030)
-get_raw_impact <- function(con, meta1, burden_outcome,is_under5 = FALSE, vaccination_years_of_interest = 2000:2030, countries_to_extract = NULL){
-  stopifnot(nrow(meta1) == 2L)
-  if(meta1$method[1L] %in% c("method0", "method1")){
-    message("parameter vaccination_years_of_interest is not used, as it is related to impact by year of vaccination.")
-  }
-  if(burden_outcome == "deaths"){
-    k <- 1
-  } else if(burden_outcome == "cases"){
-    k <- 2
-  } else if(burden_outcome == "dalys"){
-    k <- 3
-  } else {
-    stop("Can only take burden outcome as one of deaths, cases, dalys")
-  }
-  
-  # routine or campaign matters for method2a in terms of the shape of burden estimates to extract
-  # if routine, by year of birth
-  # if campaign, by calendar
-  
-  meta1$vaccine_delivery[meta1$vaccine_delivery == "no-vaccination"] <- ""
-  v <- determine_vaccine_delivery(meta1)
-  i <- unique(grepl("routine", v))
-  j <- unique(grepl("campaign", v))
-  if(i & j & meta1$method[1] == "method2a"){
-    stop("method2a is vaccine delivery specific, cannot include both routine and campaign impact at the same time.")
-  }
-  
-  age_constrain <- ifelse(is_under5, "AND age < 5", "") #applies to all methods
-  time_constrain <- sprintf("AND (year-age) IN %s", 
-                            jenner:::sql_in(vaccination_years_of_interest, text_item = FALSE)) ## applies to method2a and method2b
-  country_constrain <- ifelse(is.null(countries_to_extract), "", 
-                              sprintf("AND country IN %s", jenner:::sql_in(countries_to_extract, text_item = FALSE)))
-  
-  if(meta1$method[1] == "method0"){
-    sql <- paste("SELECT country, year AS time, sum(value) AS value",
-                 "FROM burden_estimate",
-                 "WHERE burden_estimate_set = %s",
-                 "AND burden_outcome IN %s",
-                 age_constrain,
-                 country_constrain,
-                 "GROUP BY country, year")
-  } else if(meta1$method[1] == "method1"){
-    sql <- paste("SELECT country, (year-age) AS time, sum(value)AS value",
-                 "FROM burden_estimate",
-                 "WHERE burden_estimate_set = %s",
-                 "AND burden_outcome IN %s",
-                 age_constrain,
-                 country_constrain,
-                 "GROUP BY country, (year-age)")
-  } else if(meta1$method[1] == "method2a" & i){
-    sql <- paste("SELECT country, sum(value) AS value",
-                 "FROM burden_estimate",
-                 "WHERE burden_estimate_set = %s",
-                 "AND burden_outcome IN %s",
-                 age_constrain,
-                 time_constrain,
-                 country_constrain,
-                 "GROUP BY country")
-  } else if(meta1$method[1] == "method2a" & j){
-    sql <- paste("SELECT country, sum(value) AS value",
-                 "FROM burden_estimate",
-                 "WHERE burden_estimate_set = %s",
-                 "AND burden_outcome IN %s",
-                 age_constrain,
-                 country_constrain,
-                 "GROUP BY country")
-  } else if(meta1$method[1] == "method2b"){
-    sql <- paste("SELECT country, (year-age) AS time, sum(value) AS value",
-                 "FROM burden_estimate",
-                 "WHERE burden_estimate_set = %s",
-                 "AND burden_outcome IN %s",
-                 age_constrain,
-                 time_constrain,
-                 country_constrain,
-                 "GROUP BY country, (year-age)")
-  }
-  
-  i <- meta1$meta_type == "focal"
-  ii <- unlist(strsplit(meta1$burden_outcome_id[i], ";"))
-  j <- meta1$meta_type == "baseline"
-  jj <- unlist(strsplit(meta1$burden_outcome_id[j], ";"))
-  
-  
-  d_focal <- DBI::dbGetQuery(con, sprintf(sql, 
-                                          jenner:::sql_in(meta1$burden_estimate_set[i], text_item = FALSE), 
-                                          jenner:::sql_in(ii[k], text_item = FALSE)))
-  names(d_focal)[names(d_focal) == "value"] <- "focal_value"
-  
-  d_baseline <- DBI::dbGetQuery(con, sprintf(sql, 
-                                             jenner:::sql_in(meta1$burden_estimate_set[j], text_item = FALSE), 
-                                             jenner:::sql_in(jj[k], text_item = FALSE)))
-  names(d_baseline)[names(d_baseline) == "value"] <- "baseline_value"
-  
-  d <- merge_by_common_cols(d_baseline, d_focal)
-  d$value <- d$baseline_value - d$focal_value
-  d$index <- meta1$index[1]
-  d$burden_outcome <- burden_outcome
-  
-  d
-}
-
-## get burden estimates for each impact recipe
-## different from the above is that method2a is not showing aggregated impact, but impact by "time"
-## the up-side is that this function will output one unique output format
-## the down-side is that method2a impact calculation will be slower
-## I am inclined to this version of function, as the output will be useful for having a exportable impact by year of vaccination
-## function for external users
-#d <- get_raw_impact_details(con, meta1, burden_outcome = "deaths", is_under5 = FALSE)
 get_raw_impact_details <- function(con, meta1, burden_outcome, is_under5 = FALSE, countries_to_extract = NULL){
+  #verify parameters
   stopifnot(nrow(meta1) == 2L)
+  stopifnot(burden_outcome %in% c("deaths", "cases", "dalys"))
+  stopifnot(is_under5 %in% c(TRUE, FALSE))
   
+  #preparation
+  # determine burden outcome, k will be used to determine burden outcome ids
   if(burden_outcome == "deaths"){
     k <- 1
   } else if(burden_outcome == "cases"){
@@ -121,10 +16,10 @@ get_raw_impact_details <- function(con, meta1, burden_outcome, is_under5 = FALSE
     stop("Can only take burden outcome as one of deaths, cases, dalys")
   }
   
+  # determine whether a recipe is for routine or campaign vaccine delivery
   # routine or campaign matters for method2a in terms of the shape of burden estimates to extract
   # if routine, by year of birth
   # if campaign, by calendar
-  
   meta1$vaccine_delivery[meta1$vaccine_delivery == "no-vaccination"] <- ""
   v <- determine_vaccine_delivery(meta1)
   i <- unique(grepl("routine", v))
@@ -133,12 +28,14 @@ get_raw_impact_details <- function(con, meta1, burden_outcome, is_under5 = FALSE
     stop("method2a is vaccine delivery specific, cannot include both routine and campaign impact at the same time.")
   }
   
+  # constain db extraction by country and age
   countries_to_extract <- DBI::dbGetQuery(con, sprintf("SELECT nid FROM country WHERE id IN %s",
                                                        jenner:::sql_in(countries_to_extract)))
   age_constrain <- ifelse(is_under5, "AND age < 5", "") #applies to all methods
   country_constrain <- ifelse(is.null(countries_to_extract), "", 
                               sprintf("AND country IN %s", jenner:::sql_in(countries_to_extract, text_item = FALSE)))
   
+  # set up db extraction sql queries
   if((meta1$method[1] == "method0") | (meta1$method[1] == "method2a" & j)){
     sql <- paste("SELECT country, year AS time, sum(value) AS value",
                  "FROM burden_estimate",
@@ -157,12 +54,13 @@ get_raw_impact_details <- function(con, meta1, burden_outcome, is_under5 = FALSE
                  "GROUP BY country, (year-age)")
   }
   
+  # get burden outcome ids
   i <- meta1$meta_type == "focal"
   ii <- unlist(strsplit(meta1$burden_outcome_id[i], ";"))
   j <- meta1$meta_type == "baseline"
   jj <- unlist(strsplit(meta1$burden_outcome_id[j], ";"))
   
-  
+  # extract burden estimates
   d_focal <- DBI::dbGetQuery(con, sprintf(sql, 
                                           jenner:::sql_in(meta1$burden_estimate_set[i], text_item = FALSE), 
                                           jenner:::sql_in(ii[k], text_item = FALSE)))
@@ -173,11 +71,15 @@ get_raw_impact_details <- function(con, meta1, burden_outcome, is_under5 = FALSE
                                              jenner:::sql_in(jj[k], text_item = FALSE)))
   names(d_baseline)[names(d_baseline) == "value"] <- "baseline_value"
   
+  # calculate impact estimates
   d <- merge_by_common_cols(d_baseline, d_focal)
   d$value <- d$baseline_value - d$focal_value
   d$index <- meta1$index[1]
   d$burden_outcome <- burden_outcome
+  
+  # return impact estimates
   d
+  
 }
 
 # To standardise fvps for impact by year of vaccination and IU
@@ -188,9 +90,11 @@ rename_extract_vaccination_history <- function(fvps){
                    "gender", "age",  "target",  "fvps", "coverage")
   fvps
 }
+
 # impact by year of vaccination
 # db connection is not allowed
-impact_by_year_of_vaccination_central <- function(meta1, raw_impact, fvps, fvps_updates = NULL, vaccination_years){
+# exportable for non-science users
+impact_by_year_of_vaccination <- function(meta1, raw_impact, fvps, fvps_updates = NULL, vaccination_years){
   # for external users, below are minimal standards for the three core input data
   meta_templates <- c("vaccine_delivery", "disease", "meta_type", "index", "method")
   raw_impact_templates <- c("country", "time", "value", "index", "burden_outcome")
@@ -231,7 +135,7 @@ impact_by_year_of_vaccination_central <- function(meta1, raw_impact, fvps, fvps_
     fvps_updates <- merge_by_common_cols(fvps_updates, vaccine_delivery, all.y = TRUE)
     fvps_updates <- fvps_updates[fvps_updates$year %in% vaccination_years, ]
   }
-
+  
   
   if (method == "method2a"){
     if (vaccine_delivery$activity_type[1L] == "routine"){
@@ -257,11 +161,11 @@ impact_by_year_of_vaccination_central <- function(meta1, raw_impact, fvps, fvps_
     d_iu <- merge_by_common_cols(fvps_updates, d)
     d_iu$impact <- d_iu$impact_ratio * d_iu$fvps
     return(list(native_impact = d_native,
-           interim_update = d_iu))
+                interim_update = d_iu))
   } else {
     return(d_native)
   }
-
+  
 }
 
 determine_vaccine_delivery <- function(meta1){
