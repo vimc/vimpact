@@ -36,7 +36,7 @@ extract_test_data <- function(con){
                country = NA)
   
   ###0. prepare impact calculation recipes and record related burden estimate sets
-  burden_sets <- NA
+  burden_sets <- NULL
   for(m in c("0", "1", "2a", "2b")){
     v <- get_meta_from_recipe(default_recipe, method = paste0("method", m), recipe_version, recipe = NULL, con, diseases)
     v <- v[v$modelling_group %in% models, ]
