@@ -17,22 +17,22 @@ test_that("test if vimpact functions are working as expected for central estimat
 
   ### test method 0
   message("test cross-view impact")
-  meta <- DBI::dbReadTable(con_test, "recipe_0")
+  #meta <- DBI::dbReadTable(con_test, "recipe_0")
   
   
   ### test method 1
   message("test cohort-view impact")
-  meta <- DBI::dbReadTable(con_test, "recipe_1")
+  #meta <- DBI::dbReadTable(con_test, "recipe_1")
   
   
   ### test method 2a
   message("test impact_by_year_of_vaccination conventional approach")
-  meta <- DBI::dbReadTable(con_test, "recipe_2a")
+  #meta <- DBI::dbReadTable(con_test, "recipe_2a")
   
   
   ### test method 2b
   message("test impact_by_year_of_vaccination cohort-based approach")
-  meta <- DBI::dbReadTable(con_test, "recipe_2b")
+  #meta <- DBI::dbReadTable(con_test, "recipe_2b")
   
   
 })
