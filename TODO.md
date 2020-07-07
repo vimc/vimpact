@@ -28,4 +28,4 @@ IMPACT
 
 * standardise output to match past data sets - this is only for internal use, no need to export for non-science users
 
- 
+* get_burden_central and get_burden_stochastic functions for easy-to-use

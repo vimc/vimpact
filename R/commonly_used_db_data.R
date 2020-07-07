@@ -30,13 +30,16 @@ get_touchstone <- function(con, touchstone_name){
 ##' @param vaccine_to_ignore Ignore defined vaccines
 ##' @param countries_to_extract extract data for specific countries
 ##' @param gavi_support_levels gavi support levels
+##' @param scenario_type scenario type
+##' @param external_population_estimates The rationales are 1. we can use external population estimates if any and if necessary; 
+##' 2. demographic uncertainty not only affects models, but also FVPs. If we are to conduct sensitivity analysis on impact_by_year_of_vaccination, we need to vary population input for adjusting FVPs.
 ##' @export
 extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touchstone_pop = NULL, 
                                         year_min = 2000, year_max = 2100,
                                         vaccine_to_ignore = c("DTP3", "HepB_BD_home", "none"),
                                         countries_to_extract = NULL,
                                         gavi_support_levels = c("with", "bestminus"),
-                                        scenario_type = "default") {
+                                        scenario_type = "default", external_population_estimates = NULL) {
   
   ### This function converts input coverage data to be dis-aggregated by gender and age
   ### i.e. input data by country, year and age
@@ -64,27 +67,16 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
   message("Converting input coverage data......")
   
   # extract interpolated population
-  p_int_pop <- get_population(con, touchstone_pop = touchstone_pop, demographic_statistic = 'int_pop', 
-                              year_ = year_min:year_max, gender = c('Male', 'Female', 'Both'), country_ = countries_to_extract)
-  
+  if(!is.null(external_population_estimates)){
+    p_int_pop <- get_population(con, touchstone_pop = touchstone_pop, demographic_statistic = 'int_pop', 
+                                year_ = year_min:year_max, gender = c('Male', 'Female', 'Both'), country_ = countries_to_extract)
+  } else {
+    p_int_pop <- external_population_estimates
+  }
   print("Extracted interpolated population.")
   
   ## select minimal needed coverage data from the db
-  disease_vaccine_delivery <- DBI::dbGetQuery(con, paste(sprintf("SELECT DISTINCT disease, vaccine, activity_type, gavi_support_level 
-                                                 FROM scenario
-                                                 JOIN scenario_coverage_set
-                                                 ON scenario_coverage_set.scenario = scenario.id
-                                                 JOIN coverage_set
-                                                 ON coverage_set.id = scenario_coverage_set.coverage_set
-                                                 JOIN scenario_description
-                                                 ON scenario_description.id = scenario.scenario_description
-                                                 WHERE scenario.touchstone = $1
-                                                 AND gavi_support_level IN %s
-                                                 AND vaccine NOT IN %s", 
-                                                                 jenner:::sql_in(gavi_support_levels),
-                                                                 jenner:::sql_in(vaccine_to_ignore)), 
-                                                         "AND scenario_description NOT LIKE '%LiST%'"),
-                                              "201710gavi-5")
+  disease_vaccine_delivery <- read_csv("inst/disease_vaccine_delivery.csv")
   
   cov_sets <- DBI::dbGetQuery(con, paste(sprintf("SELECT DISTINCT scenario_type, disease, coverage_set.id AS coverage_set, vaccine, activity_type, gavi_support_level 
                               FROM scenario
