@@ -49,6 +49,10 @@ assert_has_columns <- function(d, cols_must_have){
   stopifnot(all(cols_must_have %in% names(d)))
 }
 
+squote <- function(x){
+sprintf("'%s'", x)  
+}
+
 sql_in <- function(items, text_item = TRUE) {
   items <- paste(if (text_item) squote(items) else items,
                  collapse= ", ")

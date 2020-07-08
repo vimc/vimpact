@@ -16,5 +16,6 @@ Imports:
 License: MIT + file LICENSE
 Encoding: UTF-8
 Suggests:
-    testthat
+    testthat,
+    RSQLite
 RoxygenNote: 7.1.1
