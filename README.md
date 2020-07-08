@@ -8,4 +8,4 @@
 Support code for impact calculations.
 
 Add codecov when test data is ready to be added in.
-codecov.io(https://codecov.io/github/vimc/vimpact/coverage.svg?branch=master)](https://codecov.io/github/vimc/vimpact?branch=master)
+<!--codecov.io(https://codecov.io/github/vimc/vimpact/coverage.svg?branch=master)](https://codecov.io/github/vimc/vimpact?branch=master)-->
