@@ -40,7 +40,7 @@ grepv <- function(patterns, value) {
   v <- j == length(patterns)
   
   if(!all(v)) {
-    ("not sure yet what to return when not all patterns exits.")
+    stop("not all patterns exit in value.")
   }
   return(v)
 }

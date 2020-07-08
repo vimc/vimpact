@@ -14,6 +14,15 @@ test_that("not_if_finite works", {
   expect_true(not_is_finite(-Inf))
 })
 
+test_that("merge_by_common_cols works", {
+  x <- data_frame(id = c(1, 2), name = c("a", "b"), hight = c(1.75, 1.80))
+  y <- data_frame(id = c(1, 3), name = c("a", "c"), age = c(20, 30))
+  expect_equivalent(merge_by_common_cols(x, y), merge(x, y, by = c("id", "name")))
+  expect_equivalent(merge_by_common_cols(x, y, all.x = TRUE), merge(x, y, by = c("id", "name"), all.x = TRUE))
+  expect_equivalent(merge_by_common_cols(x, y, all = TRUE), merge(x, y, by = c("id", "name"), all = TRUE))
+  
+})
+
 test_that("set_as_na works", {
   expect_true(is.na(set_as_na(1)))
   expect_true(is.na(set_as_na("1")))
