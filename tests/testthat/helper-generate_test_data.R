@@ -61,19 +61,19 @@ import_test_data_central_estimates <- function(con, con_test){
   
   ###1. extract meta from database
   data[["scenario"]] <- DBI::dbGetQuery(con, sprintf("SELECT * FROM scenario WHERE id IN %s",
-                                                     jenner:::sql_in(scenario, text_item = FALSE)))
+                                                     sql_in(scenario, text_item = FALSE)))
   
   data[["scenario_coverage_set"]] <- DBI::dbGetQuery(con, sprintf("SELECT * FROM scenario_coverage_set WHERE scenario IN %s",
-                                                     jenner:::sql_in(scenario, text_item = FALSE)))
+                                                     sql_in(scenario, text_item = FALSE)))
   
   data[["coverage_set"]] <- DBI::dbGetQuery(con, sprintf("SELECT * FROM coverage_set WHERE id IN %s",
-                                                     jenner:::sql_in(data$scenario_coverage_set$coverage_set, text_item = FALSE)))
+                                                     sql_in(data$scenario_coverage_set$coverage_set, text_item = FALSE)))
   
   data[["scenario_description"]] <- DBI::dbGetQuery(con, sprintf("SELECT * FROM scenario_description WHERE id IN %s",
-                                                                 jenner:::sql_in(data$scenario$scenario_description, text_item = TRUE)))
+                                                                 sql_in(data$scenario$scenario_description, text_item = TRUE)))
 
   data[["scenario_type"]] <- DBI::dbGetQuery(con, sprintf("SELECT * FROM scenario_type WHERE id IN %s",
-                                                                 jenner:::sql_in(data$scenario_description$scenario_type, text_item = TRUE)))
+                                                                 sql_in(data$scenario_description$scenario_type, text_item = TRUE)))
   
   touch <- get_touchstone(con, touchstone)
   # cov_sets <- DBI::dbGetQuery(con, "SELECT * FROM coverage_set
@@ -87,7 +87,7 @@ import_test_data_central_estimates <- function(con, con_test){
   # data[["coverage_set"]] <- cov_sets
   
   data[["coverage"]] <- DBI::dbGetQuery(con, sprintf("SELECT * FROM coverage
-                                        WHERE coverage_set IN %s", jenner:::sql_in(data$coverage$id, text_item = FALSE)))
+                                        WHERE coverage_set IN %s", sql_in(data$coverage$id, text_item = FALSE)))
   
   ###2. extract interpolated population estimates
   data[["population"]] <- get_population(con, touchstone_pop = touch, demographic_statistic = "int_pop", gender = c("Male", "Female", "Both"), 
@@ -95,10 +95,10 @@ import_test_data_central_estimates <- function(con, con_test){
   
   ###3. extract burden from database
   data[["burden_estimate"]] <- DBI::dbGetQuery(con, sprintf("SELECT * FROM burden_estimate WHERE burden_estimate_set IN %s",
-                                                    jenner:::sql_in(burden_sets, text_item = FALSE)))
+                                                    sql_in(burden_sets, text_item = FALSE)))
   
   data[["country"]] <- DBI::dbGetQuery(con, sprintf("SELECT id, nid FROM country WHERE id IN %s",
-                                                    jenner:::sql_in(countries)))
+                                                    sql_in(countries)))
   
   data[["gender"]] <- DBI::dbReadTable(con, "gender")
   

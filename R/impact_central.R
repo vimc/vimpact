@@ -30,10 +30,10 @@ get_raw_impact_details <- function(con, meta1, burden_outcome, is_under5 = FALSE
   
   # constain db extraction by country and age
   countries_to_extract <- DBI::dbGetQuery(con, sprintf("SELECT nid FROM country WHERE id IN %s",
-                                                       jenner:::sql_in(countries_to_extract)))
+                                                       sql_in(countries_to_extract)))
   age_constrain <- ifelse(is_under5, "AND age < 5", "") #applies to all methods
   country_constrain <- ifelse(is.null(countries_to_extract), "", 
-                              sprintf("AND country IN %s", jenner:::sql_in(countries_to_extract, text_item = FALSE)))
+                              sprintf("AND country IN %s", sql_in(countries_to_extract, text_item = FALSE)))
   
   # set up db extraction sql queries
   if((meta1$method[1] == "method0") | (meta1$method[1] == "method2a" & j)){
@@ -62,13 +62,13 @@ get_raw_impact_details <- function(con, meta1, burden_outcome, is_under5 = FALSE
   
   # extract burden estimates
   d_focal <- DBI::dbGetQuery(con, sprintf(sql, 
-                                          jenner:::sql_in(meta1$burden_estimate_set[i], text_item = FALSE), 
-                                          jenner:::sql_in(ii[k], text_item = FALSE)))
+                                          sql_in(meta1$burden_estimate_set[i], text_item = FALSE), 
+                                          sql_in(ii[k], text_item = FALSE)))
   names(d_focal)[names(d_focal) == "value"] <- "focal_value"
   
   d_baseline <- DBI::dbGetQuery(con, sprintf(sql, 
-                                             jenner:::sql_in(meta1$burden_estimate_set[j], text_item = FALSE), 
-                                             jenner:::sql_in(jj[k], text_item = FALSE)))
+                                             sql_in(meta1$burden_estimate_set[j], text_item = FALSE), 
+                                             sql_in(jj[k], text_item = FALSE)))
   names(d_baseline)[names(d_baseline) == "value"] <- "baseline_value"
   
   # calculate impact estimates

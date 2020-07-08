@@ -48,3 +48,9 @@ grepv <- function(patterns, value) {
 assert_has_columns <- function(d, cols_must_have){
   stopifnot(all(cols_must_have %in% names(d)))
 }
+
+sql_in <- function(items, text_item = TRUE) {
+  items <- paste(if (text_item) squote(items) else items,
+                 collapse= ", ")
+  sprintf("(%s)", items)
+}

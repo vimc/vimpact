@@ -90,9 +90,9 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
                               AND scenario_type IN %s
                               AND gavi_support_level IN %s
                               AND vaccine NOT IN %s",
-                                                 jenner:::sql_in(scenario_type),
-                                                 jenner:::sql_in(gavi_support_levels), 
-                                                 jenner:::sql_in(vaccine_to_ignore)),
+                                                 sql_in(scenario_type),
+                                                 sql_in(gavi_support_levels), 
+                                                 sql_in(vaccine_to_ignore)),
                                          "AND scenario_description NOT LIKE '%LiST%'"),
                               touchstone_cov)
   if(nrow(cov_sets) == 0L){
@@ -107,7 +107,7 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
   }
   country_ <- ifelse(is.null(countries_to_extract), 
                      "", 
-                     sprintf("AND country IN %s", jenner:::sql_in(countries_to_extract, text_item = TRUE)))
+                     sprintf("AND country IN %s", sql_in(countries_to_extract, text_item = TRUE)))
   cov <- DBI::dbGetQuery(con, sprintf("SELECT coverage_set, country, year, age_from, age_to, gender.name AS gender, gavi_support, target, coverage 
                                       FROM coverage 
                                       JOIN gender ON gender.id = gender
@@ -115,8 +115,8 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
                                       AND coverage > 0
                                       AND year IN %s
                                       %s",
-                                      jenner:::sql_in(cov_sets$coverage_set, text_item = FALSE),
-                                      jenner:::sql_in(year_min:year_max, text_item = FALSE),
+                                      sql_in(cov_sets$coverage_set, text_item = FALSE),
+                                      sql_in(year_min:year_max, text_item = FALSE),
                                       country_))
   
   cov <- merge_by_common_cols(cov_sets, cov)
@@ -207,7 +207,7 @@ get_population <- function(con, touchstone_pop = "201710gavi-5", demographic_sta
   ## this table get population data as you wish
   sql <- read_sql("inst/sql/population.sql")
   constrains_ <- sql_constrains(country_, year_, age_)
-  sql <- sprintf(sql, jenner:::sql_in(gender), constrains_)
+  sql <- sprintf(sql, sql_in(gender), constrains_)
   return(DBI::dbGetQuery(con, sql, list(touchstone_pop, demographic_statistic)))
   
 }
@@ -224,15 +224,15 @@ sql_constrains <- function(country_ = NULL, year_ = NULL, age_ = NULL, burden_es
   
   country_ <- ifelse(is.null(country_),
                      "\t",
-                     sprintf("AND %s IN %s",country_id, jenner:::sql_in(country_)))
+                     sprintf("AND %s IN %s",country_id, sql_in(country_)))
   
   year_ <- ifelse(is.null(year_),
                   "\t",
-                  sprintf("AND year IN %s", jenner:::sql_in(year_, text_item = FALSE)))
+                  sprintf("AND year IN %s", sql_in(year_, text_item = FALSE)))
   
   age_ <- ifelse(is.null(age_),
                  "\t",
-                 sprintf("AND %s IN %s", age_id, jenner:::sql_in(age_, text_item = FALSE)))
+                 sprintf("AND %s IN %s", age_id, sql_in(age_, text_item = FALSE)))
   
   return(paste(country_, year_, age_, collapse = "\n"))
 }
