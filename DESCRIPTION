@@ -8,9 +8,14 @@ Authors@R:
              email = "rich.fitzjohn@gmail.com"),
       person("Imperial College of Science, Technology and Medicine",
              role = "cph"))
-Description: Example package for trying to get R's translation
-    infrastructure working. This is not a package to be used!
+Description: VIMC IMPACT CALCULATION PACKAGE. This package is mainly for the VIMC Science Team to investigate vaccination impact.
+Imports:
+  DBI,
+  RPostgres,
+  vaultr
 License: MIT + file LICENSE
 Encoding: UTF-8
 Suggests:
-    testthat
+    testthat,
+    RSQLite
+RoxygenNote: 7.1.1
