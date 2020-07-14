@@ -49,9 +49,9 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
   if(grepl("-", touchstone_cov)){
     tmp <- DBI::dbGetQuery(con, "SELECT * FROM touchstone WHERE id = $1", touchstone_cov)
     if(nrow(tmp) == 1L){
-      print("user defined touchstone version is used.")
+      message("User defined touchstone version is used.")
     } else {
-      stop("User defined touchstone dose not exist.")
+      stop("User defined touchstone does not exist.")
     }
   } else {
     touchstone_cov <- get_touchstone(con, touchstone_cov)
@@ -73,7 +73,7 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
   } else {
     p_int_pop <- external_population_estimates
   }
-  print("Extracted interpolated population.")
+  message("Extracted interpolated population.")
   
   ## select minimal needed coverage data from the db
   disease_vaccine_delivery <- read_csv("inst/disease_vaccine_delivery.csv")
@@ -122,7 +122,7 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
   cov <- merge_by_common_cols(cov_sets, cov)
   cov$coverage_set <- NULL
   
-  print("Extracted raw coverage data...")
+  message("Extracted raw coverage data...")
   
   ## transform coverage data
   cov <- unique(cov) # this is needed as we used to create multiple coverage_sets for MCV1 and DTP3 for LiST model
@@ -173,7 +173,7 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
   cov2 <- cov2[c("delivery_id", "country", "disease", "scenario_type","vaccine", "activity_type", "gavi_support_level", "year", 
                  "gavi_support", "gender", "age", "target_source", "coverage_source",  "cohort_size", "delivery_population", 
                  "fvps_source", "fvps_adjusted", "coverage_adjusted")]
-  print("Transformed coverage data.")
+  message("Transformed coverage data.")
   
   country_id <- DBI::dbReadTable(con, "country")
   cov2$country_nid <- country_id$nid[match(cov2$country, country_id$id)]

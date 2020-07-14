@@ -35,7 +35,7 @@ recipe_template <- function(template_version = "201710", method){
                     "<deaths_outcome1>,<deaths_outcome2>,<deaths_outcome3>;<cases_outcome1>,<cases_outcome2>,<cases_outcome3> \n",
                     "NO spacing is allowed. DO NOT provide dalys, as dalys will be added in automatically."), man)
   close(man)
-  print("Generated impact recipe template in directory recipe/.")
+  message("Generated impact recipe template in directory recipe.")
 }
 
 

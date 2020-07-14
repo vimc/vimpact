@@ -107,8 +107,9 @@ impact_by_year_of_vaccination <- function(meta1, raw_impact, fvps, fvps_updates 
   stopifnot(meta1$method %in% c("method2a", "method2b")) # only calculate impact by year of vaccination
   stopifnot(length(unique(meta1$index)) == 1L) # index has to be unique
   stopifnot(length(unique(meta1$method)) == 1L) # method has to be unique
-  print(paste("Calculating impact by year of vaccination related to vaccination programmes between",
-              min(vaccination_years), "and", max(vaccination_years)))
+  message(paste("Calculating impact by year of vaccination related to",
+                "vaccination programmes between",
+                min(vaccination_years), "and", max(vaccination_years)))
   
   # determine method
   method <- meta1$method[1L]
