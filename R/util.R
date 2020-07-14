@@ -58,3 +58,7 @@ sql_in <- function(items, text_item = TRUE) {
                  collapse= ", ")
   sprintf("(%s)", items)
 }
+
+system_file <- function(...) {
+  system.file(..., mustWork = TRUE, package = "vimpact")
+}
