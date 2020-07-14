@@ -8,7 +8,7 @@
 recipe_template <- function(template_version = "201710", method){
   assert_method(method)
   recipe <- assert_version(method, template_version)
-  recipe <- read_csv(file.path("inst/recipe", method, recipe))
+  recipe <- read_csv(system_file("recipe", method, recipe))
   
   if (!dir.exists("recipe")){
     dir.create("recipe")
@@ -44,7 +44,7 @@ get_meta_from_recipe <- function(default_recipe = TRUE, method = "method0", reci
   if (default_recipe){
     assert_method(method)
     recipe <- assert_version(method, recipe_version)
-    recipe <- read_csv(file.path("inst/recipe", method, recipe))
+    recipe <- read_csv(system_file("recipe", method, recipe))
   } else {
     if (!grepl(".csv", recipe)){
       stop("Individualised recipe shall be presented as a csv file.")
@@ -167,7 +167,7 @@ assert_method <- function(method){
 
 ## checking impact recipe version parameter (if default recipe)
 assert_version <- function(method, recipe_version){
-  files <- list.files(file.path("inst/recipe", method))
+  files <- list.files(system_file("recipe", method))
   i <- grepl(recipe_version, files)
   if (!i){
     stop("Unknown user defined recipe_version. Recipe version naming convertion is like 201710, 201810, 201910.")
