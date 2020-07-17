@@ -13,7 +13,7 @@ get_touchstone <- function(con, touchstone_name){
   d <- DBI::dbGetQuery(con, "SELECT touchstone_name, MAX(touchstone.version) as version FROM touchstone
                        WHERE touchstone_name = $1 AND version != 42 GROUP BY touchstone_name", touchstone_name)
   if (nrow(d) == 0L) {
-    stop("Unknown touchstone specified.")
+    stop("Unknown touchstone_name specified.")
   }
   paste(d, collapse = "-")
 }
