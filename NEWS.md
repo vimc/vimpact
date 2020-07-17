@@ -2,6 +2,8 @@
 
 * further constrain read_csv/read_sql to load system files when applicable
 
+* add tests for impact_meta.R
+
 ### vimpact 0.0.1 (2020-06-18)
 
 * impact calculation for central estimates
