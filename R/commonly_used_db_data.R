@@ -76,7 +76,7 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
   message("Extracted interpolated population.")
   
   ## select minimal needed coverage data from the db
-  disease_vaccine_delivery <- read_csv("inst/disease_vaccine_delivery.csv")
+  disease_vaccine_delivery <- read_csv(system_file("inst/disease_vaccine_delivery.csv"))
   
   cov_sets <- DBI::dbGetQuery(con, paste(sprintf("SELECT DISTINCT scenario_type, disease, coverage_set.id AS coverage_set, vaccine, activity_type, gavi_support_level 
                               FROM scenario
@@ -205,7 +205,7 @@ get_population <- function(con, touchstone_pop = "201710gavi-5", demographic_sta
     message("touchstone version is not specified. Lateset version is used.")
   }
   ## this table get population data as you wish
-  sql <- read_sql("inst/sql/population.sql")
+  sql <- read_sql(system_file("inst/sql/population.sql"))
   constrains_ <- sql_constrains(country_, year_, age_)
   sql <- sprintf(sql, sql_in(gender), constrains_)
   return(DBI::dbGetQuery(con, sql, list(touchstone_pop, demographic_statistic)))
