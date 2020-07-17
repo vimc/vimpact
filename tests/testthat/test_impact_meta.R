@@ -20,6 +20,20 @@ test_that("test assert_method",{
   
 })
 
+test_that("test assert_recipe_format",{
+  recipe <- data_frame(touchstone = 1, 
+                       modelling_group = 2, 
+                       disease = 3, 
+                       focal = 4, 
+                       baseline = 5, 
+                       burden_outcome = 6,
+                       redundant = 7)
+  expect_invisible(assert_recipe_format(recipe))
+  
+  recipe$touchstone <- NULL
+  expect_error(assert_recipe_format(recipe))
+  
+})
 test_that("test recipe_template",{
   ## parameters
   template_version <- "201710"
