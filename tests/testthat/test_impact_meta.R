@@ -34,6 +34,12 @@ test_that("test assert_recipe_format",{
   expect_error(assert_recipe_format(recipe))
   
 })
+
+test_that("test order_vaccine_delivery",{
+  expect_equal(order_vaccine_delivery("3,2,1"), "1,2,3")
+  expect_equal(order_vaccine_delivery("c,a,b"), "a,b,c")
+  
+})
 test_that("test recipe_template",{
   ## parameters
   template_version <- "201710"
