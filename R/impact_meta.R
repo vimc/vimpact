@@ -218,5 +218,8 @@ replace_burden_outcome <- function(burden_outcomes, a){
     
     t[i] <- paste(m2, collapse = ";")
   }
+  if(grepl("NA", t)){
+    stop("Burden outcome not defined in Montagu.")
+  }
   t
 }
