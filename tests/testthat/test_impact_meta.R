@@ -4,7 +4,7 @@ test_that("test assert_version",{
   method <- "method0"
   version <- "201710"
   expect_true(assert_version(method, version) == paste0(version, ".csv"))
- 
+  
   method <- "methoda"
   version <- "201710"
   expect_error(assert_version(method, version))
@@ -65,4 +65,16 @@ test_that("test recipe_template",{
   
   expect_equal(data, test_data)
   unlink(system_file("tests/testthat/recipe"), recursive = TRUE)
+})
+
+
+test_that("test get_meta_from_recipe",{
+  ## run function for data
+  con <- test_montagu_readonly_connection()
+  data <- get_meta_from_recipe(con = con, disease = "Hib")
+  expect_true(all(data$method == "method0"))
+  expect_true(all(data$touchstone == "201710gavi-5"))
+  expect_true(all(data$disease == "Hib"))
+  expect_equal(sum(data$meta_type == "baseline"), sum(data$meta_type == "focal"))
+  expect_equal(length(unique(data$modelling_group)), 2L)
 })
