@@ -159,7 +159,7 @@ get_meta_from_recipe <- function(default_recipe = TRUE, method = "method0", reci
 
 ## checking impact calculation method parameter
 assert_method <- function(method){
-  dirs <- list.dirs(system_file("inst/recipe"), full.names = FALSE)
+  dirs <- list.dirs(system_file("recipe"), full.names = FALSE)
   if (method %!in% dirs | method == ""){
     stop("Unknown user defined method. method must be one of method0, method1, method2a, method2b.")
   }
@@ -167,7 +167,7 @@ assert_method <- function(method){
 
 ## checking impact recipe version parameter (if default recipe)
 assert_version <- function(method, recipe_version){
-  files <- list.files(system_file("inst/recipe", method))
+  files <- list.files(system_file("recipe", method))
   i <- grepl(recipe_version, files)
   if (!i){
     stop("Unknown user defined recipe_version. Recipe version naming convertion is like 201710, 201810, 201910.")
