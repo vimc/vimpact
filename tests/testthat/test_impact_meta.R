@@ -51,22 +51,6 @@ test_that("test replace_burden_outcomes",{
   
 })
 
-test_that("test recipe_template",{
-  ## parameters
-  template_version <- "201710"
-  method <- "method0"
-  #browser()
-  ## run function for data
-  data <- recipe_template(template_version, method)
-  data <- read_csv(file.path("tests/testthat/recipe", method, "impact_recipe.csv"))
-  
-  ## test data to validate against
-  test_data <- read_csv(system_file("recipe", method, paste0(template_version, ".csv" )))
-  
-  expect_equal(data, test_data)
-  unlink(file.path("tests/testthat/recipe"), recursive = TRUE)
-})
-
 
 test_that("test get_meta_from_recipe",{
   ## run function for data
