@@ -109,8 +109,8 @@ test_that("where clause build correctly", {
     year = c(2001, 2002, 2003)
   )
   expect_equal(build_where(filters), paste0(
-    "WHERE (disease = 'HepB') AND\n",
-    "(year = 2001) OR (year = 2002) OR (year = 2003)"))
+    "WHERE ((disease = 'HepB')) AND\n",
+    "((year = 2001) OR (year = 2002) OR (year = 2003))"))
 
   filters <- list(
     test = TRUE
