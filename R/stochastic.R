@@ -1,6 +1,8 @@
-get_stochastic_data <- function(annex, table) {
+get_stochastic_data <- function(annex, table, 
+                                groups = c("disease", "country", "year")) {
+  groups_str <- paste(groups, collapse = ", ")
   DBI::dbGetQuery(annex, sprintf("
-  SELECT disease, country, year,
+  SELECT %s,
     avg(deaths_default) as deaths_default_mid,
     avg(deaths_novac) as deaths_novac_mid,
     avg(deaths_impact) as deaths_impact_mid,
@@ -20,5 +22,5 @@ get_stochastic_data <- function(annex, table) {
     percentile_cont(0.975) WITHIN GROUP (ORDER BY dalys_novac) AS dalys_novac_hi,
     percentile_cont(0.975) WITHIN GROUP (ORDER BY dalys_impact) AS dalys_impact_hi
   FROM %s
-  GROUP BY disease, country, year;", table))
+  GROUP BY %s;", groups_str, table, groups_str))
 }
