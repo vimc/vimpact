@@ -1,5 +1,5 @@
 #' Get data from stochastic tables with specified grouping and filters
-#' 
+#'
 #' Can query from cross_all, cross_under5, cohort_all and cohort_under5
 #'
 #' @param annex Connection to annex db
@@ -11,13 +11,13 @@
 #' deaths_impact, dalys_default, dalys_novac, dalys_impact with specified
 #' groupings.
 #' @export
-get_stochastic_data <- function(annex, table, 
+get_stochastic_data <- function(annex, table,
                                 groups = c("disease", "country", "year"),
                                 filters = NULL) {
   if (!(table %in% c("cross_all", "cross_under5", "cohort_all",
                      "cohort_under5"))) {
     stop(paste0("Table must be one of cross_all, cross_under5, cohort_all or",
-                " cohort_under5 got ", table))
+                " cohort_under5 got ", table, "."))
   }
   groups_str <- paste(groups, collapse = ", ")
   where_clause <- build_where(filters)

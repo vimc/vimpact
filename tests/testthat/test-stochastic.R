@@ -64,6 +64,12 @@ test_that("can get summary data of stochastic table", {
       "dalys_impact_hi"))
 })
 
+test_that("can get summary data of non-stochastic table throws error", {
+  expect_error(get_stochastic_data(NULL, "not valid"),
+               paste0("Table must be one of cross_all, cross_under5, ",
+               "cohort_all or cohort_under5 got not valid."))
+})
+
 test_that("get_stochastic can set groups", {
   con <- get_test_connection()
 
