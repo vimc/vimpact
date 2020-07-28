@@ -4,4 +4,5 @@ docker run --rm -d \
     -p 5432:5432 \
     --name vimpact-pg \
     -e POSTGRES_DB=vimpact_test_db \
-    postgres:9.2
+    -e POSTGRES_HOST_AUTH_METHOD=trust \
+    postgres:9.4

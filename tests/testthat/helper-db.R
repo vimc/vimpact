@@ -16,7 +16,9 @@ prepare_example_postgres_db <- function() {
 
 get_test_connection <- function() {
   info <- get_db_info()
-  get_postgres_connection(info$dbname, info$user, info$host)
+  con <- get_postgres_connection(info$dbname, info$user, info$host)
+  withr::defer_parent(DBI::dbDisconnect(con))
+  con
 }
 
 vimpact_test_postgres_connection <- function(dbname, user, host) {

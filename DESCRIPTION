@@ -17,5 +17,6 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 Suggests:
     testthat,
-    RSQLite
+    RSQLite,
+    withr
 RoxygenNote: 7.1.1
