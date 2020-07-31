@@ -13,9 +13,9 @@ prepare_example_postgres_db <- function() {
     add_dummy_data(con)
     DBI::dbDisconnect(con)
   }, error = function(e) {
-    message(sprintf(paste0("Failed to open db connection to postgres db",
-                           " %s with user %s and host %s."),
-                    info$dbname, info$user, info$host))
+    message(sprintf(paste0("Failed to prepare db connection to postgres db",
+                           " %s with user %s and host %s.\n    %s"),
+                    info$dbname, info$user, info$host, e$message))
   })
   invisible(TRUE)
 }
@@ -44,16 +44,23 @@ get_postgres_connection <- function(dbname, user, host) {
 }
 
 add_dummy_data <- function(con) {
-  message("Adding dummy data to database")
-  DBI::dbExecute(con, "DROP TABLE IF EXISTS cross_all CASCADE")
-  DBI::dbExecute(con, "DROP TABLE IF EXISTS cross_under5 CASCADE")
-  DBI::dbExecute(con, "DROP TABLE IF EXISTS cohort_all CASCADE")
-  DBI::dbExecute(con, "DROP TABLE IF EXISTS cohort_under5 CASCADE")
+  db_name <- DBI::dbGetQuery(con, "SELECT current_database()")
+  if (db_name != "vimpact_test_db") {
+    stop(sprintf(
+      "Can't add dummy data to db %s expected test db 'vimpact_test_db'",
+      db_name))
+  } else {
+    message("Adding dummy data to database")
+    DBI::dbExecute(con, "DROP TABLE IF EXISTS cross_all CASCADE")
+    DBI::dbExecute(con, "DROP TABLE IF EXISTS cross_under5 CASCADE")
+    DBI::dbExecute(con, "DROP TABLE IF EXISTS cohort_all CASCADE")
+    DBI::dbExecute(con, "DROP TABLE IF EXISTS cohort_under5 CASCADE")
 
-  DBI::dbWriteTable(con, "cross_all", create_dummy_data())
-  DBI::dbWriteTable(con, "cross_under5", create_dummy_data())
-  DBI::dbWriteTable(con, "cohort_all", create_dummy_data())
-  DBI::dbWriteTable(con, "cohort_under5", create_dummy_data())
+    DBI::dbWriteTable(con, "cross_all", create_dummy_data())
+    DBI::dbWriteTable(con, "cross_under5", create_dummy_data())
+    DBI::dbWriteTable(con, "cohort_all", create_dummy_data())
+    DBI::dbWriteTable(con, "cohort_under5", create_dummy_data())
+  }
 }
 
 create_dummy_data <- function() {
