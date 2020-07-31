@@ -11,7 +11,7 @@
 #' deaths_impact, dalys_default, dalys_novac, dalys_impact with specified
 #' groupings.
 #' @export
-get_stochastic_data <- function(annex, table,
+fetch_stochastic_data <- function(annex, table,
                                 groups = c("disease", "country", "year"),
                                 filters = NULL) {
   if (!(table %in% c("cross_all", "cross_under5", "cohort_all",

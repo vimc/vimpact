@@ -3,7 +3,7 @@ context("stochastic")
 test_that("can get summary data of stochastic table", {
   con <- get_test_connection()
 
-  data <- get_stochastic_data(con, "cross_all")
+  data <- fetch_stochastic_data(con, "cross_all")
   expect_equal(nrow(data), 60)
   expect_setequal(
     colnames(data),
@@ -27,7 +27,7 @@ test_that("can get summary data of stochastic table", {
   expect_true(all(data$dalys_impact_lo < data$dalys_impact_mid))
   expect_true(all(data$dalys_impact_mid < data$dalys_impact_hi))
 
-  data <- get_stochastic_data(con, "cross_under5")
+  data <- fetch_stochastic_data(con, "cross_under5")
   expect_equal(nrow(data), 60)
   expect_setequal(
     colnames(data),
@@ -39,7 +39,7 @@ test_that("can get summary data of stochastic table", {
       "deaths_impact_hi", "dalys_default_hi", "dalys_novac_hi",
       "dalys_impact_hi"))
 
-  data <- get_stochastic_data(con, "cohort_all")
+  data <- fetch_stochastic_data(con, "cohort_all")
   expect_equal(nrow(data), 60)
   expect_setequal(
     colnames(data),
@@ -51,7 +51,7 @@ test_that("can get summary data of stochastic table", {
       "deaths_impact_hi", "dalys_default_hi", "dalys_novac_hi",
       "dalys_impact_hi"))
 
-  data <- get_stochastic_data(con, "cohort_under5")
+  data <- fetch_stochastic_data(con, "cohort_under5")
   expect_equal(nrow(data), 60)
   expect_setequal(
     colnames(data),
@@ -65,7 +65,7 @@ test_that("can get summary data of stochastic table", {
 })
 
 test_that("can get summary data of non-stochastic table throws error", {
-  expect_error(get_stochastic_data(NULL, "not valid"),
+  expect_error(fetch_stochastic_data(NULL, "not valid"),
                paste0("Table must be one of cross_all, cross_under5, ",
                "cohort_all or cohort_under5 got not valid."))
 })
@@ -73,7 +73,7 @@ test_that("can get summary data of non-stochastic table throws error", {
 test_that("get_stochastic can set groups", {
   con <- get_test_connection()
 
-  data <- get_stochastic_data(con, "cross_all", groups = c("disease", "year"))
+  data <- fetch_stochastic_data(con, "cross_all", groups = c("disease", "year"))
   expect_equal(nrow(data), 30)
   expect_setequal(
     colnames(data),
@@ -89,11 +89,11 @@ test_that("get_stochastic can set groups", {
 test_that("get_stochastic can filter before aggregating", {
   con <- get_test_connection()
 
-  data <- get_stochastic_data(con, "cross_all",
-                              filters = list(
-                                disease = "HepB",
-                                year = c(2001, 2002, 2003)
-                              ))
+  data <- fetch_stochastic_data(con, "cross_all",
+                                filters = list(
+                                  disease = "HepB",
+                                  year = c(2001, 2002, 2003)
+                                ))
   expect_equal(nrow(data), 6)
   expect_setequal(
     colnames(data),
