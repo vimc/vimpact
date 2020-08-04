@@ -11,6 +11,7 @@ extract_vaccination_history(
   year_min = 2000,
   year_max = 2100,
   vaccine_to_ignore = c("DTP3", "HepB_BD_home", "none"),
+  disease_to_extract = NULL,
   countries_to_extract = NULL,
   gavi_support_levels = c("with", "bestminus"),
   scenario_type = "default",
@@ -29,6 +30,8 @@ extract_vaccination_history(
 \item{year_max}{extract data to year_max}
 
 \item{vaccine_to_ignore}{Ignore defined vaccines}
+
+\item{disease_to_extract}{extract data for specific diseases}
 
 \item{countries_to_extract}{extract data for specific countries}
 
