@@ -39,7 +39,7 @@ extract_vaccination_history(
 
 \item{scenario_type}{scenario type}
 
-\item{external_population_estimates}{The rationales are 1. we can use external population estimates if any and if necessary; 
+\item{external_population_estimates}{The rationales are 1. we can use external population estimates if any and if necessary;
 2. demographic uncertainty not only affects models, but also FVPs. If we are to conduct sensitivity analysis on impact_by_year_of_vaccination, we need to vary population input for adjusting FVPs.}
 }
 \description{
