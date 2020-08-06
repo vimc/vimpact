@@ -180,20 +180,3 @@ determine_vaccine_delivery <- function(meta1){
           unlist(strsplit(meta1$vaccine_delivery[meta1$meta_type=="baseline"], ",")))
 }
 
-standardise_impact_output <- function(meta, dat){
-  
-  i <- match(dat$index, meta$index)
-  dat$disease <- meta$disease[i]
-  dat$modelling_group <- meta$modelling_group[i]
-  
-  method <- meta$method[1]
-  if(method %in% "method1"){
-    names(dat)[which(names(dat) == "time")] <- "cohort"
-  } else {
-    names(dat)[which(names(dat) == "time")] <- "year"
-  }
-  names(dat)[which(names(dat) == "value")] <- "impact"
-  
-  dat
-}
-

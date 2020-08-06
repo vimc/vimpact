@@ -2,6 +2,24 @@ context("Test Impact Calculations")
 
 test_that("test if vimpact functions are working as expected for central estimates", {
   
+  standardise_impact_output_for_test <- function(meta, dat){
+    
+    i <- match(dat$index, meta$index)
+    dat$disease <- meta$disease[i]
+    dat$modelling_group <- meta$modelling_group[i]
+    
+    method <- meta$method[1]
+    if(method %in% "method1"){
+      names(dat)[which(names(dat) == "time")] <- "cohort"
+    } else {
+      names(dat)[which(names(dat) == "time")] <- "year"
+    }
+    names(dat)[which(names(dat) == "value")] <- "impact"
+    
+    dat
+  }
+  
+  
   skip_if_not_installed("RSQLite")
   con <- test_montagu_readonly_connection()
   con_test <- DBI::dbConnect(RSQLite::SQLite(), dbname = ":memory:")
@@ -29,7 +47,7 @@ test_that("test if vimpact functions are working as expected for central estimat
   dat <- do.call(rbind, dat)
   
   dat <- dat[dat$time %in% vaccination_years, ]
-  dat <- standardise_impact_output(meta, dat)
+  dat <- standardise_impact_output_for_test(meta, dat)
   dat$country <- country$id[match(dat$country, country$nid)] 
   
   test_data <- readRDS("testthat/test_data/impact_method0.rds")
@@ -51,7 +69,7 @@ test_that("test if vimpact functions are working as expected for central estimat
   dat <- do.call(rbind, dat)
   
   dat <- dat[dat$time %in% vaccination_years, ]
-  dat <- standardise_impact_output(meta, dat)
+  dat <- standardise_impact_output_for_test(meta, dat)
   dat$country <- country$id[match(dat$country, country$nid)] 
   
   test_data <- readRDS("testthat/test_data/impact_method1.rds")
