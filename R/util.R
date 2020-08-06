@@ -62,3 +62,7 @@ sql_in <- function(items, text_item = TRUE) {
 system_file <- function(...) {
   system.file(..., mustWork = TRUE, package = "vimpact")
 }
+
+vcapply <- function(X, FUN, ...) {
+  vapply(X, FUN, character(1), ...)
+}

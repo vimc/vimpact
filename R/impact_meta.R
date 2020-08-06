@@ -9,14 +9,14 @@ recipe_template <- function(template_version = "201710", method){
   assert_method(method)
   recipe <- assert_version(method, template_version)
   recipe <- read_csv(system_file("recipe", method, recipe))
-  
+
   if (!dir.exists("recipe")){
     dir.create("recipe")
   }
   if (!dir.exists(paste0("recipe/", method))){
     dir.create(paste0("recipe/", method))
   }
-  write.csv(recipe, file.path("recipe", method,"impact_recipe.csv"), row.names = FALSE)
+  utils::write.csv(recipe, file.path("recipe", method,"impact_recipe.csv"), row.names = FALSE)
   man <- file(file.path("recipe", "impact_recipe_man.md"))
   writeLines(paste0("## touchstone \n",
                     "touchstone lists touchstone_name, or touchstone_version if specific version applies. \n \n",
@@ -40,7 +40,7 @@ recipe_template <- function(template_version = "201710", method){
 
 
 get_meta_from_recipe <- function(default_recipe = TRUE, method = "method0", recipe_version = "201710", recipe = NULL, con, disease = NULL){
-  
+
   if (default_recipe){
     assert_method(method)
     recipe <- assert_version(method, recipe_version)
@@ -52,7 +52,7 @@ get_meta_from_recipe <- function(default_recipe = TRUE, method = "method0", reci
       recipe <- read_csv(recipe)
     }
     assert_recipe_format(recipe)
-    
+
   }
   if(!is.null(disease)){
     recipe <- recipe[recipe$disease %in% disease, ]
@@ -66,26 +66,26 @@ get_meta_from_recipe <- function(default_recipe = TRUE, method = "method0", reci
       recipe$burden_outcome[i] <- paste(recipe$burden_outcome[i], "dalys", sep = ";")
     }
   }
-  
+
   ## expand recipe
   burden_outcomes <- DBI::dbReadTable(con, "burden_outcome")
-  
+
   meta <- NULL
   for (i in seq_along(recipe[, 1])){
     t <- recipe[i, ]
     t$touchstone <- ifelse(!grepl("-", t$touchstone), get_touchstone(con, t[["touchstone"]]), t$touchstone)
-    
+
     ## split focal and baseline to multiple rows
     t_focal <- t
     t_focal$baseline <- NULL
     names(t_focal)[which(names(t_focal) == "focal")] <- "meta"
     t_focal$meta_type <- "focal"
-    
+
     t_baseline <- t
     t_baseline$focal <- NULL
     names(t_baseline)[which(names(t_baseline) == "baseline")] <- "meta"
     t_baseline$meta_type <- "baseline"
-    
+
     d <- rbind(t_baseline, t_focal)
     d$index <- i
     d$scenario_type <- NA
@@ -95,7 +95,7 @@ get_meta_from_recipe <- function(default_recipe = TRUE, method = "method0", reci
       d$scenario_type[j] <- v[1]
       d$vaccine_delivery[j] <- ifelse(length(v) == 1L, "", v[-1])
     }
-    
+
     ## get all possible meta data
     ## make this a view, eventually
     ## given disease, touchstone, model, find all scenario, coverage_sets and burden_estimate_sets.
@@ -118,7 +118,7 @@ get_meta_from_recipe <- function(default_recipe = TRUE, method = "method0", reci
                    t$touchstone,
                    t$modelling_group,
                    t$disease)
-    
+
     meta_all <- DBI::dbGetQuery(con, sql)
     ## remove yf reactive sias - otherwise cannot match with recipe
     j <- meta_all$vaccine == "YF" & meta_all$gavi_support_level == "none"
@@ -126,7 +126,7 @@ get_meta_from_recipe <- function(default_recipe = TRUE, method = "method0", reci
     meta_all$gavi_support_level <- NULL
     meta_all$vaccine_delivery <- paste(meta_all$vaccine, meta_all$activity_type, sep = "-")
     meta_all$vaccine_delivery[meta_all$vaccine_delivery == "none-none"] <- ""
-    
+
     scenario_id <- unique(meta_all$scenario_id)
     d2 <- NULL
     for (j in scenario_id){
@@ -140,7 +140,7 @@ get_meta_from_recipe <- function(default_recipe = TRUE, method = "method0", reci
                                  burden_estimate_set = v$current_burden_estimate_set[1]))
     }
     meta_all <- d2
-    
+
     ### filtering
     ### now work with meta_all and d
     ### order vaccine_delivery, so that can match
@@ -154,7 +154,7 @@ get_meta_from_recipe <- function(default_recipe = TRUE, method = "method0", reci
   meta$vaccine_delivery[meta$scenario_type == "novac"] <- "no-vaccination"
   stopifnot(all(!is.na(meta$scenario)))
   meta$method <- method
-  meta 
+  meta
 }
 
 ## checking impact calculation method parameter
@@ -180,11 +180,11 @@ assert_version <- function(method, recipe_version){
 
 ## checking impact recipe (if individualised recipe)
 assert_recipe_format <- function(recipe){
-  recipe_cols <- c("touchstone", "modelling_group", "disease", "focal", "baseline", 
+  recipe_cols <- c("touchstone", "modelling_group", "disease", "focal", "baseline",
                    "burden_outcome")
   i <- setdiff(recipe_cols, names(recipe))
   if (length(i) > 0L){
-    stop(sprintf("Missing recipe info needed - (%s)", paste(i, collapse = ", "))) 
+    stop(sprintf("Missing recipe info needed - (%s)", paste(i, collapse = ", ")))
   }
 }
 
@@ -215,7 +215,7 @@ replace_burden_outcome <- function(burden_outcomes, a){
     m2[2] <- m[k]
     k <- grepl("dalys", v)
     m2[3] <- m[k]
-    
+
     t[i] <- paste(m2, collapse = ";")
   }
   if(any(grepl("NA", t))){

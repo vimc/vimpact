@@ -7,3 +7,9 @@
 <!-- badges: end -->
 
 Support code for impact calculations.
+
+## Running tests which rely on PostgreSQL database
+
+Some require a PostgreSQL database. These tests will be skipped by default when running locally. To enable them, run the `./scripts/test_db_start.sh` script to run up a Postgres db within a docker container. When finished testing locally run `./scripts/test_db_stop.sh` to stop the container.
+
+You can connect directly to the Postgres db by running `./scripts/connect_db.sh`
