@@ -1,7 +1,7 @@
 context("Test Impact Calculations")
 
 test_that("test if vimpact functions are working as expected for central estimates", {
-  skip_if_no_reference_data()
+  #skip_if_no_reference_data()
   standardise_impact_output_for_test <- function(meta, dat){
 
     i <- match(dat$index, meta$index)
@@ -23,7 +23,7 @@ test_that("test if vimpact functions are working as expected for central estimat
   skip_if_not_installed("RSQLite")
   con <- test_montagu_readonly_connection()
   con_test <- DBI::dbConnect(RSQLite::SQLite(), dbname = ":memory:")
-  d = import_test_data_central_estimates(con, con_test)
+  import_test_data_central_estimates(con, con_test)
   on.exit({
     DBI::dbDisconnect(con)
     DBI::dbDisconnect(con_test)
