@@ -31,7 +31,7 @@ test_that("test if vimpact functions are working as expected for central estimat
 
   vaccination_years <- 2000:2030
   country <- DBI::dbReadTable(con_test, "country")
-  fvps <- readRDS("vimpact_test_data/fvps.rds")
+  fvps <- readRDS("vimpact-test-data/fvps.rds")
   fvps$disease[fvps$vaccine %in% c("HepB", "HepB_BD")] <- "HepB"
   fvps$disease[fvps$vaccine %in% c("MCV1", "MCV2", "Measles")] <- "Measles"
   fvps$disease[fvps$vaccine %in% c("YF")] <- "YF"
@@ -50,7 +50,7 @@ test_that("test if vimpact functions are working as expected for central estimat
   dat <- standardise_impact_output_for_test(meta, dat)
   dat$country <- country$id[match(dat$country, country$nid)]
 
-  test_data <- readRDS("vimpact_test_data/impact_method0.rds")
+  test_data <- readRDS("vimpact-test-data/impact_method0.rds")
   test_data <- test_data[test_data$burden_outcome == "deaths_averted", ]
   test_data <- test_data[test_data$disease %in% unique(dat$disease), ]
   a <- aggregate(impact ~ disease + modelling_group + country, dat, sum, na.rm = TRUE)
@@ -72,7 +72,7 @@ test_that("test if vimpact functions are working as expected for central estimat
   dat <- standardise_impact_output_for_test(meta, dat)
   dat$country <- country$id[match(dat$country, country$nid)]
 
-  test_data <- readRDS("vimpact_test_data/impact_method1.rds")
+  test_data <- readRDS("vimpact-test-data/impact_method1.rds")
   test_data <- test_data[test_data$burden_outcome == "deaths_averted", ]
   test_data <- test_data[test_data$disease %in% unique(dat$disease) & test_data$cohort %in% vaccination_years, ]
   a <- aggregate(impact ~ disease + modelling_group + country, dat, sum, na.rm = TRUE)
@@ -93,7 +93,7 @@ test_that("test if vimpact functions are working as expected for central estimat
                                                                      vaccination_years = vaccination_years))
   dat2 <- do.call(rbind, dat2)
 
-  test_data <- readRDS("vimpact_test_data/impact_method2a.rds")
+  test_data <- readRDS("vimpact-test-data/impact_method2a.rds")
   test_data <- test_data[test_data$vaccine %in% unique(dat2$vaccine), ]
 
   a <- unique(dat2[c("country", "vaccine", "activity_type", "impact_ratio")])
@@ -114,7 +114,7 @@ test_that("test if vimpact functions are working as expected for central estimat
                                                                      vaccination_years = vaccination_years))
   dat2 <- do.call(rbind, dat2)
 
-  test_data <- readRDS("vimpact_test_data/impact_method2b.rds")
+  test_data <- readRDS("vimpact-test-data/impact_method2b.rds")
   test_data <- test_data[test_data$vaccine %in% unique(dat2$vaccine), ]
 
   a <- aggregate(impact ~ country + vaccine + activity_type, dat2, sum, na.rm = TRUE)

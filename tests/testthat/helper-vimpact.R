@@ -29,10 +29,10 @@ test_montagu_readonly_connection <- function() {
 
 
 skip_if_no_reference_data <- function() {
-  if (!file.exists("vimpact-test_data")) {
+  if (!file.exists("vimpact-test-data")) {
     testthat::skip("Test data not found - please clone vimc/vimpact-test-data")
   }
-  args <- c("git", "-C", "vimpact-test_data", "rev-parse", "HEAD")
+  args <- c("git", "-C", "vimpact-test-data", "rev-parse", "HEAD")
   expected <- readLines("test-data-version")
   hash <- system2(args, stdout = TRUE)
   if (!is.null(attr(hash, "status"))) {
@@ -40,7 +40,7 @@ skip_if_no_reference_data <- function() {
   }
   if (hash != expected) {
     testthat::skip(sprintf(
-      "Please update vimpact-test_data to %s or update test-data-version to %s",
+      "Please update vimpact-test-data to %s or update test-data-version to %s",
       expected, hash))
   }
 }
