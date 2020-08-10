@@ -20,12 +20,12 @@ import_test_data_central_estimates <- function(con, con_test){
   touchstone <- "201710gavi"
   countries <- c("PAK", "IND", "NGA", "ETH")
   vaccination_years <- 2000:2030
-  diseases <- c("YF", "Measles")#, "HepB")
-  models <- c("IC-Garske", "LSHTM-Jit")#, "IC-Hallett")
+  diseases <- c("YF", "Measles", "HepB")
+  models <- c("IC-Garske", "LSHTM-Jit", "IC-Hallett")
   default_recipe <- TRUE
   recipe_version <- "201710"
   method_suffix <- c("0", "1", "2a", "2b")
-  
+
   # set up output data set
   data <- list(recipe_0 = NA,
                recipe_1 = NA,
@@ -42,7 +42,7 @@ import_test_data_central_estimates <- function(con, con_test){
                burden_estimate = NA,
                country = NA,
                gender = NA)
-  
+
   ###0. prepare impact calculation recipes and record related burden estimate sets
   burden_sets <- NULL
   scenario <- NULL
@@ -58,48 +58,48 @@ import_test_data_central_estimates <- function(con, con_test){
   }
   scenario <- unique(scenario)
   burden_sets <- unique(burden_sets)
-  
+
   ###1. extract meta from database
   data[["scenario"]] <- DBI::dbGetQuery(con, sprintf("SELECT * FROM scenario WHERE id IN %s",
                                                      sql_in(scenario, text_item = FALSE)))
-  
+
   data[["scenario_coverage_set"]] <- DBI::dbGetQuery(con, sprintf("SELECT * FROM scenario_coverage_set WHERE scenario IN %s",
                                                                   sql_in(scenario, text_item = FALSE)))
-  
+
   data[["coverage_set"]] <- DBI::dbGetQuery(con, sprintf("SELECT * FROM coverage_set WHERE id IN %s",
                                                          sql_in(data$scenario_coverage_set$coverage_set, text_item = FALSE)))
-  
+
   data[["scenario_description"]] <- DBI::dbGetQuery(con, sprintf("SELECT * FROM scenario_description WHERE id IN %s",
                                                                  sql_in(data$scenario$scenario_description, text_item = TRUE)))
-  
+
   data[["scenario_type"]] <- DBI::dbGetQuery(con, sprintf("SELECT * FROM scenario_type WHERE id IN %s",
                                                           sql_in(data$scenario_description$scenario_type, text_item = TRUE)))
-  
+
   data[["coverage"]] <- DBI::dbGetQuery(con, sprintf("SELECT * FROM coverage
                                         WHERE coverage_set IN %s
-                                                     AND country IN %s", 
+                                                     AND country IN %s",
                                                      sql_in(data$coverage_set$id, text_item = FALSE),
                                                      sql_in(countries, text_item = TRUE)))
-  
+
   ###2. extract interpolated population estimates
-  data[["population"]] <- get_population(con, touchstone_pop = "201710gavi-5", demographic_statistic = "int_pop", gender = c("Male", "Female", "Both"), 
+  data[["population"]] <- get_population(con, touchstone_pop = "201710gavi-5", demographic_statistic = "int_pop", gender = c("Male", "Female", "Both"),
                                          country_ = countries, year_ = vaccination_years)
-  
+
   ###3. extract burden from database
   data[["country"]] <- DBI::dbGetQuery(con, sprintf("SELECT id, nid FROM country WHERE id IN %s",
                                                     sql_in(countries)))
-  
+
   data[["gender"]] <- DBI::dbReadTable(con, "gender")
-  
-  data[["burden_estimate"]] <- DBI::dbGetQuery(con, sprintf("SELECT burden_estimate_set, country, year, age, burden_outcome, value 
-                                                            FROM burden_estimate 
+
+  data[["burden_estimate"]] <- DBI::dbGetQuery(con, sprintf("SELECT burden_estimate_set, country, year, age, burden_outcome, value
+                                                            FROM burden_estimate
                                                             WHERE burden_estimate_set IN %s
                                                             AND country IN %s AND burden_outcome != 9",
                                                             sql_in(burden_sets, text_item = FALSE),
                                                             sql_in(data$country$nid, text_item = FALSE)))
-  
+
   data[["burden_outcome"]] <- DBI::dbReadTable(con, "burden_outcome")
-  
+
   data[["touchstone"]] <- DBI::dbReadTable(con, "touchstone")
   for(name in names(data)){
    DBI::dbWriteTable(con_test, name, data[[name]], overwrite = TRUE, row.names = FALSE)
