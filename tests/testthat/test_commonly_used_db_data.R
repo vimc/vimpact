@@ -11,11 +11,11 @@ test_that("test extract_vaccination_history",{
   #skip_if_no_reference_data()
   con <- test_montagu_readonly_connection()
   test_data <- readRDS("vimpact-test-data/fvps.rds")
-  test_data <- aggregate(fvps ~ country + year + vaccine + activity_type, test_data, sum, na.rm = TRUE)
+  test_data <- stats::aggregate(fvps ~ country + year + vaccine + activity_type, test_data, sum, na.rm = TRUE)
   dat <- extract_vaccination_history(con, touchstone_cov = "201710gavi", year_min = 2000, year_max = 2100,
                                      countries_to_extract = unique(test_data$country),
                                      disease_to_extract = c("HepB", "Measles", "YF"))
-  dat <- aggregate(fvps_adjusted ~ country + year + vaccine + activity_type, dat, sum, na.rm = TRUE)
+  dat <- stats::aggregate(fvps_adjusted ~ country + year + vaccine + activity_type, dat, sum, na.rm = TRUE)
 
   d <- merge(dat, test_data, by = intersect(names(dat), names(test_data)), all = TRUE)
   d$fvps[is.na(d$fvps)] <- 0

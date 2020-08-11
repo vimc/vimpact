@@ -53,8 +53,8 @@ test_that("test if vimpact functions are working as expected for central estimat
   test_data <- readRDS("vimpact-test-data/impact_method0.rds")
   test_data <- test_data[test_data$burden_outcome == "deaths_averted", ]
   test_data <- test_data[test_data$disease %in% unique(dat$disease), ]
-  a <- aggregate(impact ~ disease + modelling_group + country, dat, sum, na.rm = TRUE)
-  b <- aggregate(impact ~ disease + modelling_group + country, test_data, sum, na.rm = TRUE)
+  a <- stats::aggregate(impact ~ disease + modelling_group + country, dat, sum, na.rm = TRUE)
+  b <- stats::aggregate(impact ~ disease + modelling_group + country, test_data, sum, na.rm = TRUE)
   a$impact <- round(a$impact/100)
   b$impact <- round(b$impact/100)
 
@@ -75,8 +75,8 @@ test_that("test if vimpact functions are working as expected for central estimat
   test_data <- readRDS("vimpact-test-data/impact_method1.rds")
   test_data <- test_data[test_data$burden_outcome == "deaths_averted", ]
   test_data <- test_data[test_data$disease %in% unique(dat$disease) & test_data$cohort %in% vaccination_years, ]
-  a <- aggregate(impact ~ disease + modelling_group + country, dat, sum, na.rm = TRUE)
-  b <- aggregate(impact ~ disease + modelling_group + country, test_data, sum, na.rm = TRUE)
+  a <- stats::aggregate(impact ~ disease + modelling_group + country, dat, sum, na.rm = TRUE)
+  b <- stats::aggregate(impact ~ disease + modelling_group + country, test_data, sum, na.rm = TRUE)
   a$impact <- round(a$impact/100)
   b$impact <- round(b$impact/100)
 
@@ -117,8 +117,8 @@ test_that("test if vimpact functions are working as expected for central estimat
   test_data <- readRDS("vimpact-test-data/impact_method2b.rds")
   test_data <- test_data[test_data$vaccine %in% unique(dat2$vaccine), ]
 
-  a <- aggregate(impact ~ country + vaccine + activity_type, dat2, sum, na.rm = TRUE)
-  b <- aggregate(impact ~ country +  vaccine + activity_type, test_data[test_data$burden_outcome == "deaths_averted", ], sum, na.rm = TRUE)
+  a <- stats::aggregate(impact ~ country + vaccine + activity_type, dat2, sum, na.rm = TRUE)
+  b <- stats::aggregate(impact ~ country +  vaccine + activity_type, test_data[test_data$burden_outcome == "deaths_averted", ], sum, na.rm = TRUE)
   d <- merge(a, b, by = c("country", "vaccine", "activity_type"), all = TRUE)
   expect_equal(d$impact.x, d$impact.y, tolerance = 1.e-1)
 
