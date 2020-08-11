@@ -153,7 +153,7 @@ impact_by_year_of_vaccination <- function(meta1, raw_impact, fvps, fvps_updates 
     d <- merge_by_common_cols(tot_impact, tot_fvps, all = TRUE)
   } else if (method == "method2b"){
     cohort_impact <- raw_impact[raw_impact$time %in% (min(fvps$time):max(fvps$time)), c("country", "time", "burden_outcome", "value")]
-    cohort_fvps <- aggregate(fvps ~ country + time, fvps, sum, na.rm = TRUE)
+    cohort_fvps <- stats::aggregate(fvps ~ country + time, fvps, sum, na.rm = TRUE)
     d <- merge_by_common_cols(cohort_impact, cohort_fvps, all = TRUE)
   }
   d$impact_ratio <- d$value / d$fvps
