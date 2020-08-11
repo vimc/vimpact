@@ -66,15 +66,20 @@ get_raw_impact_details <- function(con, meta1, burden_outcome, is_under5 = FALSE
   jj <- unlist(strsplit(meta1$burden_outcome_id[j], ";"))
 
   # extract burden estimates
-  d_focal <- DBI::dbGetQuery(con, sprintf(sql,
-                                          sql_in(meta1$burden_estimate_set[i], text_item = FALSE),
-                                          sql_in(ii[k], text_item = FALSE)))
-  names(d_focal)[names(d_focal) == "value"] <- "focal_value"
-
   d_baseline <- DBI::dbGetQuery(con, sprintf(sql,
                                              sql_in(meta1$burden_estimate_set[j], text_item = FALSE),
                                              sql_in(jj[k], text_item = FALSE)))
+
+  d_focal <- DBI::dbGetQuery(con, sprintf(sql,
+                                          sql_in(meta1$burden_estimate_set[i], text_item = FALSE),
+                                          sql_in(ii[k], text_item = FALSE)))
+  if(meta1$disease[1] == "HepB" && nrow(d_focal) == 0) {
+    ## hepb models, except for xi li, has scenario specific templates, which may not contain some countries of interest
+    d_focal <- d_baseline
+  }
+
   names(d_baseline)[names(d_baseline) == "value"] <- "baseline_value"
+  names(d_focal)[names(d_focal) == "value"] <- "focal_value"
 
   # calculate impact estimates
   d <- merge_by_common_cols(d_baseline, d_focal)

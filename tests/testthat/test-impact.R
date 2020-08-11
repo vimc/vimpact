@@ -2,7 +2,6 @@ context("Test Impact Calculations")
 
 test_that("test if vimpact functions are working as expected for central estimates", {
   #skip_if_no_reference_data()
-  browser()
   standardise_impact_output_for_test <- function(meta, dat){
 
     i <- match(dat$index, meta$index)
