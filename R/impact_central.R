@@ -24,7 +24,7 @@ get_raw_impact_details <- function(con, meta1, burden_outcome, is_under5 = FALSE
   v <- determine_vaccine_delivery(meta1)
   i <- unique(grepl("routine", v))
   j <- unique(grepl("campaign", v))
-  if(any(i) & any(j) & meta1$method[1] == "method2a"){
+  if(any(i) && any(j) && meta1$method[1] == "method2a"){
     stop("method2a is vaccine delivery specific, cannot include both routine and campaign impact at the same time.")
   }
 
@@ -41,7 +41,7 @@ get_raw_impact_details <- function(con, meta1, burden_outcome, is_under5 = FALSE
   }
 
   # set up db extraction sql queries
-  if((meta1$method[1] == "method0") | (meta1$method[1] == "method2a" & any(j))){
+  if((meta1$method[1] == "method0") || (meta1$method[1] == "method2a" && any(j))){
     sql <- paste("SELECT country, year AS time, sum(value) AS value",
                  "FROM burden_estimate",
                  "WHERE burden_estimate_set = %s",
@@ -49,7 +49,7 @@ get_raw_impact_details <- function(con, meta1, burden_outcome, is_under5 = FALSE
                  age_constrain,
                  country_constrain,
                  "GROUP BY country, year")
-  } else if((meta1$method[1] == "method1") | (meta1$method[1] == "method2a" & any(i)) | (meta1$method[1] == "method2b")){
+  } else if((meta1$method[1] == "method1") || (meta1$method[1] == "method2a" && any(i)) || (meta1$method[1] == "method2b")){
     sql <- paste("SELECT country, (year-age) AS time, sum(value)AS value",
                  "FROM burden_estimate",
                  "WHERE burden_estimate_set = %s",
@@ -127,7 +127,7 @@ impact_by_year_of_vaccination <- function(meta1, raw_impact, fvps, fvps_updates 
     vaccine_delivery$vaccine[i] <- m[1]
     vaccine_delivery$activity_type[i] <- m[2]
   }
-  if (length(unique(vaccine_delivery$activity_type)) > 1L & method == "method2a"){
+  if (length(unique(vaccine_delivery$activity_type)) > 1L && method == "method2a"){
     stop("method2a can not accommodate both routine and campaign impact in the same time, as routine and campaign impact are calculated differently.")
   }
   # prepare data
