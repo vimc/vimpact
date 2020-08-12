@@ -77,6 +77,10 @@ get_raw_impact_details <- function(con, meta1, burden_outcome, is_under5 = FALSE
     ## hepb models, except for xi li, has scenario specific templates, which may not contain some countries of interest
     d_focal <- d_baseline
   }
+  if(meta1$disease[1] == "HepB" && nrow(d_baseline) == 0) {
+    ## hepb models, except for xi li, has scenario specific templates, which may not contain some countries of interest
+     d_baseline <- d_focal
+  }
 
   names(d_baseline)[names(d_baseline) == "value"] <- "baseline_value"
   names(d_focal)[names(d_focal) == "value"] <- "focal_value"

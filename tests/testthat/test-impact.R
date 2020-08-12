@@ -86,7 +86,6 @@ test_that("test if vimpact functions are working as expected for central estimat
   #message("test impact_by_year_of_vaccination conventional approach")
   meta <- DBI::dbReadTable(con_test, "recipe_2a")
   meta <- split(meta, meta$index)
-  browser()
   dat <- lapply(meta, function(meta1) get_raw_impact_details(con = con_test, meta1, burden_outcome = "deaths"))
   dat <- do.call(rbind, dat)
   dat$country <- country$id[match(dat$country, country$nid)]
