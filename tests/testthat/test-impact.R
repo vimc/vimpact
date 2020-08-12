@@ -85,22 +85,21 @@ test_that("test if vimpact functions are working as expected for central estimat
   ### test method 2a
   #message("test impact_by_year_of_vaccination conventional approach")
   meta <- DBI::dbReadTable(con_test, "recipe_2a")
-  meta <- split(meta, meta$index)
-  dat <- lapply(meta, function(meta1) get_raw_impact_details(con = con_test, meta1, burden_outcome = "deaths"))
+  metas <- split(meta, meta$index)
+  dat <- lapply(metas, function(meta1) get_raw_impact_details(con = con_test, meta1, burden_outcome = "deaths"))
   dat <- do.call(rbind, dat)
   dat$country <- country$id[match(dat$country, country$nid)]
-  dat2 <- lapply(meta, function(meta1) impact_by_year_of_vaccination(meta1, raw_impact = dat, fvps = fvps,
+  dat2 <- lapply(metas, function(meta1) impact_by_year_of_vaccination(meta1, raw_impact = dat, fvps = fvps,
                                                                      vaccination_years = vaccination_years))
   dat2 <- do.call(rbind, dat2)
 
   test_data <- readRDS("vimpact-test-data/impact_method2a.rds")
   test_data <- test_data[test_data$vaccine %in% unique(dat2$vaccine), ]
-browser()
   a <- unique(dat2[c("country", "vaccine", "activity_type", "impact_ratio")])
   b <- unique(test_data[test_data$burden_outcome == "deaths_averted_rate",
                         c("country", "vaccine", "activity_type", "impact")])
   d <- merge_by_common_cols(a, b, all = TRUE)
-  expect_equal(d$impact_ratio*10^(-log10(d$impact_ratio)), d$impact*10^(-log10(d$impact)), tolerance = 1.e-2)
+  expect_equal(d$impact_ratio*10^(-log10(d$impact_ratio)), d$impact*10^(-log10(d$impact)), tolerance = 1.e-3)
 
   ### test method 2b
   message("test impact_by_year_of_vaccination cohort-based approach")

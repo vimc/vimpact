@@ -73,26 +73,25 @@ get_raw_impact_details <- function(con, meta1, burden_outcome, is_under5 = FALSE
   d_focal <- DBI::dbGetQuery(con, sprintf(sql,
                                           sql_in(meta1$burden_estimate_set[i], text_item = FALSE),
                                           sql_in(ii[k], text_item = FALSE)))
-  if(meta1$disease[1] == "HepB" && nrow(d_focal) == 0) {
-    ## hepb models, except for xi li, has scenario specific templates, which may not contain some countries of interest
-    d_focal <- d_baseline
+  if(meta1$disease[1] == "HepB" && (nrow(d_focal) == 0L || nrow(d_baseline) == 0L)) {
+    # when you are extracting data for HepB - IC and CDA models - for specific countries
+    # you may end out with 0 rows for d_baseline or d_focal
+    # it is because these two models run scenario specific templates
+    # not all countries appear in all scenarios
+    return(NULL)
+  } else {
+    names(d_baseline)[names(d_baseline) == "value"] <- "baseline_value"
+    names(d_focal)[names(d_focal) == "value"] <- "focal_value"
+
+    # calculate impact estimates
+    d <- merge_by_common_cols(d_baseline, d_focal)
+    d$value <- d$baseline_value - d$focal_value
+    d$index <- meta1$index[1]
+    d$burden_outcome <- burden_outcome
+
+    # return impact estimates
+    return(d)
   }
-  if(meta1$disease[1] == "HepB" && nrow(d_baseline) == 0) {
-    ## hepb models, except for xi li, has scenario specific templates, which may not contain some countries of interest
-     d_baseline <- d_focal
-  }
-
-  names(d_baseline)[names(d_baseline) == "value"] <- "baseline_value"
-  names(d_focal)[names(d_focal) == "value"] <- "focal_value"
-
-  # calculate impact estimates
-  d <- merge_by_common_cols(d_baseline, d_focal)
-  d$value <- d$baseline_value - d$focal_value
-  d$index <- meta1$index[1]
-  d$burden_outcome <- burden_outcome
-
-  # return impact estimates
-  d
 
 }
 
@@ -127,6 +126,9 @@ impact_by_year_of_vaccination <- function(meta1, raw_impact, fvps, fvps_updates 
   # determine method
   method <- meta1$method[1L]
   raw_impact <- raw_impact[raw_impact$index == meta1$index[1], ]
+  if(nrow(raw_impact) == 0L){
+    return(NULL)
+  }
 
   # determine vaccine delivery
   v <- determine_vaccine_delivery(meta1)
@@ -190,3 +192,13 @@ determine_vaccine_delivery <- function(meta1){
           unlist(strsplit(meta1$vaccine_delivery[meta1$meta_type=="baseline"], ",")))
 }
 
+## todo: hepb xili method2 impact needs de-double-counting
+# post_processing_hepb_li_method2a <- function(meta, dat, fvps){
+#   ids_li <- unique(meta$index[meta$disease == "HepB" & meta$modelling_group == "Li"])
+#
+#   d_keep <- dat[!(dat$index %in% ids_li), ]
+#
+#   d1 <- dat[dat$index %in% ids_li, ]
+#
+#
+# }
