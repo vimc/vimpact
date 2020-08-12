@@ -95,7 +95,7 @@ test_that("test if vimpact functions are working as expected for central estimat
 
   test_data <- readRDS("vimpact-test-data/impact_method2a.rds")
   test_data <- test_data[test_data$vaccine %in% unique(dat2$vaccine), ]
-
+browser()
   a <- unique(dat2[c("country", "vaccine", "activity_type", "impact_ratio")])
   b <- unique(test_data[test_data$burden_outcome == "deaths_averted_rate",
                         c("country", "vaccine", "activity_type", "impact")])
