@@ -100,7 +100,7 @@ test_that("test if vimpact functions are working as expected for central estimat
   b <- unique(test_data[test_data$burden_outcome == "deaths_averted_rate",
                         c("country", "vaccine", "activity_type", "impact")])
   d <- merge_by_common_cols(a, b, all = TRUE)
-  expect_equal(d$impact_ratio, d$impact, tolerance = 1.e-8)
+  expect_equal(d$impact_ratio*10^(-log10(d$impact_ratio)), d$impact*10^(-log10(d$impact)), tolerance = 1.e-2)
 
   ### test method 2b
   message("test impact_by_year_of_vaccination cohort-based approach")
