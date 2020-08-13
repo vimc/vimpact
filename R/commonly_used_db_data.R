@@ -13,7 +13,7 @@ get_touchstone <- function(con, touchstone_name){
   d <- DBI::dbGetQuery(con, "SELECT touchstone_name, MAX(touchstone.version) as version FROM touchstone
                        WHERE touchstone_name = $1 AND version != 42 GROUP BY touchstone_name", touchstone_name)
   if (nrow(d) == 0L) {
-    stop("Unknown touchstone specified.")
+    stop("Unknown touchstone_name specified.")
   }
   paste(d, collapse = "-")
 }
@@ -28,6 +28,7 @@ get_touchstone <- function(con, touchstone_name){
 ##' @param year_min extract data from year_min
 ##' @param year_max extract data to year_max
 ##' @param vaccine_to_ignore Ignore defined vaccines
+##' @param disease_to_extract extract data for specific diseases
 ##' @param countries_to_extract extract data for specific countries
 ##' @param gavi_support_levels gavi support levels
 ##' @param scenario_type scenario type
@@ -37,6 +38,7 @@ get_touchstone <- function(con, touchstone_name){
 extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touchstone_pop = NULL,
                                         year_min = 2000, year_max = 2100,
                                         vaccine_to_ignore = c("DTP3", "HepB_BD_home", "none"),
+                                        disease_to_extract = NULL,
                                         countries_to_extract = NULL,
                                         gavi_support_levels = c("with", "bestminus"),
                                         scenario_type = "default", external_population_estimates = NULL) {
@@ -67,8 +69,9 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
   message("Converting input coverage data......")
 
   # extract interpolated population
-  if(!is.null(external_population_estimates)){
+  if(is.null(external_population_estimates)){
     p_int_pop <- get_population(con, touchstone_pop = touchstone_pop, demographic_statistic = 'int_pop',
+
                                 year_ = year_min:year_max, gender = c('Male', 'Female', 'Both'), country_ = countries_to_extract)
   } else {
     p_int_pop <- external_population_estimates
@@ -76,7 +79,7 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
   message("Extracted interpolated population.")
 
   ## select minimal needed coverage data from the db
-  disease_vaccine_delivery <- read_csv("inst/disease_vaccine_delivery.csv")
+  disease_vaccine_delivery <- read_csv(system_file("disease_vaccine_delivery.csv"))
 
   cov_sets <- DBI::dbGetQuery(con, paste(sprintf("SELECT DISTINCT scenario_type, disease, coverage_set.id AS coverage_set, vaccine, activity_type, gavi_support_level
                               FROM scenario
@@ -105,9 +108,15 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
     cov_sets2$scenario_type <- "default"
     cov_sets <- cov_sets2[names(cov_sets)]
   }
+
+  if(!is.null(disease_to_extract)){
+    cov_sets <- cov_sets[cov_sets$disease %in% disease_to_extract, ]
+  }
+
   country_ <- ifelse(is.null(countries_to_extract),
                      "",
                      sprintf("AND country IN %s", sql_in(countries_to_extract, text_item = TRUE)))
+
   cov <- DBI::dbGetQuery(con, sprintf("SELECT coverage_set, country, year, age_from, age_to, gender.name AS gender, gavi_support, target, coverage
                                       FROM coverage
                                       JOIN gender ON gender.id = gender
@@ -123,7 +132,6 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
   cov$coverage_set <- NULL
 
   message("Extracted raw coverage data...")
-
   ## transform coverage data
   cov <- unique(cov) # this is needed as we used to create multiple coverage_sets for MCV1 and DTP3 for LiST model
   cov$activity_id <- seq_along(cov$vaccine) # attach an id to avoid combining national target population from multiple sias
@@ -205,7 +213,7 @@ get_population <- function(con, touchstone_pop = "201710gavi-5", demographic_sta
     message("touchstone version is not specified. Lateset version is used.")
   }
   ## this table get population data as you wish
-  sql <- read_sql("inst/sql/population.sql")
+  sql <- read_sql(system_file("sql/population.sql"))
   constrains_ <- sql_constrains(country_, year_, age_)
   sql <- sprintf(sql, sql_in(gender), constrains_)
   return(DBI::dbGetQuery(con, sql, list(touchstone_pop, demographic_statistic)))

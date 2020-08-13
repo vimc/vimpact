@@ -11,6 +11,7 @@ extract_vaccination_history(
   year_min = 2000,
   year_max = 2100,
   vaccine_to_ignore = c("DTP3", "HepB_BD_home", "none"),
+  disease_to_extract = NULL,
   countries_to_extract = NULL,
   gavi_support_levels = c("with", "bestminus"),
   scenario_type = "default",
@@ -30,13 +31,15 @@ extract_vaccination_history(
 
 \item{vaccine_to_ignore}{Ignore defined vaccines}
 
+\item{disease_to_extract}{extract data for specific diseases}
+
 \item{countries_to_extract}{extract data for specific countries}
 
 \item{gavi_support_levels}{gavi support levels}
 
 \item{scenario_type}{scenario type}
 
-\item{external_population_estimates}{The rationales are 1. we can use external population estimates if any and if necessary; 
+\item{external_population_estimates}{The rationales are 1. we can use external population estimates if any and if necessary;
 2. demographic uncertainty not only affects models, but also FVPs. If we are to conduct sensitivity analysis on impact_by_year_of_vaccination, we need to vary population input for adjusting FVPs.}
 }
 \description{

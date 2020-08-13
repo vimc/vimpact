@@ -159,8 +159,8 @@ get_meta_from_recipe <- function(default_recipe = TRUE, method = "method0", reci
 
 ## checking impact calculation method parameter
 assert_method <- function(method){
-  dirs <- list.dirs("inst/recipe", full.names = FALSE)
-  if (method %!in% dirs | method == ""){
+  dirs <- list.dirs(system_file("recipe"), full.names = FALSE)
+  if (method %!in% dirs || method == ""){
     stop("Unknown user defined method. method must be one of method0, method1, method2a, method2b.")
   }
 }
@@ -217,6 +217,9 @@ replace_burden_outcome <- function(burden_outcomes, a){
     m2[3] <- m[k]
 
     t[i] <- paste(m2, collapse = ";")
+  }
+  if(any(grepl("NA", t))){
+    stop("Burden outcome not defined in Montagu.")
   }
   t
 }
