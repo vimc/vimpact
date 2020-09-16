@@ -202,3 +202,47 @@ determine_vaccine_delivery <- function(meta1){
 #
 #
 # }
+
+impact_by_year_of_vaccination_country_perspective <- function(
+  raw_impact, fvps, activity_type, vaccination_years) {
+
+  fvps <- fvps[fvps$year %in% vaccination_years, ]
+  raw_impact <- add_birth_cohort(raw_impact)
+  if (activity_type == "routine"){
+    raw_impact <- raw_impact[raw_impact$birth_cohort %in%
+                               (vaccination_years - min(fvps$age)), ]
+  } else {
+    raw_impact <- raw_impact[raw_impact$birth_cohort >= min(vaccination_years), ]
+  }
+  tot_impact <- stats::aggregate(value ~ country + burden_outcome, raw_impact,
+                                 sum, na.rm = TRUE)
+  tot_fvps <- stats::aggregate(fvps ~ country, fvps, sum, na.rm = TRUE)
+  d <- merge_by_common_cols(tot_impact, tot_fvps, all = TRUE)
+  d$impact_ratio <- d$value / d$fvps
+  d
+}
+
+impact_by_year_of_vaccination_cohort_perspective <- function(
+  raw_impact, fvps, vaccination_years) {
+
+  fvps <- fvps[fvps$year %in% vaccination_years, ]
+  raw_impact <- add_birth_cohort(raw_impact)
+  fvps <- add_birth_cohort(fvps)
+  cohort_impact <- raw_impact[
+    raw_impact$birth_cohort %in%
+      (min(fvps$birth_cohort):max(fvps$birth_cohort)),
+    c("country", "birth_cohort", "burden_outcome", "value")]
+  cohort_fvps <- stats::aggregate(fvps ~ country + birth_cohort, fvps, sum,
+                                  na.rm = TRUE)
+  d <- merge_by_common_cols(cohort_impact, cohort_fvps, all = TRUE)
+  d$impact_ratio <- d$value / d$fvps
+  d
+}
+
+add_birth_cohort <- function(data) {
+  if ("birth_cohort" %in% colnames(data)) {
+    return(data)
+  }
+  data$birth_cohort <- data$year - data$age
+  data
+}

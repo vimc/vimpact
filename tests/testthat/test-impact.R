@@ -109,6 +109,7 @@ test_that("test if vimpact functions are working as expected for central estimat
   dat <- lapply(meta, function(meta1) get_raw_impact_details(con = con_test, meta1, burden_outcome = "deaths"))
   dat <- do.call(rbind, dat)
   dat$country <- country$id[match(dat$country, country$nid)]
+  browser()
   dat2 <- lapply(meta, function(meta1) impact_by_year_of_vaccination(meta1, raw_impact = dat, fvps = fvps,
                                                                      vaccination_years = vaccination_years))
   dat2 <- do.call(rbind, dat2)
@@ -123,4 +124,99 @@ test_that("test if vimpact functions are working as expected for central estimat
 
 })
 
+test_that("impact calculation 2a", {
+  raw_impact <- data_frame(
+    country = c(rep("ETH", 5), rep("PAK", 5)),
+    year = rep(2001:2005, 2),
+    age = rep(0, 10),
+    time = rep(2001:2005, 2),
+    value = c(234, 456, 345, 234, 345, 934, 567, 876, 675, 456),
+    burden_outcome = rep("deaths", 10)
+  )
 
+  fvps <- data_frame(
+    vaccine = rep("HepB", 10),
+    activity_type = rep("routine", 10),
+    country = c(rep("ETH", 5), rep("PAK", 5)),
+    year = rep(2001:2005, 2),
+    age = rep(0, 10),
+    gavi_support = c(rep(FALSE, 5), rep(TRUE, 5)),
+    population = c(1412, 1255, 4545, 3465, 3423, 23412, 4353, 3456, 7623, 8763),
+    coverage = rep(0, 10),
+    fvps = c(34, 54, 34, 54, 23, 65, 78, 98, 78, 98),
+    disease = rep("HepB", 10),
+    time = rep(2001:2005, 2)
+  )
+
+  impact <- impact_by_year_of_vaccination_country_perspective(
+    raw_impact, fvps, "routine", 2000:2030)
+  expect_equal(colnames(impact),
+              c("country", "burden_outcome", "value", "fvps", "impact_ratio"))
+  ## One row for each country, burden_outcome combination
+  expect_equal(nrow(impact), 2)
+  expect_equal(unique(impact$country), c("ETH", "PAK"))
+  expect_equal(unique(impact$burden_outcome), "deaths")
+  expect_equal(impact$value, c(1614, 3508))
+  expect_equal(impact$fvps, c(199, 417))
+  expect_equal(impact$impact_ratio, c(8.1, 8.4), tolerance = 1.e-1)
+
+  ## Retrieving impact for subset of years calculates impact correctly
+  impact <- impact_by_year_of_vaccination_country_perspective(
+    raw_impact, fvps, "routine", 2003:2030)
+  expect_equal(impact, data_frame(
+    country = c("ETH", "PAK"),
+    burden_outcome = rep("deaths", 2),
+    value = c(924, 2007),
+    fvps = c(111, 274),
+    impact_ratio = c(8.3, 7.3)
+  ), tolerance = 1.e-1)
+
+  ## Impact for campaign
+  impact <- impact_2a(raw_impact, fvps, "campaign", 2003:2030)
+})
+
+test_that("impact calculation 2b", {
+  raw_impact <- data_frame(
+    country = c(rep("ETH", 5), rep("PAK", 5)),
+    year = rep(2001:2005, 2),
+    age = rep(0, 10),
+    time = rep(2001:2005, 2),
+    value = c(234, 456, 345, 234, 345, 934, 567, 876, 675, 456),
+    burden_outcome = rep("deaths", 10)
+  )
+
+  fvps <- data_frame(
+    vaccine = rep("HepB", 15),
+    activity_type = c(rep("routine", 10), rep("campaign", 5)),
+    country = c(rep("ETH", 5), rep("PAK", 10)),
+    year = rep(2001:2005, 3),
+    age = rep(0, 15),
+    fvps = c(34, 54, 34, 54, 23, 65, 78, 98, 78, 98, 43, 45, 65, 45, 65),
+    disease = rep("HepB", 15)
+  )
+
+  impact <- impact_by_year_of_vaccination_cohort_perspective(raw_impact, fvps, 2000:2030)
+  expect_equal(colnames(impact),
+              c("country", "time", "burden_outcome", "value", "fvps",
+                "impact_ratio"))
+  ## One row for each country, burden_outcome, birth_cohort combination
+  expect_equal(nrow(impact), 10)
+  expect_equal(unique(impact$country), c("ETH", "PAK"))
+  expect_equal(unique(impact$time), 2001:2005)
+  expect_equal(impact$value,
+               c(234, 456, 345, 234, 345, 934, 567, 876, 675, 456))
+  ## This is the unchanged fvps - cohort perspective just
+  expect_equal(impact$fvps, c(34, 54, 34, 54, 23, 108, 123, 163, 123, 163))
+  expect_equal(impact$impact_ratio,
+               c(6.9, 8.4, 10.1, 4.3, 15.0, 8.6, 4.6, 5.4, 5.5, 2.8),
+               tolerance = 1e-1)
+})
+
+test_that("impact calculation can filter years of vaccination", {
+  ## test with 2 things deaths and some oother metric
+  ##
+})
+
+test_that("impact calculation can take activity_type", {
+
+})
