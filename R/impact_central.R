@@ -197,8 +197,29 @@ determine_vaccine_delivery <- function(meta1){
 #
 # }
 
+#' Calculate impact by year of vaccination country perspective
+#'
+#' This will calculate the impact by year of vaccination by country and
+#' burden outcome for a single disease and vaccine.
+#'
+#' This can take data either by vaccination year and age at vaccination or
+#' by birth cohort year.
+#'
+#' @param raw_impact Data frame of raw impact data this needs to have
+#' columns country, value, burden_outcome and either year & age or birth_cohort
+#' @param fvps Data frame of fully vaccination person data with columns
+#' country, fvps and either year & age or birth_cohort
+#' @param activity_type `routine` or `campaign` activity type
+#' @param vaccination_years Years of vaccination of interest
+#'
+#' @return Impact ratio by country and burden outcome
+#' @export
 impact_by_year_of_vaccination_country_perspective <- function(
   raw_impact, fvps, activity_type, vaccination_years) {
+  if (!(activity_type %in% c("routine", "campaign"))) {
+    stop(sprintf(
+      'Activity type must be "routine" or "campaign" got "%s".', activity_type))
+  }
 
   ## Aggregate FVPs over years of vaccination
   fvps <- fvps[fvps$year %in% vaccination_years, ]
@@ -228,6 +249,22 @@ impact_by_year_of_vaccination_country_perspective <- function(
   d
 }
 
+#' Calculate impact by year of vaccination cohort perspective
+#'
+#' This will calculate the impact by year of vaccination by country, birth
+#' cohort and burden outcome for a single disease and vaccine.
+#'
+#' This can take data either by vaccination year and age at vaccination or
+#' by birth cohort year.
+#'
+#' @param raw_impact Data frame of raw impact data this needs to have
+#' columns country, value, burden_outcome and either year & age or birth_cohort
+#' @param fvps Data frame of fully vaccination person data with columns
+#' country, fvps and either year & age or birth_cohort
+#' @param vaccination_years Years of vaccination of interest
+#'
+#' @return Impact ratio by country, birth cohort and burden outcome
+#' @export
 impact_by_year_of_vaccination_cohort_perspective <- function(
   raw_impact, fvps, vaccination_years) {
 

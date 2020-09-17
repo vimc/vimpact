@@ -189,6 +189,12 @@ test_that("impact calculation by year of vaccination country perspective", {
     impact_by_year_of_vaccination_country_perspective(raw_impact, fvps,
                                                       "routine", 2000:2005),
     "No impact data for this range of birth cohort and vaccination years")
+
+  expect_error(
+    impact_by_year_of_vaccination_country_perspective(raw_impact, fvps, "test",
+                                                      2000:2030),
+    'Activity type must be "routine" or "campaign" got "test".'
+  )
 })
 
 test_that("impact calculation by year of vaccination cohort perspective", {
