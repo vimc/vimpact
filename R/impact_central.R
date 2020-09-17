@@ -152,7 +152,7 @@ impact_by_year_of_vaccination <- function(meta1, raw_impact, fvps, fvps_updates 
     fvps_updates <- fvps_updates[fvps_updates$year %in% vaccination_years, ]
   }
 
-
+  raw_impact$birth_cohort <- raw_impact$time
   if (method == "method2a"){
     d <- impact_by_year_of_vaccination_country_perspective(
       raw_impact, fvps, vaccine_delivery$activity_type[1L], vaccination_years)
@@ -160,6 +160,8 @@ impact_by_year_of_vaccination <- function(meta1, raw_impact, fvps, fvps_updates 
     d <- impact_by_year_of_vaccination_cohort_perspective(raw_impact, fvps,
                                                           vaccination_years)
   }
+  d$time <- d$birth_cohort
+  d$birth_cohort <- NULL
   d$value <- NULL
   d$fvps <- NULL
   d_native <- merge_by_common_cols(fvps, d)

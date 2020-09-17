@@ -109,7 +109,6 @@ test_that("test if vimpact functions are working as expected for central estimat
   dat <- lapply(meta, function(meta1) get_raw_impact_details(con = con_test, meta1, burden_outcome = "deaths"))
   dat <- do.call(rbind, dat)
   dat$country <- country$id[match(dat$country, country$nid)]
-  browser()
   dat2 <- lapply(meta, function(meta1) impact_by_year_of_vaccination(meta1, raw_impact = dat, fvps = fvps,
                                                                      vaccination_years = vaccination_years))
   dat2 <- do.call(rbind, dat2)
