@@ -124,26 +124,8 @@ test_that("test if vimpact functions are working as expected for central estimat
 })
 
 test_that("impact calculation by year of vaccination country perspective", {
-  raw_impact <- data_frame(
-    country = c(rep("ETH", 5), rep("PAK", 5)),
-    year = rep(2001:2005, 2),
-    age = rep(0, 10),
-    value = c(234, 456, 345, 234, 345, 934, 567, 876, 675, 456),
-    burden_outcome = rep("deaths", 10)
-  )
-
-  fvps <- data_frame(
-    vaccine = rep("HepB", 10),
-    activity_type = rep("routine", 10),
-    country = c(rep("ETH", 5), rep("PAK", 5)),
-    year = rep(2001:2005, 2),
-    age = rep(0, 10),
-    fvps = c(34, 54, 34, 54, 23, 65, 78, 98, 78, 98),
-    disease = rep("HepB", 10)
-  )
-
   impact <- impact_by_year_of_vaccination_country_perspective(
-    raw_impact, fvps, "routine", 2000:2030)
+    impact_test_data, fvp_test_data_10, "routine", 2000:2030)
   expect_equal(colnames(impact),
               c("country", "burden_outcome", "value", "fvps", "impact_ratio"))
   ## One row for each country, burden_outcome combination
@@ -156,9 +138,10 @@ test_that("impact calculation by year of vaccination country perspective", {
 
   ## Impact for routine filters on birth cohorts in range of
   ## year of vaccinations - min age fvps
+  fvps <- fvp_test_data_10
   fvps$age <- rep(1, 10)
   impact <- impact_by_year_of_vaccination_country_perspective(
-    raw_impact, fvps, "routine", 2005:2030)
+    impact_test_data, fvps, "routine", 2005:2030)
   expect_equal(impact, data_frame(
     country = c("ETH", "PAK"),
     burden_outcome = rep("deaths", 2),
@@ -170,7 +153,7 @@ test_that("impact calculation by year of vaccination country perspective", {
   ## Impact for campaign scenarios only uses birth cohort within vaccination
   ## years range
   impact <- impact_by_year_of_vaccination_country_perspective(
-    raw_impact, fvps, "campaign", 2005:2030)
+    impact_test_data, fvps, "campaign", 2005:2030)
   expect_equal(impact, data_frame(
     country = c("ETH", "PAK"),
     burden_outcome = rep("deaths", 2),
@@ -180,10 +163,11 @@ test_that("impact calculation by year of vaccination country perspective", {
   ), tolerance = 1.e-1)
 
   expect_error(
-    impact_by_year_of_vaccination_country_perspective(raw_impact, fvps,
+    impact_by_year_of_vaccination_country_perspective(impact_test_data, fvps,
                                                       "routine", 1980:1990),
     "No FVP data for this range of vaccination years")
 
+  raw_impact <- impact_test_data
   raw_impact$age <- rep(10, 10)
   expect_error(
     impact_by_year_of_vaccination_country_perspective(raw_impact, fvps,
@@ -198,27 +182,8 @@ test_that("impact calculation by year of vaccination country perspective", {
 })
 
 test_that("impact calculation by year of vaccination cohort perspective", {
-  raw_impact <- data_frame(
-    country = c(rep("ETH", 5), rep("PAK", 5)),
-    year = rep(2001:2005, 2),
-    age = rep(0, 10),
-    time = rep(2001:2005, 2),
-    value = c(234, 456, 345, 234, 345, 934, 567, 876, 675, 456),
-    burden_outcome = rep("deaths", 10)
-  )
-
-  fvps <- data_frame(
-    vaccine = rep("HepB", 15),
-    activity_type = c(rep("routine", 10), rep("campaign", 5)),
-    country = c(rep("ETH", 5), rep("PAK", 10)),
-    year = rep(2001:2005, 3),
-    age = rep(0, 15),
-    fvps = c(34, 54, 34, 54, 23, 65, 78, 98, 78, 98, 43, 45, 65, 45, 65),
-    disease = rep("HepB", 15)
-  )
-
-  impact <- impact_by_year_of_vaccination_cohort_perspective(raw_impact, fvps,
-                                                             2000:2030)
+  impact <- impact_by_year_of_vaccination_cohort_perspective(
+    impact_test_data, fvp_test_data_15, 2000:2030)
   expect_equal(colnames(impact),
               c("country", "birth_cohort", "burden_outcome", "value", "fvps",
                 "impact_ratio"))
@@ -238,9 +203,10 @@ test_that("impact calculation by year of vaccination cohort perspective", {
 
   ## Impact calculation filters on impact calculations within range of
   ## birth cohort
+  raw_impact <- impact_test_data
   raw_impact <- raw_impact[raw_impact$year == 2001, ]
-  impact <- impact_by_year_of_vaccination_cohort_perspective(raw_impact, fvps,
-                                                             2000:2030)
+  impact <- impact_by_year_of_vaccination_cohort_perspective(
+    raw_impact, fvp_test_data_15, 2000:2030)
   expect_equal(impact,
                data_frame(
                  country = c(rep("ETH", 5), rep("PAK", 5)),
@@ -253,10 +219,11 @@ test_that("impact calculation by year of vaccination cohort perspective", {
                ))
 
   expect_error(
-    impact_by_year_of_vaccination_cohort_perspective(raw_impact, fvps,
-                                                     1980:1990),
+    impact_by_year_of_vaccination_cohort_perspective(
+      raw_impact, fvp_test_data_15, 1980:1990),
     "No FVP data for this range of vaccination years")
 
+  fvps <- fvp_test_data_15
   fvps$age <- rep(10, 15)
   expect_error(
     impact_by_year_of_vaccination_cohort_perspective(raw_impact, fvps,
