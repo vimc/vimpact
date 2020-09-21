@@ -152,7 +152,7 @@ test_that("impact calculation by year of vaccination country perspective", {
   expect_equal(unique(impact$burden_outcome), "deaths")
   expect_equal(impact$value, c(1614, 3508))
   expect_equal(impact$fvps, c(199, 417))
-  expect_equal(impact$impact_ratio, c(8.1, 8.4), tolerance = 1.e-1)
+  expect_equal(impact$impact_ratio, c(8.1105527638191, 8.41247002398081))
 
   ## Impact for routine filters on birth cohorts in range of
   ## year of vaccinations - min age fvps
@@ -231,8 +231,10 @@ test_that("impact calculation by year of vaccination cohort perspective", {
   ## This is the unchanged fvps - cohort perspective just
   expect_equal(impact$fvps, c(34, 54, 34, 54, 23, 108, 123, 163, 123, 163))
   expect_equal(impact$impact_ratio,
-               c(6.9, 8.4, 10.1, 4.3, 15.0, 8.6, 4.6, 5.4, 5.5, 2.8),
-               tolerance = 1e-1)
+               c(6.88235294117647, 8.44444444444444, 10.1470588235294,
+                 4.33333333333333, 15, 8.64814814814815, 4.60975609756098,
+                 5.37423312883436, 5.48780487804878,
+                 2.79754601226994))
 
   ## Impact calculation filters on impact calculations within range of
   ## birth cohort
@@ -246,8 +248,9 @@ test_that("impact calculation by year of vaccination cohort perspective", {
                  burden_outcome = rep(c("deaths", NA, NA, NA, NA), 2),
                  value = c(234, NA, NA, NA, NA, 934, NA, NA, NA, NA),
                  fvps = c(34, 54, 34, 54, 23, 108, 123, 163, 123, 163),
-                 impact_ratio = c(6.9, NA, NA, NA, NA, 8.6, NA, NA, NA, NA)
-               ), tolerance = 1e-1)
+                 impact_ratio = c(6.88235294117647, NA, NA, NA, NA,
+                                  8.64814814814815, NA, NA, NA, NA)
+               ))
 
   expect_error(
     impact_by_year_of_vaccination_cohort_perspective(raw_impact, fvps,
