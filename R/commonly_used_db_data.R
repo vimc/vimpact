@@ -81,7 +81,7 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
   ## select minimal needed coverage data from the db
   disease_vaccine_delivery <- read_csv(system_file("disease_vaccine_delivery.csv"))
 
-  cov_sets <- DBI::dbGetQuery(con, paste(sprintf("SELECT DISTINCT scenario_type, disease, coverage_set.id AS coverage_set, vaccine, activity_type, gavi_support_level
+  cov_sets <- DBI::dbGetQuery(con, paste(sprintf("SELECT DISTINCT scenario_type, scenario_description, disease, coverage_set.id AS coverage_set, vaccine, activity_type, gavi_support_level
                               FROM scenario
                               JOIN scenario_coverage_set
                               ON scenario_coverage_set.scenario = scenario.id
@@ -174,11 +174,11 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
   cov2$fvps_adjusted <- ifelse(cov2$fvps_source > cov2$value, cov2$value, cov2$fvps_source)
   cov2$coverage_adjusted <- cov2$fvps_adjusted / cov2$value
 
-  names(cov2) <- c("country", "year", "gender", "age", "scenario_type", "disease", "vaccine", "activity_type",
+  names(cov2) <- c("country", "year", "gender", "age", "scenario_type", "scenario_description",  "disease", "vaccine", "activity_type",
                    "gavi_support_level", "age_from", "age_to", "gavi_support", "target_source",
                    "coverage_source", "delivery_id", "cohort_size", "delivery_population", "fvps_source", "fvps_adjusted",
                    "coverage_adjusted")
-  cov2 <- cov2[c("delivery_id", "country", "disease", "scenario_type","vaccine", "activity_type", "gavi_support_level", "year",
+  cov2 <- cov2[c("delivery_id", "country", "disease", "scenario_type", "scenario_description","vaccine", "activity_type", "gavi_support_level", "year",
                  "gavi_support", "gender", "age", "target_source", "coverage_source",  "cohort_size", "delivery_population",
                  "fvps_source", "fvps_adjusted", "coverage_adjusted")]
   message("Transformed coverage data.")
