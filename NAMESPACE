@@ -3,6 +3,7 @@
 export(cohort_deaths_all_cause)
 export(extract_vaccination_history)
 export(fetch_stochastic_data)
+export(fetch_stochastic_data_year_groups)
 export(get_population)
 export(get_touchstone)
 export(recipe_template)
