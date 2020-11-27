@@ -183,7 +183,6 @@ test_that("can pull stochastic data means for year groups", {
       "dalys_novac_q1", "dalys_impact_q1", "deaths_default_q3",
       "deaths_novac_q3", "deaths_impact_q3", "dalys_default_q3",
       "dalys_novac_q3", "dalys_impact_q3"))
-  expect_equal()
 
   data <- fetch_stochastic_data_year_groups(con, "cohort_all_2019",
                                             year_groups = 2001:2015)
@@ -283,6 +282,7 @@ test_that("proportion averted deals with missing data by ignoring", {
                  WHERE disease = 'HepB'
                  AND country = 'AFG'
                  AND year = 2001")
+  on.exit(add_dummy_data(con))
   expect_equal(updated, 10)
 
   data <- fetch_stochastic_data_year_groups(con, "cross_all_2019",

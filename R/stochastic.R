@@ -93,10 +93,10 @@ fetch_stochastic_data_year_groups <- function(
   if (isTRUE(include_proprotion_averted)) {
     averted_avg <- paste0(
       "avg(deaths_impact / deaths_novac) as proportion_deaths_averted_mean,\n",
-      "avg(dalys_impact / dalys_novac) as proportion_dalys_averted_mean")
+      "avg(dalys_impact / dalys_novac) as proportion_dalys_averted_mean,")
     averted_q1 <- paste0(
       "percentile_cont(0.025) WITHIN GROUP (ORDER BY deaths_impact / deaths_novac) AS proportion_deaths_averted_q1,\n",
-      "percentile_cont(0.025) WITHIN GROUP (ORDER BY dalys_impact / dalys_novac) AS proportion_dalys_averted_q1")
+      "percentile_cont(0.025) WITHIN GROUP (ORDER BY dalys_impact / dalys_novac) AS proportion_dalys_averted_q1,")
     averted_q3 <-  paste0(",\n",
       "percentile_cont(0.975) WITHIN GROUP (ORDER BY deaths_impact / deaths_novac) AS proportion_deaths_averted_q3,\n",
       "percentile_cont(0.975) WITHIN GROUP (ORDER BY dalys_impact / dalys_novac) AS proportion_dalys_averted_q3")
@@ -138,14 +138,14 @@ fetch_stochastic_data_year_groups <- function(
       avg(dalys_default) as dalys_default_mean,
       avg(dalys_novac) as dalys_novac_mean,
       avg(dalys_impact) as dalys_impact_mean,
-      %s,
+      %s
       percentile_cont(0.025) WITHIN GROUP (ORDER BY deaths_default) AS deaths_default_q1,
       percentile_cont(0.025) WITHIN GROUP (ORDER BY deaths_novac) AS deaths_novac_q1,
       percentile_cont(0.025) WITHIN GROUP (ORDER BY deaths_impact) AS deaths_impact_q1,
       percentile_cont(0.025) WITHIN GROUP (ORDER BY dalys_default) AS dalys_default_q1,
       percentile_cont(0.025) WITHIN GROUP (ORDER BY dalys_novac) AS dalys_novac_q1,
       percentile_cont(0.025) WITHIN GROUP (ORDER BY dalys_impact) AS dalys_impact_q1,
-      %s,
+      %s
       percentile_cont(0.975) WITHIN GROUP (ORDER BY deaths_default) AS deaths_default_q3,
       percentile_cont(0.975) WITHIN GROUP (ORDER BY deaths_novac) AS deaths_novac_q3,
       percentile_cont(0.975) WITHIN GROUP (ORDER BY deaths_impact) AS deaths_impact_q3,
