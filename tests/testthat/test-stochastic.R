@@ -358,8 +358,15 @@ test_that("using a single year group returns same as fetch_stochastic_data", {
   expect_equivalent(data_grouped, data)
 })
 
-test_that("filtering on year doesn't work", {
-
+test_that("fetch_stochastic_data_year_groups errors if invalid table", {
+  expect_error(fetch_stochastic_data_year_groups(NULL, "not a table"),
+               paste0("Table must be one of cross_all_2019, cross_under5_2019,",
+               " cohort_all_2019 or cohort_under5_2019 got not a table"))
 })
 
-## Test other errors too
+test_that("fetch_stochastic_data_year_groups filtering on year doesn't work", {
+  expect_error(
+    fetch_stochastic_data_year_groups(NULL, "cross_all_2019",
+                                      filters = list(year = "2015")),
+    "Can't filter year as year used in grouping")
+})

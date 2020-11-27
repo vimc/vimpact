@@ -54,6 +54,8 @@ fetch_stochastic_data <- function(annex, table,
 #' a set of year groups to initially aggregate over a range of years. Pass
 #' individual years to get mean and quantiles for a year alone.
 #'
+#' Can also be used to query
+#'
 #' @param annex Connection to annex db
 #' @param table One of cross_all, cross_under5, cohort_all or cohort_under5
 #' @param groups Categories to group by for aggregating in query, can be any
@@ -76,6 +78,7 @@ fetch_stochastic_data_year_groups <- function(
   annex, table, groups = c("disease", "country"), filters = NULL,
   year_groups = list(c(2000:2019)),
   include_proprotion_averted = FALSE) {
+  ## Really some test of table structure would be better here
   if (!(table %in% c("cross_all_2019", "cross_under5_2019", "cohort_all_2019",
                      "cohort_under5_2019"))) {
     stop(paste0("Table must be one of cross_all_2019, cross_under5_2019, cohort_all_2019 or",
