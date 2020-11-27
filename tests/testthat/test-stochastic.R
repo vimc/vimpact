@@ -361,7 +361,8 @@ test_that("using a single year group returns same as fetch_stochastic_data", {
 test_that("fetch_stochastic_data_year_groups errors if invalid table", {
   expect_error(fetch_stochastic_data_year_groups(NULL, "not a table"),
                paste0("Table must be one of cross_all_2019, cross_under5_2019,",
-               " cohort_all_2019 or cohort_under5_2019 got not a table"))
+               " cohort_all_2019, cohort_under5_2019 or intervention_all_2019",
+               " got not a table"))
 })
 
 test_that("fetch_stochastic_data_year_groups filtering on year doesn't work", {
