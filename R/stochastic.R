@@ -82,7 +82,7 @@ fetch_stochastic_data_year_groups <- function(
   if (!(table %in% c("cross_all_2019", "cross_under5_2019", "cohort_all_2019",
                      "cohort_under5_2019", "intervention_all_2019"))) {
     stop(paste0("Table must be one of cross_all_2019, cross_under5_2019, ",
-                "cohort_all_2019, cohort_under5_2019 or intervention_all_2019",
+                "cohort_all_2019 or cohort_under5_2019",
                 " got ", table, "."))
   }
   if ("year" %in% names(filters)) {
