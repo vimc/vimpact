@@ -89,7 +89,7 @@ fetch_stochastic_data_year_groups <- function(
   groups_str <- paste(groups, collapse = ", ")
   where_clause <- build_where(filters)
   years_clause <- build_years(year_groups)
-  if (isTRUE(include_proportion_averted)) {
+  if (include_proportion_averted) {
     averted_avg <- paste0(
       "avg(deaths_impact / NULLIF(deaths_novac, 0)) as proportion_deaths_averted_mean,\n",
       "avg(dalys_impact / NULLIF(dalys_novac, 0)) as proportion_dalys_averted_mean,")
