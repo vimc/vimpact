@@ -106,60 +106,11 @@ fetch_stochastic_data_year_groups <- function(
     averted_q1 <- ""
     averted_q3 <- ""
   }
-
-  DBI::dbGetQuery(annex, sprintf("
-  with sums AS (
-    SELECT
-      %s,
-      periods.start_year as start_time,
-      periods.end_year as end_time,
-      SUM(deaths_default) as deaths_default,
-      SUM(deaths_novac) as deaths_novac,
-      SUM(deaths_impact) as deaths_impact,
-      SUM(dalys_default) as dalys_default,
-      SUM(dalys_novac) as dalys_novac,
-      SUM(dalys_impact) as dalys_impact
-    FROM
-      %s
-    JOIN (%s) as periods
-    ON
-      %s.year BETWEEN periods.start_year AND periods.end_year
-    %s
-    GROUP BY
-      %s, run_id, stochastic_file_id,
-      periods.start_year, periods.end_year)
-
-    SELECT
-      %s,
-      start_time,
-      end_time,
-      avg(deaths_default) as deaths_default_mean,
-      avg(deaths_novac) as deaths_novac_mean,
-      avg(deaths_impact) as deaths_impact_mean,
-      avg(dalys_default) as dalys_default_mean,
-      avg(dalys_novac) as dalys_novac_mean,
-      avg(dalys_impact) as dalys_impact_mean,
-      %s
-      percentile_cont(0.025) WITHIN GROUP (ORDER BY deaths_default) AS deaths_default_q1,
-      percentile_cont(0.025) WITHIN GROUP (ORDER BY deaths_novac) AS deaths_novac_q1,
-      percentile_cont(0.025) WITHIN GROUP (ORDER BY deaths_impact) AS deaths_impact_q1,
-      percentile_cont(0.025) WITHIN GROUP (ORDER BY dalys_default) AS dalys_default_q1,
-      percentile_cont(0.025) WITHIN GROUP (ORDER BY dalys_novac) AS dalys_novac_q1,
-      percentile_cont(0.025) WITHIN GROUP (ORDER BY dalys_impact) AS dalys_impact_q1,
-      %s
-      percentile_cont(0.975) WITHIN GROUP (ORDER BY deaths_default) AS deaths_default_q3,
-      percentile_cont(0.975) WITHIN GROUP (ORDER BY deaths_novac) AS deaths_novac_q3,
-      percentile_cont(0.975) WITHIN GROUP (ORDER BY deaths_impact) AS deaths_impact_q3,
-      percentile_cont(0.975) WITHIN GROUP (ORDER BY dalys_default) AS dalys_default_q3,
-      percentile_cont(0.975) WITHIN GROUP (ORDER BY dalys_novac) AS dalys_novac_q3,
-      percentile_cont(0.975) WITHIN GROUP (ORDER BY dalys_impact) AS dalys_impact_q3
-      %s
-    FROM
-      sums
-    GROUP BY
-      %s, start_time, end_time",
-    groups_str, table, years_clause, table, where_clause, groups_str,
-    groups_str, averted_avg, averted_q1, averted_q3, groups_str))
+  sql <- readLines(system_file, "sql/aggregate_stochastic.sql")
+  DBI::dbGetQuery(annex, glue::glue(sql,
+    groups = groups_str, table = table, years = years_clause,
+    where = where_clause, averted_avg = averted_avg, averted_q1 =averted_q1,
+    averted_q3 = averted_q3))
 }
 
 build_where <- function(filters) {
