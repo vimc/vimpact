@@ -361,7 +361,7 @@ test_that("using a single year group returns same as fetch_stochastic_data", {
 test_that("fetch_stochastic_data_year_groups errors if invalid table", {
   expect_error(fetch_stochastic_data_year_groups(NULL, "not a table"),
                paste0("Table must be one of cross_all_2019, cross_under5_2019,",
-               " cohort_all_2019 or cohort_under5_2019.",
+               " cohort_all_2019 or cohort_under5_2019",
                " got not a table"))
 })
 
@@ -375,9 +375,9 @@ test_that("fetch_stochastic_data_year_groups filtering on year doesn't work", {
 test_that("proportion averted deals with divide by 0", {
   con <- get_test_connection()
 
-  ## Try 1 empty group (so summary table has an empty entry)
+  ## Make denominator 0 for one of the groups
   updated <- DBI::dbExecute(con, "UPDATE cross_all_2019
-                 SET deaths_impact = 0
+                 SET deaths_novac = 0
                  WHERE disease = 'HepB'
                  AND country = 'AFG'
                  AND year = 2001")
@@ -387,4 +387,9 @@ test_that("proportion averted deals with divide by 0", {
   data <- fetch_stochastic_data_year_groups(con, "cross_all_2019",
                                             year_groups = 2001,
                                             include_proportion_averted = TRUE)
+  ## 2 diseases, 2 countries, 1 year group
+  expect_equal(nrow(data), 4)
+  expect_equal(data$proportion_deaths_averted_mean[[1]], NA_real_)
+  expect_equal(data$proportion_deaths_averted_q1[[1]], NA_real_)
+  expect_equal(data$proportion_deaths_averted_q3[[1]], NA_real_)
 })

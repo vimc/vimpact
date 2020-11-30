@@ -93,14 +93,14 @@ fetch_stochastic_data_year_groups <- function(
   years_clause <- build_years(year_groups)
   if (isTRUE(include_proportion_averted)) {
     averted_avg <- paste0(
-      "avg(deaths_impact / deaths_novac) as proportion_deaths_averted_mean,\n",
-      "avg(dalys_impact / dalys_novac) as proportion_dalys_averted_mean,")
+      "avg(deaths_impact / NULLIF(deaths_novac, 0)) as proportion_deaths_averted_mean,\n",
+      "avg(dalys_impact / NULLIF(dalys_novac, 0)) as proportion_dalys_averted_mean,")
     averted_q1 <- paste0(
-      "percentile_cont(0.025) WITHIN GROUP (ORDER BY deaths_impact / deaths_novac) AS proportion_deaths_averted_q1,\n",
-      "percentile_cont(0.025) WITHIN GROUP (ORDER BY dalys_impact / dalys_novac) AS proportion_dalys_averted_q1,")
+      "percentile_cont(0.025) WITHIN GROUP (ORDER BY deaths_impact / NULLIF(deaths_novac, 0)) AS proportion_deaths_averted_q1,\n",
+      "percentile_cont(0.025) WITHIN GROUP (ORDER BY dalys_impact / NULLIF(dalys_novac, 0)) AS proportion_dalys_averted_q1,")
     averted_q3 <-  paste0(",\n",
-      "percentile_cont(0.975) WITHIN GROUP (ORDER BY deaths_impact / deaths_novac) AS proportion_deaths_averted_q3,\n",
-      "percentile_cont(0.975) WITHIN GROUP (ORDER BY dalys_impact / dalys_novac) AS proportion_dalys_averted_q3")
+      "percentile_cont(0.975) WITHIN GROUP (ORDER BY deaths_impact / NULLIF(deaths_novac, 0)) AS proportion_deaths_averted_q3,\n",
+      "percentile_cont(0.975) WITHIN GROUP (ORDER BY dalys_impact / NULLIF(dalys_novac, 0)) AS proportion_dalys_averted_q3")
   } else {
     averted_avg <- ""
     averted_q1 <- ""
