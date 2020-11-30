@@ -42,8 +42,5 @@ groupings.
 This will retrieve mean, 0.025 and 0.975 quantiles from cross_all_2019,
 cross_under5_2019, cohort_all_2019 and cohort_under5_2019. You can pass
 a set of year groups to initially aggregate over a range of years. Pass
-individual years to get mean and quantiles for a year alone.
-}
-\details{
-Can also be used to query
+individual years to get mean and quantiles for a year alone.d
 }
