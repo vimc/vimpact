@@ -244,7 +244,7 @@ test_that("year group summarised stochastics can aggregate over groups", {
 test_that("year group summarised stochastics can get proportion averted", {
   con <- get_test_connection()
   data <- fetch_stochastic_data_year_groups(con, "cross_all_2019",
-                                            include_proprotion_averted = TRUE)
+                                            include_proportion_averted = TRUE)
   ## 2 diseases, 2 countries, 1 year group
   expect_equal(nrow(data), 4)
   expect_setequal(
@@ -286,7 +286,7 @@ test_that("proportion averted deals with missing data by ignoring", {
   expect_equal(updated, 10)
 
   data <- fetch_stochastic_data_year_groups(con, "cross_all_2019",
-                                            include_proprotion_averted = TRUE)
+                                            include_proportion_averted = TRUE)
   ## 2 diseases, 2 countries, 1 year group
   expect_equal(nrow(data), 4)
   expect_true(!any(is.na(data$proportion_deaths_averted_mean)))
@@ -304,7 +304,7 @@ test_that("proportion averted deals with missing data by ignoring", {
 
   ## Empty denominator will return NA
   data <- fetch_stochastic_data_year_groups(con, "cross_all_2019",
-                                            include_proprotion_averted = TRUE,
+                                            include_proportion_averted = TRUE,
                                             year_groups = list(2001, 2002:2015))
   ## 2 diseases, 2 countries, 2 year group
   expect_equal(nrow(data), 8)

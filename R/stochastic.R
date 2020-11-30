@@ -66,7 +66,7 @@ fetch_stochastic_data <- function(annex, table,
 #' of each year group. Note that passing a range of years wider than
 #' the data itself will only aggregate over the years for which there is data
 #' available
-#' @param include_proprotion_averted If TRUE then calculates mean and quantiles
+#' @param include_proportion_averted If TRUE then calculates mean and quantiles
 #' for proportion_deaths_averted = deaths_impact / deaths_novac and
 #' for proportion_dalys_averted = dalys_impact / dalys_novac
 #'
@@ -77,7 +77,7 @@ fetch_stochastic_data <- function(annex, table,
 fetch_stochastic_data_year_groups <- function(
   annex, table, groups = c("disease", "country"), filters = NULL,
   year_groups = list(c(2000:2019)),
-  include_proprotion_averted = FALSE) {
+  include_proportion_averted = FALSE) {
   ## Really some test of table structure would be better here
   if (!(table %in% c("cross_all_2019", "cross_under5_2019", "cohort_all_2019",
                      "cohort_under5_2019", "intervention_all_2019"))) {
@@ -91,7 +91,7 @@ fetch_stochastic_data_year_groups <- function(
   groups_str <- paste(groups, collapse = ", ")
   where_clause <- build_where(filters)
   years_clause <- build_years(year_groups)
-  if (isTRUE(include_proprotion_averted)) {
+  if (isTRUE(include_proportion_averted)) {
     averted_avg <- paste0(
       "avg(deaths_impact / deaths_novac) as proportion_deaths_averted_mean,\n",
       "avg(dalys_impact / dalys_novac) as proportion_dalys_averted_mean,")

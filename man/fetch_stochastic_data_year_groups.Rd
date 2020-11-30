@@ -10,7 +10,7 @@ fetch_stochastic_data_year_groups(
   groups = c("disease", "country"),
   filters = NULL,
   year_groups = list(c(2000:2019)),
-  include_proprotion_averted = FALSE
+  include_proportion_averted = FALSE
 )
 }
 \arguments{
@@ -29,7 +29,7 @@ of each year group. Note that passing a range of years wider than
 the data itself will only aggregate over the years for which there is data
 available}
 
-\item{include_proprotion_averted}{If TRUE then calculates mean and quantiles
+\item{include_proportion_averted}{If TRUE then calculates mean and quantiles
 for proportion_deaths_averted = deaths_impact / deaths_novac and
 for proportion_dalys_averted = dalys_impact / dalys_novac}
 }
