@@ -110,8 +110,7 @@ fetch_stochastic_data_year_groups <- function(
   DBI::dbGetQuery(annex, sprintf("
   with sums AS (
     SELECT
-      disease,
-      country,
+      %s,
       periods.start_year as start_time,
       periods.end_year as end_time,
       SUM(deaths_default) as deaths_default,
@@ -131,8 +130,7 @@ fetch_stochastic_data_year_groups <- function(
       periods.start_year, periods.end_year)
 
     SELECT
-      disease,
-      country,
+      %s,
       start_time,
       end_time,
       avg(deaths_default) as deaths_default_mean,
@@ -160,8 +158,8 @@ fetch_stochastic_data_year_groups <- function(
       sums
     GROUP BY
       %s, start_time, end_time",
-    table, years_clause, table, where_clause, groups_str, averted_avg,
-    averted_q1, averted_q3, groups_str))
+    groups_str, table, years_clause, table, where_clause, groups_str,
+    groups_str, averted_avg, averted_q1, averted_q3, groups_str))
 }
 
 build_where <- function(filters) {
