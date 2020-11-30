@@ -259,17 +259,11 @@ test_that("year group summarised stochastics can get proportion averted", {
       "deaths_novac_q3", "deaths_impact_q3", "dalys_default_q3",
       "dalys_novac_q3", "dalys_impact_q3",  "proportion_deaths_averted_q3",
       "proportion_dalys_averted_q3"))
-  expect_true(!any(is.na(data$proportion_deaths_averted_mean)))
   expect_true(all(is.finite(data$proportion_deaths_averted_mean)))
-  expect_true(!any(is.na(data$proportion_dalys_averted_mean)))
   expect_true(all(is.finite(data$proportion_dalys_averted_mean)))
-  expect_true(!any(is.na(data$proportion_deaths_averted_q1)))
   expect_true(all(is.finite(data$proportion_deaths_averted_q1)))
-  expect_true(!any(is.na(data$proportion_dalys_averted_q1)))
   expect_true(all(is.finite(data$proportion_dalys_averted_q1)))
-  expect_true(!any(is.na(data$proportion_deaths_averted_q3)))
   expect_true(all(is.finite(data$proportion_deaths_averted_q3)))
-  expect_true(!any(is.na(data$proportion_dalys_averted_q3)))
   expect_true(all(is.finite(data$proportion_dalys_averted_q3)))
 })
 
@@ -289,17 +283,11 @@ test_that("proportion averted deals with missing data by ignoring", {
                                             include_proportion_averted = TRUE)
   ## 2 diseases, 2 countries, 1 year group
   expect_equal(nrow(data), 4)
-  expect_true(!any(is.na(data$proportion_deaths_averted_mean)))
   expect_true(all(is.finite(data$proportion_deaths_averted_mean)))
-  expect_true(!any(is.na(data$proportion_dalys_averted_mean)))
   expect_true(all(is.finite(data$proportion_dalys_averted_mean)))
-  expect_true(!any(is.na(data$proportion_deaths_averted_q1)))
   expect_true(all(is.finite(data$proportion_deaths_averted_q1)))
-  expect_true(!any(is.na(data$proportion_dalys_averted_q1)))
   expect_true(all(is.finite(data$proportion_dalys_averted_q1)))
-  expect_true(!any(is.na(data$proportion_deaths_averted_q3)))
   expect_true(all(is.finite(data$proportion_deaths_averted_q3)))
-  expect_true(!any(is.na(data$proportion_dalys_averted_q3)))
   expect_true(all(is.finite(data$proportion_dalys_averted_q3)))
 
   ## Empty denominator will return NA
@@ -309,19 +297,13 @@ test_that("proportion averted deals with missing data by ignoring", {
   ## 2 diseases, 2 countries, 2 year group
   expect_equal(nrow(data), 8)
   expect_equal(data$proportion_deaths_averted_mean[1], NA_real_)
-  expect_true(!any(is.na(data$proportion_deaths_averted_mean[2:8])))
   expect_true(all(is.finite(data$proportion_deaths_averted_mean[2:8])))
-  expect_true(!any(is.na(data$proportion_dalys_averted_mean)))
   expect_true(all(is.finite(data$proportion_dalys_averted_mean)))
   expect_equal(data$proportion_deaths_averted_q1[1], NA_real_)
-  expect_true(!any(is.na(data$proportion_deaths_averted_q1[2:8])))
   expect_true(all(is.finite(data$proportion_deaths_averted_q1[2:8])))
-  expect_true(!any(is.na(data$proportion_dalys_averted_q1)))
   expect_true(all(is.finite(data$proportion_dalys_averted_q1)))
   expect_equal(data$proportion_deaths_averted_q3[1], NA_real_)
-  expect_true(!any(is.na(data$proportion_deaths_averted_q3[2:8])))
   expect_true(all(is.finite(data$proportion_deaths_averted_q3[2:8])))
-  expect_true(!any(is.na(data$proportion_dalys_averted_q3)))
   expect_true(all(is.finite(data$proportion_dalys_averted_q3)))
 })
 
