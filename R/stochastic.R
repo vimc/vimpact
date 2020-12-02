@@ -104,10 +104,10 @@ fetch_stochastic_data_year_groups <- function(
     averted_q1 <- ""
     averted_q3 <- ""
   }
-  sql <- readLines(system_file, "sql/aggregate_stochastic.sql")
-  DBI::dbGetQuery(annex, glue::glue(sql,
+  sql <- readLines(system_file("sql/aggregate_stochastic.sql"))
+  DBI::dbGetQuery(annex, glue::glue(paste(sql, collapse = "\n"),
     groups = groups_str, table = table, years = years_clause,
-    where = where_clause, averted_avg = averted_avg, averted_q1 =averted_q1,
+    where = where_clause, averted_avg = averted_avg, averted_q1 = averted_q1,
     averted_q3 = averted_q3))
 }
 
