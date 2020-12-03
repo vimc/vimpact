@@ -9,14 +9,13 @@ Authors@R:
       person("Imperial College of Science, Technology and Medicine",
              role = "cph"))
 Description: VIMC IMPACT CALCULATION PACKAGE. This package is mainly for the VIMC Science Team to investigate vaccination impact.
-Imports:
-  DBI,
-  RPostgres,
-  vaultr
 License: MIT + file LICENSE
 Encoding: UTF-8
 Imports:
-    glue
+    DBI,
+    glue,
+    RPostgres,
+    vaultr
 Suggests:
     testthat,
     RSQLite,
