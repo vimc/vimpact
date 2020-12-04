@@ -24,7 +24,7 @@ combination of disease and/or country}
 \item{filters}{Filters to apply before aggregation}
 
 \item{year_groups}{List of year groups to sum over before calculating
-mean and quantiles. This will all years within range from min & max
+mean and quantiles. This will sum over all years within range from min & max
 of each year group. Note that passing a range of years wider than
 the data itself will only aggregate over the years for which there is data
 available}
