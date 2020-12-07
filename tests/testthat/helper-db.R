@@ -55,11 +55,19 @@ add_dummy_data <- function(con) {
     DBI::dbExecute(con, "DROP TABLE IF EXISTS cross_under5 CASCADE")
     DBI::dbExecute(con, "DROP TABLE IF EXISTS cohort_all CASCADE")
     DBI::dbExecute(con, "DROP TABLE IF EXISTS cohort_under5 CASCADE")
+    DBI::dbExecute(con, "DROP TABLE IF EXISTS cross_all_2019 CASCADE")
+    DBI::dbExecute(con, "DROP TABLE IF EXISTS cross_under5_2019 CASCADE")
+    DBI::dbExecute(con, "DROP TABLE IF EXISTS cohort_all_2019 CASCADE")
+    DBI::dbExecute(con, "DROP TABLE IF EXISTS cohort_under5_2019 CASCADE")
 
     DBI::dbWriteTable(con, "cross_all", create_dummy_data())
     DBI::dbWriteTable(con, "cross_under5", create_dummy_data())
     DBI::dbWriteTable(con, "cohort_all", create_dummy_data())
     DBI::dbWriteTable(con, "cohort_under5", create_dummy_data())
+    DBI::dbWriteTable(con, "cross_all_2019", create_dummy_data())
+    DBI::dbWriteTable(con, "cross_under5_2019", create_dummy_data())
+    DBI::dbWriteTable(con, "cohort_all_2019", create_dummy_data())
+    DBI::dbWriteTable(con, "cohort_under5_2019", create_dummy_data())
   }
 }
 
