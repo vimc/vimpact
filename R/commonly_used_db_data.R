@@ -271,12 +271,12 @@ cohort_deaths_all_cause <- function(con, touchstone_pop, cohorts, under_5 = TRUE
   P <- stats::aggregate(value~country + year, data = P, sum)
 
   ### live birth
-  cbr <- get_population(con, country_ = NULL, year_ = year, age_ = NULL, demographic_statistic = "cbr")[c("country","year", "value")]
+  cbr <- get_population(con, touchstone_pop = touchstone_pop, country_ = NULL, year_ = year, age_ = NULL, demographic_statistic = "cbr")[c("country","year", "value")]
   d <- merge(P, cbr, by = c("country", "year"), all.x = TRUE)
   d$birth <- d$value.x * d$value.y
 
   ### under5 mortality
-  mort_rate <- get_population(con, country_ = NULL, year_ = year, age_ = NULL, demographic_statistic = "unwpp_u5mr")[c("country", "year", "value")]
+  mort_rate <- get_population(con, touchstone_pop = touchstone_pop, country_ = NULL, year_ = year, age_ = NULL, demographic_statistic = "unwpp_u5mr")[c("country", "year", "value")]
 
   d <- merge(d, mort_rate, by = c("country", "year"))
   d$all_cause <- d$birth * d$value
