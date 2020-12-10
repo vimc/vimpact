@@ -1,3 +1,7 @@
+### vimpact 0.0.4
+
+* Fix extract_vaccine_history() and cohort_deaths_all_cause(). (VIMC-4444)
+
 ### vimpact 0.0.3
 
 * Add helper for retrieving year aggregated summary data
