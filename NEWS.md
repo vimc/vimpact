@@ -1,6 +1,6 @@
 ### vimpact 0.0.4
-https://mrc-ide.myjetbrains.com/youtrack/issue/VIMC-4444
-Fix extract_vaccine_history() and cohort_deaths_all_cause().
+
+* Fix extract_vaccine_history() and cohort_deaths_all_cause(). (VIMC-4444)
 
 ### vimpact 0.0.3
 
