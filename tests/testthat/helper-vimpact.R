@@ -44,3 +44,31 @@ skip_if_no_reference_data <- function() {
       expected, hash))
   }
 }
+
+impact_test_data <- data_frame(
+  country = c(rep("ETH", 5), rep("PAK", 5)),
+  year = rep(2001:2005, 2),
+  age = rep(0, 10),
+  value = c(234, 456, 345, 234, 345, 934, 567, 876, 675, 456),
+  burden_outcome = rep("deaths", 10)
+)
+
+fvp_test_data_10 <- data_frame(
+  vaccine = rep("HepB", 10),
+  activity_type = rep("routine", 10),
+  country = c(rep("ETH", 5), rep("PAK", 5)),
+  year = rep(2001:2005, 2),
+  age = rep(0, 10),
+  fvps = c(34, 54, 34, 54, 23, 65, 78, 98, 78, 98),
+  disease = rep("HepB", 10)
+)
+
+fvp_test_data_15 <- data_frame(
+  vaccine = rep("HepB", 15),
+  activity_type = c(rep("routine", 10), rep("campaign", 5)),
+  country = c(rep("ETH", 5), rep("PAK", 10)),
+  year = rep(2001:2005, 3),
+  age = rep(0, 15),
+  fvps = c(34, 54, 34, 54, 23, 65, 78, 98, 78, 98, 43, 45, 65, 45, 65),
+  disease = rep("HepB", 15)
+)

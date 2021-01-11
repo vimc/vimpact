@@ -152,22 +152,16 @@ impact_by_year_of_vaccination <- function(meta1, raw_impact, fvps, fvps_updates 
     fvps_updates <- fvps_updates[fvps_updates$year %in% vaccination_years, ]
   }
 
-
+  raw_impact$birth_cohort <- raw_impact$time
   if (method == "method2a"){
-    if (vaccine_delivery$activity_type[1L] == "routine"){
-      raw_impact <- raw_impact[raw_impact$time %in% (vaccination_years - min(fvps$age)), ]
-    } else {
-      raw_impact <- raw_impact[raw_impact$time >= min(vaccination_years), ]
-    }
-    tot_impact <- stats::aggregate(value ~ country + burden_outcome, raw_impact, sum, na.rm = TRUE)
-    tot_fvps <- stats::aggregate(fvps~country, fvps, sum, na.rm = TRUE)
-    d <- merge_by_common_cols(tot_impact, tot_fvps, all = TRUE)
+    d <- impact_by_year_of_vaccination_country_perspective(
+      raw_impact, fvps, vaccine_delivery$activity_type[1L], vaccination_years)
   } else if (method == "method2b"){
-    cohort_impact <- raw_impact[raw_impact$time %in% (min(fvps$time):max(fvps$time)), c("country", "time", "burden_outcome", "value")]
-    cohort_fvps <- stats::aggregate(fvps ~ country + time, fvps, sum, na.rm = TRUE)
-    d <- merge_by_common_cols(cohort_impact, cohort_fvps, all = TRUE)
+    d <- impact_by_year_of_vaccination_cohort_perspective(raw_impact, fvps,
+                                                          vaccination_years)
   }
-  d$impact_ratio <- d$value / d$fvps
+  d$time <- d$birth_cohort
+  d$birth_cohort <- NULL
   d$value <- NULL
   d$fvps <- NULL
   d_native <- merge_by_common_cols(fvps, d)
@@ -202,3 +196,106 @@ determine_vaccine_delivery <- function(meta1){
 #
 #
 # }
+
+#' Calculate impact by year of vaccination country perspective
+#'
+#' This will calculate the impact by year of vaccination by country and
+#' burden outcome for a single disease and vaccine.
+#'
+#' This can take data either by vaccination year and age at vaccination or
+#' by birth cohort year.
+#'
+#' @param raw_impact Data frame of raw impact data this needs to have
+#' columns country, value, burden_outcome and either year & age or birth_cohort
+#' @param fvps Data frame of fully vaccination person data with columns
+#' country, fvps and either year & age or birth_cohort
+#' @param activity_type `routine` or `campaign` activity type
+#' @param vaccination_years Years of vaccination of interest
+#'
+#' @return Impact ratio by country and burden outcome
+#' @export
+impact_by_year_of_vaccination_country_perspective <- function(
+  raw_impact, fvps, activity_type, vaccination_years) {
+  if (!(activity_type %in% c("routine", "campaign"))) {
+    stop(sprintf(
+      'Activity type must be "routine" or "campaign" got "%s".', activity_type))
+  }
+
+  ## Aggregate FVPs over years of vaccination
+  fvps <- fvps[fvps$year %in% vaccination_years, ]
+  if (nrow(fvps) == 0) {
+    stop("No FVP data for this range of vaccination years")
+  }
+  tot_fvps <- stats::aggregate(fvps ~ country, fvps, sum, na.rm = TRUE)
+
+  ## Aggregate raw_impact grouped by country & burden_outcome where birth
+  ## cohort is in range
+  raw_impact$birth_cohort <- get_birth_cohort(raw_impact)
+  if (activity_type == "routine"){
+    raw_impact <- raw_impact[raw_impact$birth_cohort %in%
+                               (vaccination_years - min(fvps$age)), ]
+  } else {
+    raw_impact <- raw_impact[raw_impact$birth_cohort >= min(vaccination_years), ]
+  }
+  if (nrow(raw_impact) == 0) {
+    stop("No impact data for this range of birth cohort and vaccination years")
+  }
+  tot_impact <- stats::aggregate(value ~ country + burden_outcome, raw_impact,
+                                 sum, na.rm = TRUE)
+
+  ## Calculate impact_ratio from the aggregates
+  d <- merge_by_common_cols(tot_impact, tot_fvps, all = TRUE)
+  d$impact_ratio <- d$value / d$fvps
+  d
+}
+
+#' Calculate impact by year of vaccination cohort perspective
+#'
+#' This will calculate the impact by year of vaccination by country, birth
+#' cohort and burden outcome for a single disease and vaccine.
+#'
+#' This can take data either by vaccination year and age at vaccination or
+#' by birth cohort year.
+#'
+#' @param raw_impact Data frame of raw impact data this needs to have
+#' columns country, value, burden_outcome and either year & age or birth_cohort
+#' @param fvps Data frame of fully vaccination person data with columns
+#' country, fvps and either year & age or birth_cohort
+#' @param vaccination_years Years of vaccination of interest
+#'
+#' @return Impact ratio by country, birth cohort and burden outcome
+#' @export
+impact_by_year_of_vaccination_cohort_perspective <- function(
+  raw_impact, fvps, vaccination_years) {
+
+  ## Aggregate FVPs by birth cohort and country
+  fvps <- fvps[fvps$year %in% vaccination_years, ]
+  fvps$birth_cohort <- get_birth_cohort(fvps)
+  if (nrow(fvps) == 0) {
+    stop("No FVP data for this range of vaccination years")
+  }
+  cohort_fvps <- stats::aggregate(fvps ~ country + birth_cohort, fvps, sum,
+                                  na.rm = TRUE)
+
+  ## Filter raw_impact to birth_cohorts within range of FVP cohort data
+  raw_impact$birth_cohort <- get_birth_cohort(raw_impact)
+  cohort_impact <- raw_impact[
+    raw_impact$birth_cohort %in%
+      (min(fvps$birth_cohort):max(fvps$birth_cohort)),
+    c("country", "birth_cohort", "burden_outcome", "value")]
+  if (nrow(cohort_impact) == 0) {
+    stop("No impact data for this range of birth cohort and fvp data")
+  }
+
+  ## Calculate impact ratio
+  d <- merge_by_common_cols(cohort_impact, cohort_fvps, all = TRUE)
+  d$impact_ratio <- d$value / d$fvps
+  d
+}
+
+get_birth_cohort <- function(data) {
+  if ("birth_cohort" %in% colnames(data)) {
+    return(data$birth_cohort)
+  }
+  data$year - data$age
+}
