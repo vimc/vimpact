@@ -1,4 +1,5 @@
 disease,vaccine,activity_type
+Cholera,Cholera,campaign
 HepB,HepB,routine
 HepB,HepB_BD,routine
 Hib,Hib3,routine
@@ -16,5 +17,7 @@ Rota,Rota,routine
 Rubella,RCV2,routine
 Rubella,Rubella,campaign
 Rubella,Rubella,routine
+Typhoid,Typhoid,campaign
+Typhoid,Typhoid,routine
 YF,YF,campaign
 YF,YF,routine
