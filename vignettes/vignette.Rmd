@@ -1,0 +1,83 @@
+---
+title: "Using vimpact for estimating vaccine impact"
+author: "Xiang Li"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+default_reporter <- testthat::default_reporter()
+options(testthat.default_reporter = "summary")
+library(vimpact)
+```
+
+Vimpact provides a set of methodologies developed by VIMC Science Team for quantifying vaccination impact in terms of cases averted, deaths averted and DALYs (disability-adjusted life years) averted. It also stores functions that extract frequently used data sets from Montagu and Annex database. 
+
+**[todo]**
+Add a link to our impact calculation methods
+
+## A. vimpact for VIMC internal users
+
+Vimpact is primarily developed for VIMC internal users. It contains various functions for reporting and analytic purposes. 
+
+### Frequently used functions communicating with Montagu database
+There are a set of frequently used functions that extracts data from VIMC databases. 
+
+**Determine latest touchstone version**
+
+Montagu data is touchstone based. Each touchstone may contain multiple versions as it is developed. The most recent version of touchstone can be determined by `get_touchstone` where `con` specifies the database machine, and `touchstone_name` indicates the touchstone of interest.
+
+```
+get_touchstone(con, touchstone_name = "201710gavi")
+```
+
+This will return `201710gavi-6`. `201710gavi` touchstone has 6 versions. And Version 6 has the most recent coverage scenarios.
+
+**Extract demographic data**
+Demographic data is frequently used for analysis. It is therefore useful to have a standardized function extracting demographic data from Montagu. 
+
+```
+get_population(con, touchstone_pop = "201710gavi-5", demographic_statistic = "int_pop", gender = "Both",
+                           country_ = NULL, year_ = NULL, age_ = NULL)
+```
+
+`demographic_statistic` is demographic_statistic_type code; `gender` can be `Female, Male or Both` if specified or all three selections if NULL; `country_` is all VIMC countries if NULL or an array of selected countries; similar for `year_` and `age_`. 
+
+
+**Extract vaccination coverage data**
+```
+extract_vaccination_history(con, touchstone_cov = "201710gavi", touchstone_pop = NULL,
+                                        year_min = 2000, year_max = 2100,
+                                        vaccine_to_ignore = c("DTP3", "HepB_BD_home", "none"),
+                                        disease_to_extract = NULL,
+                                        countries_to_extract = NULL,
+                                        gavi_support_levels = c("with", "bestminus"),
+                                        scenario_type = "default", external_population_estimates = NULL, full_description = TRUE)
+```
+
+
+### Annex views (Susy to add)
+
+
+### Vaccine impact calculations
+
+**prepare impact calculation recipe**
+
+**impact by calendar year**
+
+**impact by year of birth**
+
+**impact by year of vaccination**
+
+## B. vimpact for external users
+
+**prepare impact calculation recipe**
+
