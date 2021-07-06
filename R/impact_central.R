@@ -142,9 +142,17 @@ impact_by_year_of_vaccination <- function(meta1, raw_impact, fvps, fvps_updates 
     stop("method2a can not accommodate both routine and campaign impact in the same time, as routine and campaign impact are calculated differently.")
   }
   # prepare data
-  fvps$time <- fvps$year - fvps$age
-  fvps <- merge_by_common_cols(fvps, vaccine_delivery, all.y = TRUE)
   fvps <- fvps[fvps$year %in% vaccination_years, ]
+  fvps$time <- fvps$year - fvps$age
+  fvps_tmp <- merge_by_common_cols(fvps, vaccine_delivery, all.y = TRUE)
+  if(all(is.na(fvps_tmp$fvps))){
+    fvps_tmp <- fvps[1, ]
+    fvps_tmp$vaccine <- vaccine_delivery$vaccine
+    fvps_tmp$activity_type <- vaccine_delivery$activity_type
+    fvps_tmp$coverage <- 0
+    fvps_tmp$fvps <- 0
+  }
+  fvps <- fvps_tmp
 
   if(!is.null(fvps_updates)){
     fvps_updates$time <- fvps_updates$year - fvps_updates$age
@@ -182,8 +190,8 @@ impact_by_year_of_vaccination <- function(meta1, raw_impact, fvps, fvps_updates 
 }
 
 determine_vaccine_delivery <- function(meta1){
-  setdiff(unlist(strsplit(meta1$vaccine_delivery[meta1$meta_type == "focal"], ",")),
-          unlist(strsplit(meta1$vaccine_delivery[meta1$meta_type=="baseline"], ",")))
+  setdiff(unlist(strsplit(as.character(meta1$vaccine_delivery[meta1$meta_type == "focal"]), ",")),
+          unlist(strsplit(as.character(meta1$vaccine_delivery[meta1$meta_type=="baseline"]), ",")))
 }
 
 ## todo: hepb xili method2 impact needs de-double-counting
