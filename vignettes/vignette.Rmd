@@ -172,12 +172,12 @@ As external users, you are not able to communicate with VIMC databases. Hence it
 
 
 
-**impact by year of vaccination**
+**impact by year of vaccination (2a)**
 
 ```{r}
-vaccination_years <- 2000:2018
+vaccination_years <- 2000:2030
 fvps <- read.csv("example_data/example_fvps.csv")
-meta <- read.csv("example_data/example_meta.csv")
+meta <- read.csv("example_data/example_meta_method2a.csv")
 dat <- read.csv("example_data/example_raw_impact_method2a.csv")
 metas <- split(meta, meta$index)
 
