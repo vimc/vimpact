@@ -159,16 +159,37 @@ dat2 <- do.call(rbind, dat2)
 ```
 
 ## B. vimpact for external users
-Vimpact is not yet friendly for external users. It lacks guidance and documentation.
+[Vimpact is not yet friendly for external users. It lacks guidance and documentation. So I am openning up a new section for external users.]
 
-As external users, you are not able to communicate with VIMC databases. Hence it is not possible to make running of `get_meta_from_recipe` and `get_raw_impact_details`. The former function prepares impact recipes, and the latter generates impact method0 and method1. Therefore external users are more likely to calculate method0 and method1 by their own (which are straightforward) and use vimpact to evaluate vaccine impact by year of vaccination views.
+As external users, you are not able to communicate with VIMC databases. Hence it is not possible to make running of `get_meta_from_recipe` and `get_raw_impact_details`. The former function prepares impact recipes, and the latter generates impact method0 and method1. Therefore external users are more likely to calculate method0 and method1 on their own (which are straightforward) and use vimpact to evaluate vaccine impact by year of vaccination views.
+
+This section gives an example of running impact by year of vaccination (vaccination activity view/method2a).
 
 **prepare impact calculation**
-1. vaccination coverage
+There are three data frames you will need to prepare, i.e. meta data for impact calculation, vaccination coverage and raw impact that compares disease burden between two scenarios. Examples of these data frames are provided in vignettes/example_data
 
-2. raw impact (impact by year and age)
+1. meta data (see e.g. vignettes/example_data/example_meta_method2a.csv)
+There are columns specifically designed for VIMC internal users. Columns you need to fulfill are vaccine_delivery, disease, meta_type, index and method.
 
-3. meta data
+vaccine delivery comes as units of <disease>-<activity_type> sperated by `,`. activity_type should be either routine or campaign. No vaccination counterfactual scenario should be specified as `no-vaccination`.
+
+meta_type indicates whether a scenario is baseline or focal.
+
+index should be integers linking paired scenarios (one baseline and one focal).
+
+method should be either `method2a` or `method2b`.
+
+2. vaccination coverage (see e.g. vignettes/example_data/example_fvps.csv)
+  vaccine activity_type country year age gavi_support population coverage fvps disease
+1      YF       routine     ABC 2000   0        FALSE      27214        0    0      YF
+2      YF       routine     ABC 2001   0        FALSE      27472        0    0      YF
+
+3. raw impact  (see e.g. vignettes/example_data/example_raw_impact_method2a.csv)
+  country time baseline_value focal_value value index burden_outcome
+1     ABC 2000             16          16     0    19         deaths
+2     ABC 2001             16          16     0    19         deaths
+
+
 
 
 
