@@ -12,7 +12,7 @@ name: test-coverage
 
 jobs:
   test-coverage:
-    runs-on: macOS-latest
+    runs-on: ubuntu-20.04
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -42,6 +42,10 @@ jobs:
           remotes::install_deps(dependencies = TRUE)
           remotes::install_cran("covr")
         shell: Rscript {0}
+
+      - name: Start test DB
+        if: runner.os == 'Linux'
+        run: ./scripts/test_db_start.sh
 
       - name: Test coverage
         run: covr::codecov()
