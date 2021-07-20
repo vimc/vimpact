@@ -30,7 +30,6 @@ README.md: README.Rmd
 	sed -i.bak 's/[[:space:]]*$$//' README.md
 	rm -f $@.bak myfile.json
 
-
 pkgdown:
 	${RSCRIPT} -e "library(methods); pkgdown::build_site()"
 
