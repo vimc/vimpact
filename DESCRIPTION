@@ -9,6 +9,7 @@ Authors@R:
       person("Imperial College of Science, Technology and Medicine",
              role = "cph"))
 Description: VIMC IMPACT CALCULATION PACKAGE. This package is mainly for the VIMC Science Team to investigate vaccination impact.
+Depends: R (>= 3.5.0)
 License: MIT + file LICENSE
 Encoding: UTF-8
 Imports:
