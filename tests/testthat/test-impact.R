@@ -231,3 +231,27 @@ test_that("impact calculation by year of vaccination cohort perspective", {
     "No impact data for this range of birth cohort and fvp data")
 })
 
+test_that("impact by calendar year can be caluclated", {
+  impact <- impact_by_calendar_year(impact_test_data_baseline,
+                                    impact_test_data_focal)
+  expected_data <- data_frame(
+    country = c(rep("ETH", 3), rep("PAK", 3)),
+    burden_outcome = rep("deaths", 6),
+    year = rep(2001:2003, 2),
+    impact = c(355, 348, 211, 945, 366, 101)
+  )
+  expect_equal(impact, expected_data)
+})
+
+test_that("impact by calendar errors if columns missing", {
+  focal_data <- impact_test_data_focal[, c("country", "burden_outcome", "year")]
+  expect_error(impact_by_calendar_year(impact_test_data_baseline, focal_data),
+               "Required column names age, value are missing from focal_impact")
+})
+
+test_that("impact by calendar year only returns rows where groups match", {
+  focal_data <- impact_test_data_focal
+  focal_data$year <- rep(2003:2007, 2)
+  impact <- impact_by_calendar_year(impact_test_data_baseline, focal_data)
+  expect_equal(nrow(impact), 2)
+})

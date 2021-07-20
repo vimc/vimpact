@@ -1,5 +1,5 @@
 ---
-title: "Using vimpact for estimating vaccine impact"
+title: "Using vimpact for estimating vaccine impact - VIMC members"
 author: "Xiang Li"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -19,12 +19,12 @@ options(testthat.default_reporter = "summary")
 library(vimpact)
 ```
 
+This vignette describes how to use vimpact to estiamte vaccine impact for members of the VIMC team. It describes how to use methods which require access to the montagu database and so cannot be used by external users.
+
 Vimpact provides a set of methodologies developed by VIMC Science Team for quantifying vaccination impact in terms of cases averted, deaths averted and DALYs (disability-adjusted life years) averted. It also stores functions that extract frequently used data sets from Montagu and Annex database. 
 
 **[todo]**
 Add a link to our impact calculation methods
-
-## A. vimpact for VIMC internal users
 
 Vimpact is primarily developed for VIMC internal users. It contains various functions for reporting and analytic purposes. 
 
@@ -157,54 +157,3 @@ dat2 <- lapply(metas, function(meta1) impact_by_year_of_vaccination(meta1, raw_i
 dat2 <- do.call(rbind, dat2)
 
 ```
-
-## B. vimpact for external users
-[Vimpact is not yet friendly for external users. It lacks guidance and documentation. So I am openning up a new section for external users.]
-
-As external users, you are not able to communicate with VIMC databases. Hence it is not possible to make running of `get_meta_from_recipe` and `get_raw_impact_details`. The former function prepares impact recipes, and the latter generates impact method0 and method1. Therefore external users are more likely to calculate method0 and method1 on their own (which are straightforward) and use vimpact to evaluate vaccine impact by year of vaccination views.
-
-This section gives an example of running impact by year of vaccination (vaccination activity view/method2a).
-
-**prepare impact calculation**
-There are three data frames you will need to prepare, i.e. meta data for impact calculation, vaccination coverage and raw impact that compares disease burden between two scenarios. Examples of these data frames are provided in vignettes/example_data
-
-1. meta data (see e.g. vignettes/example_data/example_meta_method2a.csv)
-There are columns specifically designed for VIMC internal users. Columns you need to fulfill are vaccine_delivery, disease, meta_type, index and method.
-
-vaccine delivery comes as units of <disease>-<activity_type> sperated by `,`. activity_type should be either routine or campaign. No vaccination counterfactual scenario should be specified as `no-vaccination`.
-
-meta_type indicates whether a scenario is baseline or focal.
-
-index should be integers linking paired scenarios (one baseline and one focal).
-
-method should be either `method2a` or `method2b`.
-
-2. vaccination coverage (see e.g. vignettes/example_data/example_fvps.csv)
-  vaccine activity_type country year age gavi_support population coverage fvps disease
-1      YF       routine     ABC 2000   0        FALSE      27214        0    0      YF
-2      YF       routine     ABC 2001   0        FALSE      27472        0    0      YF
-
-3. raw impact  (see e.g. vignettes/example_data/example_raw_impact_method2a.csv)
-  country time baseline_value focal_value value index burden_outcome
-1     ABC 2000             16          16     0    19         deaths
-2     ABC 2001             16          16     0    19         deaths
-
-
-
-
-
-**impact by year of vaccination (2a)**
-
-```{r}
-vaccination_years <- 2000:2030
-fvps <- read.csv("example_data/example_fvps.csv")
-meta <- read.csv("example_data/example_meta_method2a.csv")
-dat <- read.csv("example_data/example_raw_impact_method2a.csv")
-metas <- split(meta, meta$index)
-
-dat2 <- lapply(metas, function(meta1) impact_by_year_of_vaccination(meta1, raw_impact = dat, fvps = fvps,
-                                                                     vaccination_years = vaccination_years))
-dat2 <- do.call(rbind, dat2)
-
-```
-

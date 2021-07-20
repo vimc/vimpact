@@ -307,3 +307,38 @@ get_birth_cohort <- function(data) {
   }
   data$year - data$age
 }
+
+
+#' Calculate impact by calendar year
+#'
+#' Calculate impact accrued over all ages for a specific year. This calculates
+#' the difference in disease burden between baseline and focal scenarios for a
+#' given year. The baseline scenario can have no vaccination or different
+#' coverage to the focal scenario. This aggregates the impact over all ages
+#' modelled. This does not account for the future disease burden averted through
+#' current vaccine activities.
+#'
+#' @param baseline_impact Data frame of baseline impact data this needs to have
+#' columns country, burden_outcome, year, age, value
+#' @param focal_impact Data frame of focal impact data this needs to have
+#' columns country, burden_outcome, year, age, value
+#'
+#' @return Vaccine impact by country and year for burden outcomes as a data
+#' frame with columns country, year, burden_outcome and impact
+#' @export
+impact_by_calendar_year <- function(baseline_impact, focal_impact) {
+  assert_col_names(baseline_impact,
+                   c("country", "burden_outcome", "year", "age", "value"))
+  assert_col_names(focal_impact,
+                   c("country", "burden_outcome", "year", "age", "value"))
+  baseline_impact <- stats::aggregate(value ~ year + country + burden_outcome,
+                                      baseline_impact,
+                                      sum, na.rm = TRUE)
+  focal_impact <- stats::aggregate(value ~ year + country + burden_outcome,
+                                   focal_impact,
+                                   sum, na.rm = TRUE)
+  data <- merge(baseline_impact, focal_impact,
+                c("country", "burden_outcome", "year"), sort = FALSE)
+  data$impact <- data$value.x - data$value.y
+  data[, c("country", "burden_outcome", "year", "impact")]
+}
