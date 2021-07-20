@@ -66,11 +66,3 @@ test_that("assert_col_names checks required columns are present", {
   expect_error(assert_col_names(data, c("one", "two", "three")),
                "Required column names two, three are missing from data")
 })
-
-test_that("assert_group_counts ensures equal number of groups", {
-  purchases <- data_frame(person = c("Alice", "Bob", "Bob"),
-                      item = c("Cake", "Fish", "Carrot"),
-                      cost = c(2, 3, 1))
-  additional_purchases <- purchases
-  expect_true(assert_group_counts(purchases, additional_purchases, "item"))
-})
