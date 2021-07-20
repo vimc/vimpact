@@ -147,8 +147,8 @@ test_that("impact calculation by year of vaccination country perspective", {
     burden_outcome = rep("deaths", 2),
     value = c(579, 1131),
     fvps = c(23, 98),
-    impact_ratio = c(25.2, 11.5)
-  ), tolerance = 1.e-1)
+    impact_ratio = c(25.173913, 11.540816)
+  ))
 
   ## Impact for campaign scenarios only uses birth cohort within vaccination
   ## years range
@@ -159,8 +159,8 @@ test_that("impact calculation by year of vaccination country perspective", {
     burden_outcome = rep("deaths", 2),
     value = c(345, 456),
     fvps = c(23, 98),
-    impact_ratio = c(15.0, 4.6)
-  ), tolerance = 1.e-1)
+    impact_ratio = c(15.0, 4.6530612)
+  ))
 
   expect_error(
     impact_by_year_of_vaccination_country_perspective(impact_test_data, fvps,
