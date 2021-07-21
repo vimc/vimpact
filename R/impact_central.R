@@ -331,14 +331,53 @@ impact_by_calendar_year <- function(baseline_impact, focal_impact) {
                    c("country", "burden_outcome", "year", "age", "value"))
   assert_col_names(focal_impact,
                    c("country", "burden_outcome", "year", "age", "value"))
-  baseline_impact <- stats::aggregate(value ~ year + country + burden_outcome,
-                                      baseline_impact,
-                                      sum, na.rm = TRUE)
-  focal_impact <- stats::aggregate(value ~ year + country + burden_outcome,
-                                   focal_impact,
-                                   sum, na.rm = TRUE)
-  data <- merge(baseline_impact, focal_impact,
+  baseline <- stats::aggregate(value ~ year + country + burden_outcome,
+                               baseline_impact,
+                               sum, na.rm = TRUE)
+  focal <- stats::aggregate(value ~ year + country + burden_outcome,
+                            focal_impact,
+                            sum, na.rm = TRUE)
+  data <- merge(baseline, focal,
                 c("country", "burden_outcome", "year"), sort = FALSE)
   data$impact <- data$value.x - data$value.y
   data[, c("country", "burden_outcome", "year", "impact")]
+}
+
+#' Calculate impact by birth year (lifetime impact)
+#'
+#' The birth year method accounts for the long-term impact accrued over the
+#' lifetime of a particular birth cohort. The duration of modelling needs to
+#' be appropriate to the pathogen of interest as in some cases, such as HepB,
+#' disease occurs later in life. For example if we model vaccination for birth
+#' cohorts born from 2000 to 2030 and model disease burden until 2100 we do
+#' not account for the vaccine impact for those born in 2030 once they are
+#' over 70 years old. The method also does not specifically account for the
+#' impact of vaccinating a cohort outside the cohort vaccinated (e.g.
+#' because of herd protection).
+#'
+#' @param baseline_impact Data frame of baseline impact data this needs to have
+#' columns country, burden_outcome, year, age, value
+#' @param focal_impact Data frame of focal impact data this needs to have
+#' columns country, burden_outcome, year, age, value
+#'
+#' @return Vaccine impact by country and birth year for burden outcomes as a
+#' data frame with columns country, year, burden_outcome and impact
+#' @export
+impact_by_birth_year <- function(baseline_impact, focal_impact) {
+  assert_col_names(baseline_impact,
+                   c("country", "burden_outcome", "year", "age", "value"))
+  assert_col_names(focal_impact,
+                   c("country", "burden_outcome", "year", "age", "value"))
+  baseline_impact$birth_year <- baseline_impact$year - baseline_impact$age
+  focal_impact$birth_year <- focal_impact$year - focal_impact$age
+  baseline <- stats::aggregate(value ~ birth_year + country + burden_outcome,
+                               baseline_impact,
+                               sum, na.rm = TRUE)
+  focal <- stats::aggregate(value ~ birth_year + country + burden_outcome,
+                            focal_impact,
+                            sum, na.rm = TRUE)
+  data <- merge(baseline, focal,
+                c("country", "burden_outcome", "birth_year"), sort = FALSE)
+  data$impact <- data$value.x - data$value.y
+  data[, c("country", "burden_outcome", "birth_year", "impact")]
 }
