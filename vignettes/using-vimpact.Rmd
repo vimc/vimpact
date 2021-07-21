@@ -16,14 +16,65 @@ knitr::opts_chunk$set(
 )
 default_reporter <- testthat::default_reporter()
 options(testthat.default_reporter = "summary")
-library(vimpact)
 ```
 
 This vignette describes how to use impact calculation methods used in VIMC as an external user.
 
 ## Impact by calendar year (cross-sectional impact)
 
+This method is available via function `impact_by_calendar_year`. To you use it you need to provide 2 data frames. These contain baseline and focal impact for a particular vaccine in multiple countries over a range of years and ages.
+
+These data frames must contain columns for country, burden_outcome (e.g. cases, deaths, DALYs), year, age and value. It will sum the values for each group of country, burden_outcome, year for baseline and focal and calculate the difference of these groups.
+
+If the baseline and focal impact data contains groups which do not overlap then this will return impact only for groups contained in both datasets.
+
+```{r}
+impact_test_data_baseline <- data.frame(
+  country = c(rep("ETH", 5), rep("PAK", 5)),
+  year = rep(c(2001, 2002, 2001, 2002, 2003), 2),
+  age = c(0, 0, 1, 1, 1),
+  value = c(234, 456, 345, 234, 345, 934, 567, 876, 675, 456),
+  burden_outcome = rep("deaths", 10)
+)
+
+impact_test_data_focal <- data.frame(
+  country = c(rep("ETH", 5), rep("PAK", 5)),
+  year = rep(c(2001, 2002, 2001, 2002, 2003), 2),
+  age = c(0, 0, 1, 1, 1),
+  value = c(90, 121, 134, 221, 134, 432, 534, 433, 342, 355),
+  burden_outcome = rep("deaths", 10)
+)
+
+vimpact::impact_by_calendar_year(impact_test_data_baseline, impact_test_data_focal)
+```
+
 ## Impact by birth year (lifetime impact)
+
+This method is available via function `impact_by_birth_year`. This requires the same data as `impact_by_calendar_year`. You need to provide 2 data frames. These contain baseline and focal impact for a particular vaccine in multiple countries over a range of years and ages.
+
+These data frames must contain columns for country, burden_outcome (e.g. cases, deaths, DALYs), year, age and value. It will sum the impact grouped by country, burden_outcome, and birth year. Where birth year is `year - age`. Then calculates the impact for these groups.
+
+If the baseline and focal impact data contains groups which do not overlap then this will return impact only for groups contained in both datasets.
+
+```{r}
+impact_test_data_baseline <- data.frame(
+  country = c(rep("ETH", 5), rep("PAK", 5)),
+  year = rep(c(2001, 2002, 2001, 2002, 2003), 2),
+  age = c(0, 0, 1, 1, 1),
+  value = c(234, 456, 345, 234, 345, 934, 567, 876, 675, 456),
+  burden_outcome = rep("deaths", 10)
+)
+
+impact_test_data_focal <- data.frame(
+  country = c(rep("ETH", 5), rep("PAK", 5)),
+  year = rep(c(2001, 2002, 2001, 2002, 2003), 2),
+  age = c(0, 0, 1, 1, 1),
+  value = c(90, 121, 134, 221, 134, 432, 534, 433, 342, 355),
+  burden_outcome = rep("deaths", 10)
+)
+
+vimpact::impact_by_birth_year(impact_test_data_baseline, impact_test_data_focal)
+```
 
 ## Impact by year of vaccination: impact ratio stratified by activity type
 
@@ -60,7 +111,7 @@ method should be either `method2a` or `method2b`.
 
 **impact by year of vaccination (2a)**
 
-```{r}
+```
 vaccination_years <- 2000:2030
 fvps <- read.csv("example_data/example_fvps.csv")
 meta <- read.csv("example_data/example_meta_method2a.csv")
