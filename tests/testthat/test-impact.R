@@ -256,6 +256,41 @@ test_that("impact by calendar year only returns rows where groups match", {
   expect_equal(nrow(impact), 2)
 })
 
+test_that("impact by calendar year: external and internal functions agree", {
+  skip_if_not_installed("RSQLite")
+  con <- DBI::dbConnect(RSQLite::SQLite(), dbname = ":memory:")
+  on.exit({
+    DBI::dbDisconnect(con)
+  })
+  ## Add test data to db we need to add some columns for this to work
+  baseline <- impact_test_data_baseline
+  baseline$burden_estimate_set <- 1
+  baseline$burden_outcome <- 1
+  focal <- impact_test_data_focal
+  focal$burden_estimate_set <- 2
+  focal$burden_outcome <- 1
+  burden_estimate <- rbind(baseline, focal)
+  DBI::dbWriteTable(con, "burden_estimate", burden_estimate)
+
+  meta <- data_frame(
+    scenario_type = c("default", "default"),
+    vaccine_delivery = c("YF-campaign,YF-routine", "YF-routine"),
+    meta_type = c("baseline", "focal"),
+    index = c(1, 1),
+    method = c("method0", "method0"),
+    burden_estimate_set = c(1, 2),
+    burden_outcome_id = c("1", "1"))
+
+  vimc_impact <- get_raw_impact_details(con = con, meta,
+                                        burden_outcome = "deaths")
+  public_impact <- impact_by_calendar_year(impact_test_data_baseline,
+                                           impact_test_data_focal)
+  ## Throw away columns we don't care about
+  vimc_impact <- vimc_impact[, c("country", "burden_outcome", "time", "value")]
+  ## column names slightly different time vs year and value vs impact
+  expect_equivalent(vimc_impact, public_impact)
+})
+
 test_that("impact by birth year can be caluclated", {
   impact <- impact_by_birth_year(impact_test_data_baseline,
                                     impact_test_data_focal)
@@ -279,4 +314,39 @@ test_that("impact by birth year only returns rows where birth year match", {
     birth_year = rep(2002, 2),
     impact = c(711, 591)
   ))
+})
+
+test_that("impact by birth year: external and internal functions agree", {
+  skip_if_not_installed("RSQLite")
+  con <- DBI::dbConnect(RSQLite::SQLite(), dbname = ":memory:")
+  on.exit({
+    DBI::dbDisconnect(con)
+  })
+  ## Add test data to db we need to add some columns for this to work
+  baseline <- impact_test_data_baseline
+  baseline$burden_estimate_set <- 1
+  baseline$burden_outcome <- 1
+  focal <- impact_test_data_focal
+  focal$burden_estimate_set <- 2
+  focal$burden_outcome <- 1
+  burden_estimate <- rbind(baseline, focal)
+  DBI::dbWriteTable(con, "burden_estimate", burden_estimate)
+
+  meta <- data_frame(
+    scenario_type = c("default", "default"),
+    vaccine_delivery = c("YF-campaign,YF-routine", "YF-routine"),
+    meta_type = c("baseline", "focal"),
+    index = c(1, 1),
+    method = c("method1", "method1"),
+    burden_estimate_set = c(1, 2),
+    burden_outcome_id = c("1", "1"))
+
+  vimc_impact <- get_raw_impact_details(con = con, meta,
+                                        burden_outcome = "deaths")
+  public_impact <- impact_by_birth_year(impact_test_data_baseline,
+                                           impact_test_data_focal)
+  ## Throw away columns we don't care about
+  vimc_impact <- vimc_impact[, c("country", "burden_outcome", "time", "value")]
+  ## column names slightly different time vs year and value vs impact
+  expect_equivalent(vimc_impact, public_impact)
 })
