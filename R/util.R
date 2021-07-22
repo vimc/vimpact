@@ -45,10 +45,6 @@ grepv <- function(patterns, value) {
   return(v)
 }
 
-assert_has_columns <- function(d, cols_must_have){
-  stopifnot(all(cols_must_have %in% names(d)))
-}
-
 squote <- function(x){
 sprintf("'%s'", x)
 }
@@ -67,8 +63,8 @@ vcapply <- function(X, FUN, ...) {
   vapply(X, FUN, character(1), ...)
 }
 
-assert_col_names <- function(data, col_names,
-                             name = deparse(substitute(data))) {
+assert_has_columns <- function(data, col_names,
+                               name = deparse(substitute(data))) {
   missing_names <- setdiff(col_names, colnames(data))
   if (length(missing_names) > 0) {
     stop(sprintf("Required column names %s are missing from %s",
