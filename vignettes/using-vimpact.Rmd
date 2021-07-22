@@ -4,7 +4,7 @@ author: "Xiang Li"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{vignette}
+  %\VignetteIndexEntry{Using vimpact for estimating vaccine impact}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -98,7 +98,7 @@ index should be integers linking paired scenarios (one baseline and one focal).
 
 method should be either `method2a` or `method2b`.
 
-2. vaccination coverage (see e.g. vignettes/example_data/example_fvps.csv)
+2. vaccination coverage (see e.g. inst/extdata/example_data/example_fvps.csv)
   vaccine activity_type country year age gavi_support population coverage fvps disease
 1      YF       routine     ABC 2000   0        FALSE      27214        0    0      YF
 2      YF       routine     ABC 2001   0        FALSE      27472        0    0      YF
@@ -113,9 +113,12 @@ method should be either `method2a` or `method2b`.
 
 ```
 vaccination_years <- 2000:2030
-fvps <- read.csv("example_data/example_fvps.csv")
-meta <- read.csv("example_data/example_meta_method2a.csv")
-dat <- read.csv("example_data/example_raw_impact_method2a.csv")
+fvps <- read.csv(system.file("extdata/example_data/example_fvps.csv", 
+                 package = "vimpact"))
+meta <- read.csv(system.file("extdata/example_data/example_meta_method2a.csv", 
+                 package = "vimpact"))
+dat <- read.csv(system.file(
+  "extdata/example_data/example_raw_impact_method2a.csv", package = "vimpact"))
 metas <- split(meta, meta$index)
 
 dat2 <- lapply(metas, function(meta1) impact_by_year_of_vaccination(meta1, raw_impact = dat, fvps = fvps,

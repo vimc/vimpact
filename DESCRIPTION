@@ -18,7 +18,10 @@ Imports:
     RPostgres,
     vaultr
 Suggests:
+    knitr,
     testthat,
+    rmarkdown,
     RSQLite,
     withr
 RoxygenNote: 7.1.1
+VignetteBuilder: knitr
