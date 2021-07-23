@@ -368,18 +368,18 @@ impact_by_birth_year <- function(baseline_impact, focal_impact) {
                      c("country", "burden_outcome", "year", "age", "value"))
   assert_has_columns(focal_impact,
                      c("country", "burden_outcome", "year", "age", "value"))
-  baseline_impact$birth_year <- baseline_impact$year - baseline_impact$age
-  focal_impact$birth_year <- focal_impact$year - focal_impact$age
-  baseline <- stats::aggregate(value ~ birth_year + country + burden_outcome,
+  baseline_impact$birth_cohort <- baseline_impact$year - baseline_impact$age
+  focal_impact$birth_cohort <- focal_impact$year - focal_impact$age
+  baseline <- stats::aggregate(value ~ birth_cohort + country + burden_outcome,
                                baseline_impact,
                                sum, na.rm = TRUE)
-  focal <- stats::aggregate(value ~ birth_year + country + burden_outcome,
+  focal <- stats::aggregate(value ~ birth_cohort + country + burden_outcome,
                             focal_impact,
                             sum, na.rm = TRUE)
   data <- merge(baseline, focal,
-                c("country", "burden_outcome", "birth_year"), sort = FALSE)
+                c("country", "burden_outcome", "birth_cohort"), sort = FALSE)
   data$impact <- data$value.x - data$value.y
-  data[, c("country", "burden_outcome", "birth_year", "impact")]
+  data[, c("country", "burden_outcome", "birth_cohort", "impact")]
 }
 
 #' Calculate impact by year of vaccination: activity type
@@ -395,18 +395,19 @@ impact_by_birth_year <- function(baseline_impact, focal_impact) {
 #' activity-specific impact ratios which we then multiply by the number of
 #' FVPs (fully vaccinated persons) to calculate impact.
 #'
-#'
 #' @param baseline_impact Data frame of baseline impact data this needs to have
 #' columns country, burden_outcome, vaccine_delivery, year, age, value
 #' @param focal_impact Data frame of focal impact data this needs to have
 #' columns country, burden_outcome, vaccine_delivery, year, age, value
 #' @param fvps Data frame of FVPs (fully vaccinated persons) needs to have
-#' columns ...
+#' columns country, year, activity_type, fvps other columns can be included
+#' and will be aggregated over.
+#' @param vaccination_years Years of vaccination of interest.
 #'
 #' @return Vaccine impact by ..
 #' @export
 impact_by_year_of_vaccination_activity_type <- function(
-  baseline_impact, focal_impact, fvps) {
+  baseline_impact, focal_impact, fvps, vaccination_years) {
   assert_has_columns(
     baseline_impact,
     c("country", "burden_outcome", "activity_type", "year", "age", "value"))
@@ -416,31 +417,54 @@ impact_by_year_of_vaccination_activity_type <- function(
   assert_has_columns(
     fvps,
     c("country", "year", "activity_type", "age", "fvps"))
+
+  ## Routine
   baseline_routine <- baseline_impact[
     baseline_impact$activity_type == "routine", ]
-  baseline_campaign <- baseline_impact[
-    baseline_impact$activity_type == "campaign", ]
   focal_routine <- focal_impact[
     baseline_impact$activity_type == "routine", ]
+  routine_raw_impact <- impact_by_birth_year(baseline_routine, focal_routine)
+  names(routine_raw_impact)[names(routine_raw_impact) == "birth_cohort"] <-
+    "time"
+  routine_raw_impact$activity_type <- "routine"
+
+  ## Campaign
+  baseline_campaign <- baseline_impact[
+    baseline_impact$activity_type == "campaign", ]
   focal_campaign <- focal_impact[
     baseline_impact$activity_type == "campaign", ]
-  routine_raw_impact <- impact_by_calendar_year(baseline_routine, focal_routine)
-  campaign_raw_impact <- impact_by_birth_year(baseline_campaign, focal_campaign)
+  campaign_raw_impact <- impact_by_calendar_year(baseline_campaign,
+                                                 focal_campaign)
+  names(campaign_raw_impact)[names(campaign_raw_impact) == "year"] <- "time"
+  campaign_raw_impact$activity_type <- "campaign"
 
-  ## Do more stuff
-  routine_fvps <- fvps[fvps$activity_type == "routine", ]
-  campaign_fvps <- fvps[fvps$activity_type == "campaign", ]
+  ## Merge routine & campaign impacts
+  raw_impact <- rbind(routine_raw_impact, campaign_raw_impact)
+  tot_impact <- stats::aggregate(
+    impact ~ country + burden_outcome + activity_type,
+    raw_impact, sum, na.rm = TRUE)
 
-  routine_impact <- impact_by_year_of_vaccination_country_perspective(
-    routine_raw_impact, routine_fvps, "routine", 2000:2030)
-  campaign_impact <- impact_by_year_of_vaccination_country_perspective(
-    campaign_raw_impact, campaign_fvps, "campaign", 2000:2030)
-  routine_impact$activity_type <- "routine"
-  campaign_impact$actiity_type <- "campaign"
+  ## Get FVP totals for routine & campaign
+  fvps <- fvps[fvps$year %in% vaccination_years, ]
+  if (nrow(fvps) == 0) {
+    stop("No FVP data for this range of vaccination years")
+  }
+  tot_fvps <- stats::aggregate(fvps ~ country + activity_type,
+                               fvps, sum, na.rm = TRUE)
 
-  impact_ratio <- rbind(routine_impact, campaign_impact)
+  ## Calculate impact_ratio
+  impact_ratio <- merge(tot_impact, tot_fvps, c("country", "activity_type"))
   impact_ratio$impact_ratio <- impact_ratio$impact / impact_ratio$fvps
-  impact <- merge_by_common_cols(fvps, impact_ratio)
+  impact_ratio <- impact_ratio[, -which(names(impact_ratio) %in%
+                                          c("fvps", "impact"))]
+
+  ## Calculate impact
+  fvps_country <- stats::aggregate(fvps ~ country + activity_type + year,
+                                   fvps, sum, na.rm = TRUE)
+  impact <- merge(fvps_country, impact_ratio, c("country", "activity_type"))
   impact$impact <- impact$impact_ratio * impact$fvps
-  impact[, c("country", "year", "impact")]
+  impact <- impact[,
+    c("country", "activity_type", "year", "burden_outcome", "impact")]
+  impact[order(impact$country, impact$activity_type, impact$burden_outcome,
+               impact$year), ]
 }

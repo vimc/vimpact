@@ -58,7 +58,8 @@ impact_test_data_baseline <- data_frame(
   year = rep(c(2001, 2002, 2001, 2002, 2003), 2),
   age = c(0, 0, 1, 1, 1),
   value = c(234, 456, 345, 234, 345, 934, 567, 876, 675, 456),
-  burden_outcome = rep("deaths", 10)
+  burden_outcome = rep("deaths", 10),
+  activity_type = rep(c(rep("routine", 2), rep("campaign", 3)), 2)
 )
 
 impact_test_data_focal <- data_frame(
@@ -66,7 +67,8 @@ impact_test_data_focal <- data_frame(
   year = rep(c(2001, 2002, 2001, 2002, 2003), 2),
   age = c(0, 0, 1, 1, 1),
   value = c(90, 121, 134, 221, 134, 432, 534, 433, 342, 355),
-  burden_outcome = rep("deaths", 10)
+  burden_outcome = rep("deaths", 10),
+  activity_type = rep(c(rep("routine", 2), rep("campaign", 3)), 2)
 )
 
 fvp_test_data_10 <- data_frame(

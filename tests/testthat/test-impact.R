@@ -297,7 +297,7 @@ test_that("impact by birth year can be caluclated", {
   expected_data <- data_frame(
     country = c(rep("ETH", 3), rep("PAK", 3)),
     burden_outcome = rep("deaths", 6),
-    birth_year = rep(2000:2002, 2),
+    birth_cohort = rep(2000:2002, 2),
     impact = c(211, 157, 546, 443, 835, 134)
   )
   expect_equal(impact, expected_data)
@@ -311,7 +311,7 @@ test_that("impact by birth year only returns rows where birth year match", {
   expect_equal(impact, data_frame(
     country = c("ETH", "PAK"),
     burden_outcome = rep("deaths", 2),
-    birth_year = rep(2002, 2),
+    birth_cohort = rep(2002, 2),
     impact = c(711, 591)
   ))
 })
@@ -349,4 +349,94 @@ test_that("impact by birth year: external and internal functions agree", {
   vimc_impact <- vimc_impact[, c("country", "burden_outcome", "time", "value")]
   ## column names slightly different time vs year and value vs impact
   expect_equivalent(vimc_impact, public_impact)
+})
+
+test_that("impact by year of vaccination activity type", {
+  impact <- impact_by_year_of_vaccination_activity_type(
+    impact_test_data_baseline, impact_test_data_focal, fvp_test_data_15,
+    2000:2030)
+  expect_equal(nrow(impact), nrow(fvp_test_data_15))
+  expect_equal(
+    colnames(impact),
+    c("country", "activity_type", "year", "burden_outcome", "impact"))
+})
+
+test_that("impact activity type: internal and external functions agree", {
+  skip_if_not_installed("RSQLite")
+  con <- DBI::dbConnect(RSQLite::SQLite(), dbname = ":memory:")
+  on.exit({
+    DBI::dbDisconnect(con)
+  })
+  ## Add test data to db we need to add some columns for this to work
+  baseline <- impact_test_data_baseline
+  baseline_burden_estimate_set <- vapply(baseline$activity_type,
+                                         function(type) {
+                                           if (type == "routine") {
+                                             1L
+                                           } else {
+                                             2L
+                                           }
+                                         }, integer(1))
+  baseline$burden_estimate_set <- baseline_burden_estimate_set
+  baseline$burden_outcome <- 1
+
+  focal <- impact_test_data_focal
+  focal_burden_estimate_set <- vapply(baseline$activity_type,
+                                      function(type) {
+                                        if (type == "routine") {
+                                          3L
+                                        } else {
+                                          4L
+                                        }
+                                      }, integer(1))
+  focal$burden_estimate_set <- focal_burden_estimate_set
+  focal$burden_outcome <- 1
+  burden_estimate <- rbind(baseline, focal)
+  DBI::dbWriteTable(con, "burden_estimate", burden_estimate)
+
+  ## Campaign
+  meta <- data_frame(
+    scenario_type = c("default", "default"),
+    vaccine_delivery = c("no-vaccination", "YF-campaign"),
+    disease = c("YF", "YF"),
+    meta_type = c("baseline", "focal"),
+    index = c(1, 1),
+    method = c("method2a", "method2a"),
+    burden_estimate_set = c(2, 4),
+    burden_outcome_id = c("1", "1"))
+
+  campaign_raw_impact <- get_raw_impact_details(con = con, meta,
+                                                burden_outcome = "deaths")
+  fvp <- fvp_test_data_15
+  fvp$vaccine <- "YF"
+  fvp$disease <- "YF"
+  campaign_impact <- impact_by_year_of_vaccination(
+    meta, campaign_raw_impact, fvp, vaccination_years = 2000:2030)
+
+  ## Routine
+  meta <- data_frame(
+    scenario_type = c("default", "default"),
+    vaccine_delivery = c("no-vaccination", "YF-routine"),
+    disease = c("YF", "YF"),
+    meta_type = c("baseline", "focal"),
+    index = c(1, 1),
+    method = c("method2a", "method2a"),
+    burden_estimate_set = c(1, 3),
+    burden_outcome_id = c("1", "1"))
+
+  routine_raw_impact <- get_raw_impact_details(con = con, meta,
+                                               burden_outcome = "deaths")
+  routine_impact <- impact_by_year_of_vaccination(
+    meta, routine_raw_impact, fvp, vaccination_years = 2000:2030)
+
+  vimc_impact <- rbind(campaign_impact, routine_impact)
+
+  public_impact <- impact_by_year_of_vaccination_activity_type(
+    impact_test_data_baseline, impact_test_data_focal, fvp,
+    2000:2030)
+  ## Filter vimc impact to same columns as public to compare values
+  vimc_impact <- vimc_impact[, colnames(public_impact)]
+  vimc_impact <- vimc_impact[
+    order(vimc_impact$country, vimc_impact$activity_type, vimc_impact$year), ]
+  expect_equal(public_impact, vimc_impact, check.attributes = FALSE)
 })
