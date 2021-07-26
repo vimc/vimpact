@@ -418,6 +418,10 @@ impact_by_year_of_vaccination_activity_type <- function(
   assert_has_columns(
     fvps,
     c("country", "year", "activity_type", "age", "fvps"))
+  activity_types <- c("routine", "campaign")
+  assert_allowed_values(baseline_impact, "activity_type", activity_types)
+  assert_allowed_values(focal_impact, "activity_type", activity_types)
+  assert_allowed_values(fvps, "activity_type", activity_types)
 
   ## Routine
   baseline_routine <- baseline_impact[

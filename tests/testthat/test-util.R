@@ -61,3 +61,12 @@ test_that("assert_col_names checks required columns are present", {
   expect_error(assert_has_columns(data, c("one", "two", "three")),
                "Required column names two, three are missing from data")
 })
+
+test_that("assert_allowed_values checks columns have only allowed values", {
+  data <- data_frame(one = c("1", "2", "3"),
+                     this = c(1, 2, 3))
+  expect_true(assert_allowed_values(data, "one", c("1", "2", "3")))
+  expect_true(assert_allowed_values(data, "one", c("1", "2", "3")))
+  expect_error(assert_allowed_values(data, "one", "1"),
+               "Column 'one' contains values '2', '3'. Allowed values are '1'.")
+})

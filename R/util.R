@@ -73,3 +73,15 @@ assert_has_columns <- function(data, col_names,
   }
   invisible(TRUE)
 }
+
+assert_allowed_values <- function(data, column, values) {
+  present_values <- unique(data[[column]])
+  additional_values <- setdiff(present_values, values)
+  if (length(additional_values) > 0) {
+    stop(sprintf("Column '%s' contains values %s. Allowed values are %s.",
+                 column,
+                 paste(sprintf("'%s'", additional_values), collapse = ", "),
+                 paste(sprintf("'%s'", values), collapse = ", ")))
+  }
+  invisible(TRUE)
+}
