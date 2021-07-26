@@ -385,10 +385,10 @@ impact_by_birth_year <- function(baseline_impact, focal_impact) {
 #' Calculate impact by year of vaccination: activity type
 #'
 #' Impact by year of vaccination with impact ratio stratified by activity type.
-#' Stratifying impact atio by activity type captures the differing effects of
+#' Stratifying impact ratio by activity type captures the differing effects of
 #' routine and campaign vaccination.
 #'
-#' To calculate mpact by year of vaccination using impact ratios stratified by
+#' To calculate impact by year of vaccination using impact ratios stratified by
 #' activity type, we assume that routine vaccination and campaign vaccination,
 #' which target multiple age groups, have different effects; for example due
 #' to dosage clustering. Hence, this method produces multiple,
@@ -404,7 +404,8 @@ impact_by_birth_year <- function(baseline_impact, focal_impact) {
 #' and will be aggregated over.
 #' @param vaccination_years Years of vaccination of interest.
 #'
-#' @return Vaccine impact by ..
+#' @return Vaccine impact by country, activity type (routine or campaign), year
+#' and burden outcome
 #' @export
 impact_by_year_of_vaccination_activity_type <- function(
   baseline_impact, focal_impact, fvps, vaccination_years) {

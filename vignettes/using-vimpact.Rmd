@@ -22,6 +22,8 @@ This vignette describes how to use impact calculation methods used in VIMC as an
 
 ## Impact by calendar year (cross-sectional impact)
 
+Impact by calendar year calculates impact accrused over all ages for a specific year. This calculates the difference in disease burden between baseline and focal scenarios for a given year.
+
 This method is available via function `impact_by_calendar_year`. To you use it you need to provide 2 data frames. These contain baseline and focal impact for a particular vaccine in multiple countries over a range of years and ages.
 
 These data frames must contain columns for country, burden_outcome (e.g. cases, deaths, DALYs), year, age and value. It will sum the values for each group of country, burden_outcome, year for baseline and focal and calculate the difference of these groups.
@@ -50,82 +52,43 @@ vimpact::impact_by_calendar_year(impact_test_data_baseline, impact_test_data_foc
 
 ## Impact by birth year (lifetime impact)
 
-This method is available via function `impact_by_birth_year`. This requires the same data as `impact_by_calendar_year`. You need to provide 2 data frames. These contain baseline and focal impact for a particular vaccine in multiple countries over a range of years and ages.
+The birth year method accounts for the long-term impact accrued over the lifetime of a particular birth cohort. This method is available via function `impact_by_birth_year`. This requires the same data as `impact_by_calendar_year`. You need to provide 2 data frames. These contain baseline and focal impact for a particular vaccine in multiple countries over a range of years and ages.
 
 These data frames must contain columns for country, burden_outcome (e.g. cases, deaths, DALYs), year, age and value. It will sum the impact grouped by country, burden_outcome, and birth year. Where birth year is `year - age`. Then calculates the impact for these groups.
 
 If the baseline and focal impact data contains groups which do not overlap then this will return impact only for groups contained in both datasets.
 
 ```{r}
-impact_test_data_baseline <- data.frame(
-  country = c(rep("ETH", 5), rep("PAK", 5)),
-  year = rep(c(2001, 2002, 2001, 2002, 2003), 2),
-  age = c(0, 0, 1, 1, 1),
-  value = c(234, 456, 345, 234, 345, 934, 567, 876, 675, 456),
-  burden_outcome = rep("deaths", 10)
-)
-
-impact_test_data_focal <- data.frame(
-  country = c(rep("ETH", 5), rep("PAK", 5)),
-  year = rep(c(2001, 2002, 2001, 2002, 2003), 2),
-  age = c(0, 0, 1, 1, 1),
-  value = c(90, 121, 134, 221, 134, 432, 534, 433, 342, 355),
-  burden_outcome = rep("deaths", 10)
-)
-
 vimpact::impact_by_birth_year(impact_test_data_baseline, impact_test_data_focal)
 ```
 
-## Impact by year of vaccination: impact ratio stratified by activity type
+## Impact by year of vaccination
 
-## Impact by year of vaccination: impact ratio stratified by birth cohort
+Impact by year of vaccination methods are vital for determining the long-term impact of of vaccination due to activities carried out in a particular year. We obtain the impact ratio as the impact attributable per fully vaccinated person (FVP) calculated as the coverage × cohort size. This ratio can be stratified by different characteristics, such as birth cohort in order to catch temporal changes in transmission or healthcare or by activity type to capture the differing effects of routine and campaign vaccination. The impact ratio allows effects due to a particular year’s worth of vaccination to be attributed to that year.
 
+### Impact by year of vaccination: impact ratio stratified by activity type
 
+To calculate impact by year of vaccination with impact ratio stratified by activity type use function `impact_by_year_of_vaccination_activity_type`. You need to provide 3 data frames. Like the previous two impact methods this needs a data frame of baseline impact and focal impact. These must contain the same columns as in the previous two methods with the addition of a column for the `activity_type` of the vaccination - either routine or campaign.
 
-As external users, you are not able to communicate with VIMC databases. Hence it is not possible to make running of `get_meta_from_recipe` and `get_raw_impact_details`. The former function prepares impact recipes, and the latter generates impact method0 and method1. Therefore external users are more likely to calculate method0 and method1 on their own (which are straightforward) and use vimpact to evaluate vaccine impact by year of vaccination views.
+You also need to provide a data frame of FVP (fully vaccinated person) data which contains country, year, activity type, age and fvp. And a set of `vaccintaion_years` which is a range of years for which you want calculate impact for. This will be used to filter the baseline impact, focal impact and FVPs.
 
-This section gives an example of running impact by year of vaccination (vaccination activity view/method2a).
+This method produces impact values for a particular disease stratified by country, activity type, year and burden outcome.
 
-**prepare impact calculation**
-There are three data frames you will need to prepare, i.e. meta data for impact calculation, vaccination coverage and raw impact that compares disease burden between two scenarios. Examples of these data frames are provided in vignettes/example_data
+```{r}
+impact_test_data_baseline$activity_type <- rep(c(rep("routine", 2), rep("campaign", 3)), 2)
+impact_test_data_focal$activity_type <- rep(c(rep("routine", 2), rep("campaign", 3)), 2)
+  
+  
+fvp_test_data <- data.frame(
+  activity_type = c(rep("routine", 10), rep("campaign", 5)),
+  country = c(rep("ETH", 5), rep("PAK", 10)),
+  year = rep(2001:2005, 3),
+  age = rep(0, 15),
+  fvps = c(34, 54, 34, 54, 23, 65, 78, 98, 78, 98, 43, 45, 65, 45, 65)
+)
 
-1. meta data (see e.g. vignettes/example_data/example_meta_method2a.csv)
-There are columns specifically designed for VIMC internal users. Columns you need to fulfill are vaccine_delivery, disease, meta_type, index and method.
-
-vaccine delivery comes as units of <disease>-<activity_type> sperated by `,`. activity_type should be either routine or campaign. No vaccination counterfactual scenario should be specified as `no-vaccination`.
-
-meta_type indicates whether a scenario is baseline or focal.
-
-index should be integers linking paired scenarios (one baseline and one focal).
-
-method should be either `method2a` or `method2b`.
-
-2. vaccination coverage (see e.g. inst/extdata/example_data/example_fvps.csv)
-  vaccine activity_type country year age gavi_support population coverage fvps disease
-1      YF       routine     ABC 2000   0        FALSE      27214        0    0      YF
-2      YF       routine     ABC 2001   0        FALSE      27472        0    0      YF
-
-3. raw impact  (see e.g. vignettes/example_data/example_raw_impact_method2a.csv)
-  country time baseline_value focal_value value index burden_outcome
-1     ABC 2000             16          16     0    19         deaths
-2     ABC 2001             16          16     0    19         deaths
-
-
-**impact by year of vaccination (2a)**
-
+vimpact::impact_by_year_of_vaccination_activity_type(impact_test_data_baseline, impact_test_data_focal, fvp_test_data, 2000:2030)
 ```
-vaccination_years <- 2000:2030
-fvps <- read.csv(system.file("extdata/example_data/example_fvps.csv", 
-                 package = "vimpact"))
-meta <- read.csv(system.file("extdata/example_data/example_meta_method2a.csv", 
-                 package = "vimpact"))
-dat <- read.csv(system.file(
-  "extdata/example_data/example_raw_impact_method2a.csv", package = "vimpact"))
-metas <- split(meta, meta$index)
 
-dat2 <- lapply(metas, function(meta1) impact_by_year_of_vaccination(meta1, raw_impact = dat, fvps = fvps,
-                                                                     vaccination_years = vaccination_years))
-dat2 <- do.call(rbind, dat2)
-
-```
+### Impact by year of vaccination: impact ratio stratified by birth cohort
 
