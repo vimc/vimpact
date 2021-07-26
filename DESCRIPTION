@@ -18,6 +18,7 @@ Imports:
     RPostgres,
     vaultr
 Suggests:
+    ggplot2,
     knitr,
     testthat,
     rmarkdown,
