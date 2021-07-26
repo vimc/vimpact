@@ -20,6 +20,18 @@ options(testthat.default_reporter = "summary")
 
 This vignette describes how to use impact calculation methods used in VIMC as an external user.
 
+## Data
+
+The simplest possible example is a static model with constant routine immunisation and a one-off campaign. Burden estimates from a theoretical country are found in 2 csv titled `example_baseline_burden.csv` and `example_focal_burden.csv`. These include estimates of burden in years 1900 - 2100 and display the format used by the functions.
+
+```{r}
+example_baseline <- read.csv(system.file("extdata/example_baseline_burden.csv", package = "vimpact"))
+example_focal <- read.csv(system.file("extdata/example_focal_burden.csv", package = "vimpact"))
+str(example_baseline)
+str(example_focal)
+```
+
+
 ## Impact by calendar year (cross-sectional impact)
 
 Impact by calendar year calculates impact accrued over all ages for a specific year. This calculates the difference in disease burden between baseline and focal scenarios for a given year.
@@ -31,24 +43,8 @@ These data frames must contain columns for country, burden_outcome (e.g. cases, 
 If the baseline and focal impact data contains groups which do not overlap then this will return impact only for groups contained in both datasets.
 
 ```{r}
-impact_test_data_baseline <- data.frame(
-  country = c(rep("ETH", 5), rep("PAK", 5)),
-  year = rep(c(2001, 2002, 2001, 2002, 2003), 2),
-  age = c(0, 0, 1, 1, 1),
-  value = c(234, 456, 345, 234, 345, 934, 567, 876, 675, 456),
-  burden_outcome = rep("deaths", 10)
-)
-
-impact_test_data_focal <- data.frame(
-  country = c(rep("ETH", 5), rep("PAK", 5)),
-  year = rep(c(2001, 2002, 2001, 2002, 2003), 2),
-  age = c(0, 0, 1, 1, 1),
-  value = c(90, 121, 134, 221, 134, 432, 534, 433, 342, 355),
-  burden_outcome = rep("deaths", 10)
-)
-
-calendar_year <- vimpact::impact_by_calendar_year(impact_test_data_baseline, impact_test_data_focal)
-calendar_year
+calendar_year <- vimpact::impact_by_calendar_year(example_baseline, example_focal)
+str(calendar_year)
 ```
 
 ## Impact by birth year (lifetime impact)
@@ -60,8 +56,8 @@ These data frames must contain columns for country, burden_outcome (e.g. cases, 
 If the baseline and focal impact data contains groups which do not overlap then this will return impact only for groups contained in both datasets.
 
 ```{r}
-birth_year <- vimpact::impact_by_birth_year(impact_test_data_baseline, impact_test_data_focal)
-birth_year
+birth_year <- vimpact::impact_by_birth_year(example_baseline, example_focal)
+str(birth_year)
 ```
 
 ```{r}
@@ -69,9 +65,13 @@ birth_year$year <- birth_year$birth_cohort
 birth_year$impact_birth_year <- birth_year$impact
 calendar_year$impact_calendar_year <- calendar_year$impact
 plot_data <- merge(birth_year, calendar_year, by = c("country", "burden_outcome", "year"))
+plot_data$year <- as.Date(paste(plot_data$year, "01", "01", sep = "-"))
 ggplot2::ggplot(plot_data, ggplot2::aes(x = year)) +
-  ggplot2::geom_line(ggplot2::aes(y = impact_birth_year)) +
-  ggplot2::geom_line(ggplot2::aes(y = impact_calendar_year))
+  ggplot2::geom_line(ggplot2::aes(y = impact_birth_year, colour = "birth year")) +
+  ggplot2::geom_line(ggplot2::aes(y = impact_calendar_year, colour = "calendar year")) + 
+  ggplot2::expand_limits(y = 0) + 
+  ggplot2::ylab("Impact") + 
+  ggplot2::xlab("Year")
 ```
 
 ## Impact by year of vaccination
@@ -87,20 +87,10 @@ You also need to provide a data frame of FVP (fully vaccinated person) data whic
 This method produces impact values for a particular disease stratified by country, activity type, year and burden outcome.
 
 ```{r}
-impact_test_data_baseline$activity_type <- rep(c(rep("routine", 2), rep("campaign", 3)), 2)
-impact_test_data_focal$activity_type <- rep(c(rep("routine", 2), rep("campaign", 3)), 2)
+example_fvps <- read.csv(system.file("extdata/example_fvps.csv", package = "vimpact"))
   
-  
-fvp_test_data <- data.frame(
-  activity_type = c(rep("routine", 10), rep("campaign", 5)),
-  country = c(rep("ETH", 5), rep("PAK", 10)),
-  year = rep(2001:2005, 3),
-  age = rep(0, 15),
-  fvps = c(34, 54, 34, 54, 23, 65, 78, 98, 78, 98, 43, 45, 65, 45, 65)
-)
-
-activity_type <- vimpact::impact_by_year_of_vaccination_activity_type(impact_test_data_baseline, impact_test_data_focal, fvp_test_data, 2000:2030)
-activity_type
+activity_type <- vimpact::impact_by_year_of_vaccination_activity_type(example_baseline, example_focal, example_fvps, 2000:2030)
+str(activity_type)
 ```
 
 ### Impact by year of vaccination: impact ratio stratified by birth cohort
@@ -110,8 +100,8 @@ Impact by year of vaccination can be stratified by birth cohort to catch tempora
 This method requires basline impact, focal impact and FVPs disaggregated by country, burden outcome, year and age. The data doesn't have to be disaggregated by `activity_type`. This returns impact for a particular vaccine by country, year and burden outcome.
 
 ```{r}
-cohort_type <- vimpact::impact_by_year_of_vaccination_birth_cohort(impact_test_data_baseline, impact_test_data_focal, fvp_test_data, 2000:2030)
-cohort_type
+cohort_type <- vimpact::impact_by_year_of_vaccination_birth_cohort(example_baseline, example_focal, example_fvps, 2000:2030)
+str(cohort_type)
 ```
 
 ```{r}
@@ -120,9 +110,13 @@ activity_sum <- stats::aggregate(impact ~ country + year + burden_outcome,
 activity_sum$impact_activity_strat <- activity_sum$impact
 cohort_type$impact_cohort_strat <- cohort_type$impact
 plot_data <- merge(activity_sum, cohort_type, by = c("country", "burden_outcome", "year"))
+plot_data$year <- as.Date(paste(plot_data$year, "01", "01", sep = "-"))
 ggplot2::ggplot(plot_data, ggplot2::aes(x = year)) +
-  ggplot2::geom_line(ggplot2::aes(y = impact_cohort_strat)) +
-  ggplot2::geom_line(ggplot2::aes(y = impact_activity_strat))
+  ggplot2::geom_line(ggplot2::aes(y = impact_cohort_strat, colour = "cohort")) +
+  ggplot2::geom_line(ggplot2::aes(y = impact_activity_strat, colour = "activity")) +
+  ggplot2::expand_limits(y = 0) + 
+  ggplot2::ylab("Impact") + 
+  ggplot2::xlab("Year")
 ```
 
 ## Glossary

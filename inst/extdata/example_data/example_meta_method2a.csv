@@ -1,5 +1,0 @@
-"","scenario_type","vaccine_delivery","touchstone","modelling_group","disease","meta","burden_outcome","comment","meta_type","index","scenario","coverage_set","burden_estimate_set","burden_outcome_id","method"
-"1","default","YF-campaign,YF-routine","your_touchstone","your_model","YF","default:YF-routine,YF-campaign","deaths;cases;dalys",NA,"focal",19,508,"651,650",689,"6;1;5","method2a"
-"2","default","YF-routine","your_touchstone","your_model","YF","default:YF-routine","deaths;cases;dalys",NA,"baseline",19,509,"651",688,"6;1;5","method2a"
-"3","default","YF-routine","your_touchstone","your_model","YF","default:YF-routine","deaths;cases;dalys",NA,"focal",20,509,"651",688,"6;1;5","method2a"
-"4","novac","no-vaccination","your_touchstone","your_model","YF","novac","deaths;cases;dalys",NA,"baseline",20,507,"644",687,"6;1;5","method2a"
