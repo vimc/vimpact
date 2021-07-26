@@ -1,6 +1,6 @@
 ---
 title: "Using vimpact for estimating vaccine impact"
-author: "Xiang Li"
+author: "Rob Ashton, Xiang Li, Katy Gaythorpe"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
