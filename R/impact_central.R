@@ -469,3 +469,74 @@ impact_by_year_of_vaccination_activity_type <- function(
   impact[order(impact$country, impact$activity_type, impact$burden_outcome,
                impact$year), ]
 }
+
+#' Calculate impact by year of vaccination: birth cohort
+#'
+#' Impact by year of vaccination with impact ratio stratified by birth cohort.
+#' Stratifying impact ratio by birth cohort aims to catch temporal changes in
+#' transmission or healthcare.
+#'
+#' This method is invariant to activity type. Vaccine effect is assumed to vary
+#' over time through birth cohorts. This means that rather than averaging the
+#' effect of vaccination over time, we account for the variation in transmission
+#' and health of the population. This influences how one year's vaccination may
+#' work compared to another. For example, if therapeutic treatments for a
+#' disease improve over time, we may expect the impact of vaccination in 2050
+#' to be less than that now as the population is generally healthier.
+#'
+#' @param baseline_impact Data frame of baseline impact data this needs to have
+#' columns country, burden_outcome, vaccine_delivery, year, age, value
+#' @param focal_impact Data frame of focal impact data this needs to have
+#' columns country, burden_outcome, vaccine_delivery, year, age, value
+#' @param fvps Data frame of FVPs (fully vaccinated persons) needs to have
+#' columns country, year, activity_type, fvps other columns can be included
+#' and will be aggregated over.
+#' @param vaccination_years Years of vaccination of interest.
+#'
+#' @return Vaccine impact by country, activity type (routine or campaign), year
+#' and burden outcome
+#' @export
+impact_by_year_of_vaccination_birth_cohort <- function(
+  baseline_impact, focal_impact, fvps, vaccination_years) {
+  assert_has_columns(
+    baseline_impact,
+    c("country", "burden_outcome", "year", "age", "value"))
+  assert_has_columns(
+    focal_impact,
+    c("country", "burden_outcome", "year", "age", "value"))
+  assert_has_columns(
+    fvps,
+    c("country", "year", "age", "fvps"))
+
+  ## Get impact for birth cohort
+  raw_impact <- impact_by_birth_year(baseline_impact, focal_impact)
+  tot_impact <- stats::aggregate(
+    impact ~ country + burden_outcome + birth_cohort,
+    raw_impact, sum, na.rm = TRUE)
+
+  ## Get FVP totals for birth year/birth cohort
+  fvps$birth_cohort <- get_birth_cohort(fvps)
+  fvps <- fvps[fvps$year %in% vaccination_years, ]
+  if (nrow(fvps) == 0) {
+    stop("No FVP data for this range of vaccination years")
+  }
+  tot_fvps <- stats::aggregate(fvps ~ country + birth_cohort,
+                               fvps, sum, na.rm = TRUE)
+
+  ## Calculate impact_ratio
+  impact_ratio <- merge(tot_impact, tot_fvps, c("country", "birth_cohort"))
+  impact_ratio$impact_ratio <- impact_ratio$impact / impact_ratio$fvps
+  impact_ratio <- impact_ratio[, -which(names(impact_ratio) %in%
+                                          c("fvps", "impact"))]
+
+  ## Calculate impact
+  fvps_country <- stats::aggregate(fvps ~ country + birth_cohort + year,
+                                   fvps, sum, na.rm = TRUE)
+  impact_birth_cohort <- merge(fvps_country, impact_ratio,
+                               c("country", "birth_cohort"))
+  impact_birth_cohort$impact <- impact_birth_cohort$impact_ratio *
+    impact_birth_cohort$fvps
+  impact <- stats::aggregate(impact ~ country + year + burden_outcome,
+                             impact_birth_cohort, sum, na.rm = TRUE)
+  impact[order(impact$country, impact$burden_outcome, impact$year), ]
+}

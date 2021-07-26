@@ -440,3 +440,61 @@ test_that("impact activity type: internal and external functions agree", {
     order(vimc_impact$country, vimc_impact$activity_type, vimc_impact$year), ]
   expect_equal(public_impact, vimc_impact, check.attributes = FALSE)
 })
+
+test_that("impact by year of vaccination birth cohort", {
+  impact <- impact_by_year_of_vaccination_birth_cohort(
+    impact_test_data_baseline, impact_test_data_focal, fvp_test_data_15,
+    2000:2030)
+  ## 2 countries, 2 birth years each for which there is impact data & FVPs
+  expect_equal(nrow(impact), 4)
+  expect_equal(
+    colnames(impact),
+    c("country", "year", "burden_outcome", "impact"))
+})
+
+test_that("impact birth cohort: internal and external functions agree", {
+  skip_if_not_installed("RSQLite")
+  con <- DBI::dbConnect(RSQLite::SQLite(), dbname = ":memory:")
+  on.exit({
+    DBI::dbDisconnect(con)
+  })
+  ## Add test data to db we need to add some columns for this to work
+  baseline <- impact_test_data_baseline
+  baseline$burden_estimate_set <- 1
+  baseline$burden_outcome <- 1
+  focal <- impact_test_data_focal
+  focal$burden_estimate_set <- 2
+  focal$burden_outcome <- 1
+  burden_estimate <- rbind(baseline, focal)
+  DBI::dbWriteTable(con, "burden_estimate", burden_estimate)
+
+  ## Campaign
+  meta <- data_frame(
+    scenario_type = c("default", "default"),
+    vaccine_delivery = c("no-vaccination", "YF-routine,YF-campaign"),
+    disease = c("YF", "YF"),
+    meta_type = c("baseline", "focal"),
+    index = c(1, 1),
+    method = c("method2b", "method2b"),
+    burden_estimate_set = c(1, 2),
+    burden_outcome_id = c("1", "1"))
+
+  vimc_raw_impact <- get_raw_impact_details(con = con, meta,
+                                            burden_outcome = "deaths")
+  fvp <- fvp_test_data_15
+  fvp$vaccine <- "YF"
+  fvp$disease <- "YF"
+  vimc_impact <- impact_by_year_of_vaccination(
+    meta, vimc_raw_impact, fvp, vaccination_years = 2000:2030)
+
+  public_impact <- impact_by_year_of_vaccination_birth_cohort(
+    impact_test_data_baseline, impact_test_data_focal, fvp,
+    2000:2030)
+
+  ## Aggregate vimc impact and compare with public
+  vimc_impact <- stats::aggregate(impact ~ country + year + burden_outcome,
+                                  vimc_impact, sum, na.rm = TRUE)
+  vimc_impact <- vimc_impact[
+    order(vimc_impact$country, vimc_impact$year), ]
+  expect_equal(public_impact, vimc_impact, check.attributes = FALSE)
+})

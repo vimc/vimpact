@@ -22,11 +22,11 @@ This vignette describes how to use impact calculation methods used in VIMC as an
 
 ## Impact by calendar year (cross-sectional impact)
 
-Impact by calendar year calculates impact accrused over all ages for a specific year. This calculates the difference in disease burden between baseline and focal scenarios for a given year.
+Impact by calendar year calculates impact accrued over all ages for a specific year. This calculates the difference in disease burden between baseline and focal scenarios for a given year.
 
-This method is available via function `impact_by_calendar_year`. To you use it you need to provide 2 data frames. These contain baseline and focal impact for a particular vaccine in multiple countries over a range of years and ages.
+To use this method you need to provide a data frame of baseline impact and a data frame of focal impact for the vaccine of interest for a given age, year and country.
 
-These data frames must contain columns for country, burden_outcome (e.g. cases, deaths, DALYs), year, age and value. It will sum the values for each group of country, burden_outcome, year for baseline and focal and calculate the difference of these groups.
+These data frames must contain columns for country, burden_outcome (e.g. cases, deaths, DALYs), year, age and value. It will sum the values over all ages for each year and return the impact as the difference between baseline and focal scenarios for each group.
 
 If the baseline and focal impact data contains groups which do not overlap then this will return impact only for groups contained in both datasets.
 
@@ -47,24 +47,36 @@ impact_test_data_focal <- data.frame(
   burden_outcome = rep("deaths", 10)
 )
 
-vimpact::impact_by_calendar_year(impact_test_data_baseline, impact_test_data_focal)
+calendar_year <- vimpact::impact_by_calendar_year(impact_test_data_baseline, impact_test_data_focal)
+calendar_year
 ```
 
 ## Impact by birth year (lifetime impact)
 
-The birth year method accounts for the long-term impact accrued over the lifetime of a particular birth cohort. This method is available via function `impact_by_birth_year`. This requires the same data as `impact_by_calendar_year`. You need to provide 2 data frames. These contain baseline and focal impact for a particular vaccine in multiple countries over a range of years and ages.
+When calculating impact by birth year we account for the long-term impact of vaccination by finding the sum of the difference in burden between focal and baseline scenarios over the lifetime of a particular cohort. This can be written as $D(c, k) = \sum_{y-a=k}D_{b-f}(a, c, y)$ where $y \in Y_{m}$ and $a \in A_{m}$ where $D$ is the difference in burden, $b$ is baseline, $f$ is focal, $a$ is age, $c$ is country, $y$ is year, $k$ is birth cohort, $Y_{m}$ are the years modelled and $A_{m}$ are the ages modelled. This requires the same data as `impact_by_calendar_year`. You need to provide data frames containing baseline and focal impact for the vaccine of interest for a given age, year and country.
 
 These data frames must contain columns for country, burden_outcome (e.g. cases, deaths, DALYs), year, age and value. It will sum the impact grouped by country, burden_outcome, and birth year. Where birth year is `year - age`. Then calculates the impact for these groups.
 
 If the baseline and focal impact data contains groups which do not overlap then this will return impact only for groups contained in both datasets.
 
 ```{r}
-vimpact::impact_by_birth_year(impact_test_data_baseline, impact_test_data_focal)
+birth_year <- vimpact::impact_by_birth_year(impact_test_data_baseline, impact_test_data_focal)
+birth_year
+```
+
+```{r}
+birth_year$year <- birth_year$birth_cohort
+birth_year$impact_birth_year <- birth_year$impact
+calendar_year$impact_calendar_year <- calendar_year$impact
+plot_data <- merge(birth_year, calendar_year, by = c("country", "burden_outcome", "year"))
+ggplot2::ggplot(plot_data, ggplot2::aes(x = year)) +
+  ggplot2::geom_line(ggplot2::aes(y = impact_birth_year)) +
+  ggplot2::geom_line(ggplot2::aes(y = impact_calendar_year))
 ```
 
 ## Impact by year of vaccination
 
-Impact by year of vaccination methods are vital for determining the long-term impact of of vaccination due to activities carried out in a particular year. We obtain the impact ratio as the impact attributable per fully vaccinated person (FVP) calculated as the coverage × cohort size. This ratio can be stratified by different characteristics, such as birth cohort in order to catch temporal changes in transmission or healthcare or by activity type to capture the differing effects of routine and campaign vaccination. The impact ratio allows effects due to a particular year’s worth of vaccination to be attributed to that year.
+The final view of impact is by attributing it to the year in which vaccination took place. Impact by year of vaccination methods are vital for determining the long-term impact of of vaccination due to activities carried out in a particular year. We obtain the impact ratio as the impact attributable per fully vaccinated person (FVP) calculated as the coverage × cohort size. This ratio can be stratified by different characteristics, such as birth cohort in order to catch temporal changes in transmission or healthcare or by activity type to capture the differing effects of routine and campaign vaccination. The impact ratio allows effects due to a particular year’s worth of vaccination to be attributed to that year.
 
 ### Impact by year of vaccination: impact ratio stratified by activity type
 
@@ -87,8 +99,42 @@ fvp_test_data <- data.frame(
   fvps = c(34, 54, 34, 54, 23, 65, 78, 98, 78, 98, 43, 45, 65, 45, 65)
 )
 
-vimpact::impact_by_year_of_vaccination_activity_type(impact_test_data_baseline, impact_test_data_focal, fvp_test_data, 2000:2030)
+activity_type <- vimpact::impact_by_year_of_vaccination_activity_type(impact_test_data_baseline, impact_test_data_focal, fvp_test_data, 2000:2030)
+activity_type
 ```
 
 ### Impact by year of vaccination: impact ratio stratified by birth cohort
 
+Impact by year of vaccination can be stratified by birth cohort to catch temporal changes in transmission or healthcare. This method is invariant to vaccination activity type. However, vaccine effect is assumed to vary over time through birth cohorts.
+
+This method requires basline impact, focal impact and FVPs disaggregated by country, burden outcome, year and age. The data doesn't have to be disaggregated by `activity_type`. This returns impact for a particular vaccine by country, year and burden outcome.
+
+```{r}
+cohort_type <- vimpact::impact_by_year_of_vaccination_birth_cohort(impact_test_data_baseline, impact_test_data_focal, fvp_test_data, 2000:2030)
+cohort_type
+```
+
+```{r}
+activity_sum <- stats::aggregate(impact ~ country + year + burden_outcome,
+                                 activity_type, sum)
+activity_sum$impact_activity_strat <- activity_sum$impact
+cohort_type$impact_cohort_strat <- cohort_type$impact
+plot_data <- merge(activity_sum, cohort_type, by = c("country", "burden_outcome", "year"))
+ggplot2::ggplot(plot_data, ggplot2::aes(x = year)) +
+  ggplot2::geom_line(ggplot2::aes(y = impact_cohort_strat)) +
+  ggplot2::geom_line(ggplot2::aes(y = impact_activity_strat))
+```
+
+## Glossary
+
+All definitions and terminology can be found in the associated manuscript available at: https://www.medrxiv.org/content/10.1101/2021.01.08.21249378v1.full-text ; we include a summary below.
+
+FVP - Fully vaccinated person
+
+Focal scenario - The vaccination scenario to be assessed in comparison to a baseline scenario
+
+Baseline scenario - The vaccination scenario to be compared against, often the situation without any vaccination (no-vac)
+
+Impact- The effect of vaccination often measure in deaths or cases averted and calculated as the difference in burden between a focal scenario and a baseline scenario
+
+Impact ratios - The impact per fully vaccinated person
