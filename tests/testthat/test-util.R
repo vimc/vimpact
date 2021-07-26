@@ -41,11 +41,6 @@ test_that("grepv works", {
   expect_true(all(grepv(c("a", "b", "c"), tmp)))
 })
 
-test_that("assert_has_columns works", {
-  a <- data_frame(x = NA, y = NA, z = NA)
-  expect_error(assert_has_columns(a, c("f")))
-})
-
 test_that("squote works", {
   a <- 1
   expect_true(squote(a) == "'1'")
@@ -61,8 +56,8 @@ test_that("sql_in works", {
 test_that("assert_col_names checks required columns are present", {
   data <- data_frame(one = c("1", "2", "3"),
                      this = c(1, 2, 3))
-  expect_true(assert_col_names(data, "one"))
-  expect_true(assert_col_names(data, c("one", "this")))
-  expect_error(assert_col_names(data, c("one", "two", "three")),
+  expect_true(assert_has_columns(data, "one"))
+  expect_true(assert_has_columns(data, c("one", "this")))
+  expect_error(assert_has_columns(data, c("one", "two", "three")),
                "Required column names two, three are missing from data")
 })
