@@ -57,7 +57,7 @@ jobs:
         run: ./scripts/test_db_start.sh
 
       - name: Test coverage
-        run: covr::codecov()
+        run: covr::codecov(quiet = FALSE, clean = FALSE)
         shell: Rscript {0}
 
       - name: Setup tmate session
