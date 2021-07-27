@@ -50,6 +50,7 @@ jobs:
           install.packages(c("remotes"))
           remotes::install_deps(dependencies = TRUE)
           remotes::install_cran("covr")
+          install.packages('unixtools', repos = 'http://www.rforge.net/')
         shell: Rscript {0}
 
       - name: Start test DB
@@ -57,7 +58,9 @@ jobs:
         run: ./scripts/test_db_start.sh
 
       - name: Test coverage
-        run: covr::codecov(quiet = FALSE, clean = FALSE)
+        run: |
+          unixtools::set.tempdir(".")
+          covr::codecov(quiet = FALSE, clean = FALSE)
         shell: Rscript {0}
 
       - name: Setup tmate session
