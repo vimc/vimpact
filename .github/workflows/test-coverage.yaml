@@ -50,7 +50,6 @@ jobs:
           install.packages(c("remotes"))
           remotes::install_deps(dependencies = TRUE)
           remotes::install_cran("covr")
-          install.packages('unixtools', repos = 'http://www.rforge.net/')
         shell: Rscript {0}
 
       - name: Start test DB
@@ -59,11 +58,6 @@ jobs:
 
       - name: Test coverage
         run: |
-          unixtools::set.tempdir(".")
-          Sys.sleep(10)
-          covr::codecov(quiet = FALSE, clean = FALSE)
+          Sys.sleep(5)
+          covr::codecov()
         shell: Rscript {0}
-
-      - name: Setup tmate session
-        if: ${{ failure() }}
-        uses: mxschmitt/action-tmate@v3
