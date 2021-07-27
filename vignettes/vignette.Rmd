@@ -111,7 +111,7 @@ dat <- do.call(rbind, dat)
 ```
 
 
-**impact by year of vaccination (2a)**
+**impact by year of vaccination: impact ratio stratified by activity type (method 2a)**
 
 ```
 vaccination_years <- 2000:2018
@@ -136,7 +136,7 @@ dat2 <- do.call(rbind, dat2)
 
 ```
 
-**impact by year of vaccination (2b)**
+**impact by year of vaccination: impact ratio stratified by birth cohort (method 2b)**
 ```
 meta <- get_meta_from_recipe(default_recipe = TRUE, method = "method2b", recipe_version = "201710", recipe = NULL, con, disease = "Hib")
 
