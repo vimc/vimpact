@@ -58,6 +58,7 @@ jobs:
 
       - name: Test coverage
         run: |
+          # Wait for postgres db to accept connections
           Sys.sleep(5)
           covr::codecov()
         shell: Rscript {0}
