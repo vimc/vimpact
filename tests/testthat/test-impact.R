@@ -361,6 +361,53 @@ test_that("impact by year of vaccination activity type", {
     c("country", "activity_type", "year", "burden_outcome", "impact"))
 })
 
+test_that("impact by year of vaccination activity type: only campaign", {
+  baseline <- impact_test_data_baseline[
+    impact_test_data_baseline$activity_type == "campaign", ]
+  focal <- impact_test_data_focal[
+    impact_test_data_focal$activity_type == "campaign", ]
+  fvps <- fvp_test_data_15[fvp_test_data_15$activity_type == "campaign", ]
+  impact <- impact_by_year_of_vaccination_activity_type(baseline, focal,
+                                                        fvps, 2000:2030)
+  expect_equal(nrow(impact), nrow(fvps))
+  expect_equal(
+    colnames(impact),
+    c("country", "activity_type", "year", "burden_outcome", "impact"))
+})
+
+test_that("impact by year of vaccination activity type: only routine", {
+  baseline <- impact_test_data_baseline[
+    impact_test_data_baseline$activity_type == "routine", ]
+  focal <- impact_test_data_focal[
+    impact_test_data_focal$activity_type == "routine", ]
+  fvps <- fvp_test_data_15[fvp_test_data_15$activity_type == "routine", ]
+  impact <- impact_by_year_of_vaccination_activity_type(baseline, focal,
+                                                        fvps, 2000:2030)
+  expect_equal(nrow(impact), nrow(fvps))
+  expect_equal(
+    colnames(impact),
+    c("country", "activity_type", "year", "burden_outcome", "impact"))
+})
+
+test_that("impact by YOV activity type: different impact & fvp", {
+  baseline <- impact_test_data_baseline[
+    impact_test_data_baseline$activity_type == "routine", ]
+  focal <- impact_test_data_focal[
+    impact_test_data_focal$activity_type == "routine", ]
+  fvps <- fvp_test_data_15[fvp_test_data_15$activity_type == "campaign", ]
+  impact <- impact_by_year_of_vaccination_activity_type(baseline, focal,
+                                                        fvps, 2000:2030)
+  ## No common entries for impact and fvps so return empty
+  expect_equal(nrow(impact), 0)
+})
+
+test_that("impact by YOV activity type: no fvps in vaccination years", {
+  expect_error(impact_by_year_of_vaccination_activity_type(
+    impact_test_data_baseline, impact_test_data_focal, fvp_test_data_15,
+    2050:2060),
+    "No FVP data for this range of vaccination years")
+})
+
 test_that("impact activity type: internal and external functions agree", {
   skip_if_not_installed("RSQLite")
   con <- DBI::dbConnect(RSQLite::SQLite(), dbname = ":memory:")
@@ -450,6 +497,13 @@ test_that("impact by year of vaccination birth cohort", {
   expect_equal(
     colnames(impact),
     c("country", "year", "burden_outcome", "impact"))
+})
+
+test_that("impact by YOV birth cohort: no fvps in vaccination years", {
+  expect_error(impact_by_year_of_vaccination_birth_cohort(
+    impact_test_data_baseline, impact_test_data_focal, fvp_test_data_15,
+    2050:2060),
+    "No FVP data for this range of vaccination years")
 })
 
 test_that("impact birth cohort: internal and external functions agree", {

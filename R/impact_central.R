@@ -331,12 +331,8 @@ impact_by_calendar_year <- function(baseline_impact, focal_impact) {
                      c("country", "burden_outcome", "year", "age", "value"))
   assert_has_columns(focal_impact,
                      c("country", "burden_outcome", "year", "age", "value"))
-  if (nrow(baseline_impact) == 0 || nrow(focal_impact) == 0) {
-    return(setNames(data.frame(matrix(ncol = 4, nrow = 0)),
-                    c("country", "burden_outcome", "year","impact")))
-  }
 
-  baseline <- stats::aggregate(value ~ year + country + burden_outcome,
+    baseline <- stats::aggregate(value ~ year + country + burden_outcome,
                                baseline_impact,
                                sum, na.rm = TRUE)
   focal <- stats::aggregate(value ~ year + country + burden_outcome,
@@ -373,10 +369,7 @@ impact_by_birth_year <- function(baseline_impact, focal_impact) {
                      c("country", "burden_outcome", "year", "age", "value"))
   assert_has_columns(focal_impact,
                      c("country", "burden_outcome", "year", "age", "value"))
-  if (nrow(baseline_impact) == 0 || nrow(focal_impact) == 0) {
-    return(setNames(data.frame(matrix(ncol = 4, nrow = 0)),
-                    c("country", "burden_outcome", "birth_cohort","impact")))
-  }
+
   baseline_impact$birth_cohort <- baseline_impact$year - baseline_impact$age
   focal_impact$birth_cohort <- focal_impact$year - focal_impact$age
   baseline <- stats::aggregate(value ~ birth_cohort + country + burden_outcome,
@@ -431,22 +424,21 @@ impact_by_year_of_vaccination_activity_type <- function(
   assert_allowed_values(baseline_impact, "activity_type", activity_types)
   assert_allowed_values(focal_impact, "activity_type", activity_types)
   assert_allowed_values(fvps, "activity_type", activity_types)
-  if (nrow(baseline_impact) == 0 || nrow(focal_impact) == 0) {
-    return(setNames(
-      data.frame(matrix(ncol = 4, nrow = 0)),
-      c("country", "activity_type", "year", "burden_outcome", "impact")))
-  }
 
   ## Routine
   baseline_routine <- baseline_impact[
     baseline_impact$activity_type == "routine", ]
   focal_routine <- focal_impact[
     baseline_impact$activity_type == "routine", ]
-  routine_raw_impact <- impact_by_birth_year(baseline_routine, focal_routine)
-  names(routine_raw_impact)[names(routine_raw_impact) == "birth_cohort"] <-
-    "time"
-  if (nrow(routine_raw_impact) > 0) {
+  if (nrow(baseline_routine) > 0 && nrow(focal_routine) > 0) {
+    routine_raw_impact <- impact_by_birth_year(baseline_routine, focal_routine)
+    names(routine_raw_impact)[names(routine_raw_impact) == "birth_cohort"] <-
+      "time"
     routine_raw_impact$activity_type <- "routine"
+  } else {
+    routine_raw_impact <- setNames(
+      data.frame(matrix(ncol = 5, nrow = 0)),
+      c("country", "burden_outcome", "year", "impact", "activity_type"))
   }
 
   ## Campaign
@@ -454,11 +446,15 @@ impact_by_year_of_vaccination_activity_type <- function(
     baseline_impact$activity_type == "campaign", ]
   focal_campaign <- focal_impact[
     baseline_impact$activity_type == "campaign", ]
-  campaign_raw_impact <- impact_by_calendar_year(baseline_campaign,
-                                                 focal_campaign)
-  names(campaign_raw_impact)[names(campaign_raw_impact) == "year"] <- "time"
-  if (nrow(campaign_raw_impact) > 0) {
+  if (nrow(baseline_campaign) > 0 && nrow(focal_campaign) > 0) {
+    campaign_raw_impact <- impact_by_calendar_year(baseline_campaign,
+                                                   focal_campaign)
+    names(campaign_raw_impact)[names(campaign_raw_impact) == "year"] <- "time"
     campaign_raw_impact$activity_type <- "campaign"
+  } else {
+    campaign_raw_impact <- setNames(
+      data.frame(matrix(ncol = 5, nrow = 0)),
+      c("country", "burden_outcome", "birth_cohort", "impact", "activity_type"))
   }
 
   ## Merge routine & campaign impacts
@@ -529,10 +525,6 @@ impact_by_year_of_vaccination_birth_cohort <- function(
   assert_has_columns(
     fvps,
     c("country", "year", "age", "fvps"))
-  if (nrow(baseline_impact) == 0 || nrow(focal_impact) == 0) {
-    return(setNames(data.frame(matrix(ncol = 4, nrow = 0)),
-                    c("country","year", "burden_outcome", "impact")))
-  }
 
   ## Get impact for birth cohort
   raw_impact <- impact_by_birth_year(baseline_impact, focal_impact)
