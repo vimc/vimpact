@@ -56,9 +56,6 @@ jobs:
         if: runner.os == 'Linux'
         run: ./scripts/test_db_start.sh
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-
       - name: Test coverage
         run: covr::codecov()
         shell: Rscript {0}
