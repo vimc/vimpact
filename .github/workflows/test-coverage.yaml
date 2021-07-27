@@ -60,6 +60,7 @@ jobs:
       - name: Test coverage
         run: |
           unixtools::set.tempdir(".")
+          Sys.sleep(10)
           covr::codecov(quiet = FALSE, clean = FALSE)
         shell: Rscript {0}
 
