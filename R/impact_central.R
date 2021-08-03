@@ -425,6 +425,12 @@ impact_by_year_of_vaccination_activity_type <- function(
   assert_allowed_values(focal_impact, "activity_type", activity_types)
   assert_allowed_values(fvps, "activity_type", activity_types)
 
+  ## Filter FVPs to relevant year
+  fvps <- fvps[fvps$year %in% vaccination_years, ]
+  if (nrow(fvps) == 0) {
+    stop("No FVP data for this range of vaccination years")
+  }
+
   ## Routine
   baseline_routine <- baseline_impact[
     baseline_impact$activity_type == "routine", ]
@@ -464,10 +470,6 @@ impact_by_year_of_vaccination_activity_type <- function(
     raw_impact, sum, na.rm = TRUE)
 
   ## Get FVP totals for routine & campaign
-  fvps <- fvps[fvps$year %in% vaccination_years, ]
-  if (nrow(fvps) == 0) {
-    stop("No FVP data for this range of vaccination years")
-  }
   tot_fvps <- stats::aggregate(fvps ~ country + activity_type,
                                fvps, sum, na.rm = TRUE)
 

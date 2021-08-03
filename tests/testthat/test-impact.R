@@ -416,27 +416,13 @@ test_that("impact activity type: internal and external functions agree", {
   })
   ## Add test data to db we need to add some columns for this to work
   baseline <- impact_test_data_baseline
-  baseline_burden_estimate_set <- vapply(baseline$activity_type,
-                                         function(type) {
-                                           if (type == "routine") {
-                                             1L
-                                           } else {
-                                             2L
-                                           }
-                                         }, integer(1))
-  baseline$burden_estimate_set <- baseline_burden_estimate_set
+  baseline$burden_estimate_set <-
+    as.integer(baseline$activity_type != "routine") + 1
   baseline$burden_outcome <- 1
 
   focal <- impact_test_data_focal
-  focal_burden_estimate_set <- vapply(baseline$activity_type,
-                                      function(type) {
-                                        if (type == "routine") {
-                                          3L
-                                        } else {
-                                          4L
-                                        }
-                                      }, integer(1))
-  focal$burden_estimate_set <- focal_burden_estimate_set
+  focal$burden_estimate_set <-
+    as.integer(baseline$activity_type != "routine") + 3
   focal$burden_outcome <- 1
   burden_estimate <- rbind(baseline, focal)
   DBI::dbWriteTable(con, "burden_estimate", burden_estimate)
