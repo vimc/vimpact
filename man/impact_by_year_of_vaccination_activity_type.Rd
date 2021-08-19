@@ -5,17 +5,17 @@
 \title{Calculate impact by year of vaccination: activity type}
 \usage{
 impact_by_year_of_vaccination_activity_type(
-  baseline_impact,
-  focal_impact,
+  baseline_burden,
+  focal_burden,
   fvps,
   vaccination_years
 )
 }
 \arguments{
-\item{baseline_impact}{Data frame of baseline impact data this needs to have
+\item{baseline_burden}{Data frame of baseline impact data this needs to have
 columns country, burden_outcome, vaccine_delivery, year, age, value}
 
-\item{focal_impact}{Data frame of focal impact data this needs to have
+\item{focal_burden}{Data frame of focal impact data this needs to have
 columns country, burden_outcome, vaccine_delivery, year, age, value}
 
 \item{fvps}{Data frame of FVPs (fully vaccinated persons) needs to have
