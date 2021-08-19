@@ -20,13 +20,17 @@ This vignette describes how to use impact calculation methods used in VIMC as an
 
 ## Data
 
-The simplest possible example is a static model with constant routine immunisation and a one-off campaign. Burden estimates from a theoretical country are found in 2 csv titled `example_baseline_burden.csv` and `example_focal_burden.csv`. These include estimates of burden in years 1900 - 2100 and display the format used by the functions.
+The simplest possible example is a static model with constant routine immunisation and a one-off campaign. Burden estimates from a theoretical country are found in 3 csv titled `example_novax_burden.csv`, `example_routine_burden.csv` and `example_routine_campaign_burden.csv`. These include estimates of burden in years 1900 - 2100 and display the format used by the functions.
 
 ```{r}
-example_baseline <- read.csv(system.file("extdata/example_baseline_burden.csv", package = "vimpact"))
-example_focal <- read.csv(system.file("extdata/example_focal_burden.csv", package = "vimpact"))
-str(example_baseline)
-str(example_focal)
+example_novax <- read.csv(system.file("extdata/example_novax_burden.csv", package = "vimpact"))
+example_routine <- read.csv(system.file("extdata/example_routine_burden.csv", package = "vimpact"))
+example_routine_campaign <- read.csv(system.file("extdata/example_routine_campaign_burden.csv", package = "vimpact"))
+
+str(example_novax)
+str(example_routine)
+str(example_routine_campaign)
+
 ```
 
 
@@ -41,7 +45,7 @@ These data frames must contain columns for country, burden_outcome (e.g. cases, 
 If the baseline and focal impact data contains groups which do not overlap then this will return impact only for groups contained in both datasets.
 
 ```{r}
-calendar_year <- vimpact::impact_by_calendar_year(example_baseline, example_focal)
+calendar_year <- vimpact::impact_by_calendar_year(baseline_burden = example_novax, focal_burden = example_routine_campaign)
 str(calendar_year)
 ```
 
@@ -54,7 +58,7 @@ These data frames must contain columns for country, burden_outcome (e.g. cases, 
 If the baseline and focal impact data contains groups which do not overlap then this will return impact only for groups contained in both datasets.
 
 ```{r}
-birth_year <- vimpact::impact_by_birth_year(example_baseline, example_focal)
+birth_year <- vimpact::impact_by_birth_year(baseline_burden = example_novax, focal_burden = example_routine_campaign)
 str(birth_year)
 ```
 
@@ -86,8 +90,12 @@ This method produces impact values for a particular disease stratified by countr
 
 ```{r}
 example_fvps <- read.csv(system.file("extdata/example_fvps.csv", package = "vimpact"))
-  
-activity_type <- vimpact::impact_by_year_of_vaccination_activity_type(example_baseline, example_focal, example_fvps, 2000:2030)
+
+routine <- vimpact::impact_by_year_of_vaccination_activity_type(baseline_burden = example_novax, focal_burden = example_routine, fvps = example_fvps[example_fvps$activity_type == "routine",], 2000:2030)
+
+campaign <- vimpact::impact_by_year_of_vaccination_activity_type(baseline_burden = example_routine, focal_burden = example_routine_campaign, fvps = example_fvps[example_fvps$activity_type == "campaign",], 2000:2030)
+
+activity_type <- rbind(routine, campaign)
 str(activity_type)
 ```
 
@@ -98,16 +106,18 @@ Impact by year of vaccination can be stratified by birth cohort to catch tempora
 This method requires basline impact, focal impact and FVPs disaggregated by country, burden outcome, year and age. The data doesn't have to be disaggregated by `activity_type`. This returns impact for a particular vaccine by country, year and burden outcome.
 
 ```{r}
-cohort_type <- vimpact::impact_by_year_of_vaccination_birth_cohort(example_baseline, example_focal, example_fvps, 2000:2030)
+cohort_type <- vimpact::impact_by_year_of_vaccination_birth_cohort(baseline_burden = example_novax, focal_burden = example_routine_campaign, fvps = example_fvps, 2000:2030)
 str(cohort_type)
 ```
 
 ```{r}
 activity_sum <- stats::aggregate(impact ~ country + year + burden_outcome,
                                  activity_type, sum)
+cohort_sum <- stats::aggregate(impact ~ country + year + burden_outcome,
+                                 cohort_type, sum)
 activity_sum$impact_activity_strat <- activity_sum$impact
-cohort_type$impact_cohort_strat <- cohort_type$impact
-plot_data <- merge(activity_sum, cohort_type, by = c("country", "burden_outcome", "year"))
+cohort_sum$impact_cohort_strat <- cohort_sum$impact
+plot_data <- merge(activity_sum, cohort_sum, by = c("country", "burden_outcome", "year"))
 plot_data$year <- as.Date(paste(plot_data$year, "01", "01", sep = "-"))
 ggplot2::ggplot(plot_data, ggplot2::aes(x = year)) +
   ggplot2::geom_line(ggplot2::aes(y = impact_cohort_strat, colour = "cohort")) +
