@@ -468,13 +468,13 @@ impact_by_year_of_vaccination_activity_type <- function(
                                           c("fvps", "impact"))]
 
   ## Calculate impact
-  fvps_country <- stats::aggregate(fvps ~ country + activity_type + year,
+  fvps_country <- stats::aggregate(fvps ~ country + vaccine + activity_type + year,
                                    fvps, sum, na.rm = TRUE)
   impact <- merge(fvps_country, impact_ratio, c("country", "activity_type"))
   impact$impact <- impact$impact_ratio * impact$fvps
   impact <- impact[,
-    c("country", "activity_type", "year", "burden_outcome", "impact")]
-  impact[order(impact$country, impact$activity_type, impact$burden_outcome,
+    c("country", "vaccine", "activity_type", "year", "burden_outcome", "impact")]
+  impact[order(impact$country, impact$vaccine, impact$activity_type, impact$burden_outcome,
                impact$year), ]
 }
 
@@ -538,13 +538,13 @@ impact_by_year_of_vaccination_birth_cohort <- function(
                                           c("fvps", "impact"))]
 
   ## Calculate impact
-  fvps_country <- stats::aggregate(fvps ~ country + birth_cohort + year + activity_type,
+  fvps_country <- stats::aggregate(fvps ~ country + birth_cohort + year + vaccine + activity_type,
                                    fvps, sum, na.rm = TRUE)
   impact_birth_cohort <- merge(fvps_country, impact_ratio,
                                c("country", "birth_cohort"))
   impact_birth_cohort$impact <- impact_birth_cohort$impact_ratio *
     impact_birth_cohort$fvps
-  impact <- stats::aggregate(impact ~ country + year + burden_outcome + activity_type,
+  impact <- stats::aggregate(impact ~ country + year + burden_outcome + vaccine + activity_type,
                              impact_birth_cohort, sum, na.rm = TRUE)
-  impact[order(impact$country, impact$burden_outcome, impact$year), ]
+  impact[order(impact$country, impact$burden_outcome, impact$vaccine, impact$activity_type, impact$year), ]
 }
