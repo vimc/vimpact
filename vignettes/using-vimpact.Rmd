@@ -113,6 +113,8 @@ str(cohort_type)
 ```{r}
 activity_sum <- stats::aggregate(impact ~ country + year + burden_outcome,
                                  activity_type, sum)
+cohort_type <- stats::aggregate(impact ~ country + year + burden_outcome,
+                                 cohort_type, sum)
 activity_sum$impact_activity_strat <- activity_sum$impact
 cohort_type$impact_cohort_strat <- cohort_type$impact
 plot_data <- merge(activity_sum, cohort_type, by = c("country", "burden_outcome", "year"))
