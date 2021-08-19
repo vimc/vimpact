@@ -113,11 +113,11 @@ str(cohort_type)
 ```{r}
 activity_sum <- stats::aggregate(impact ~ country + year + burden_outcome,
                                  activity_type, sum)
-cohort_type <- stats::aggregate(impact ~ country + year + burden_outcome,
+cohort_sum <- stats::aggregate(impact ~ country + year + burden_outcome,
                                  cohort_type, sum)
 activity_sum$impact_activity_strat <- activity_sum$impact
-cohort_type$impact_cohort_strat <- cohort_type$impact
-plot_data <- merge(activity_sum, cohort_type, by = c("country", "burden_outcome", "year"))
+cohort_sum$impact_cohort_strat <- cohort_sum$impact
+plot_data <- merge(activity_sum, cohort_sum, by = c("country", "burden_outcome", "year"))
 plot_data$year <- as.Date(paste(plot_data$year, "01", "01", sep = "-"))
 ggplot2::ggplot(plot_data, ggplot2::aes(x = year)) +
   ggplot2::geom_line(ggplot2::aes(y = impact_cohort_strat, colour = "cohort")) +
