@@ -318,9 +318,9 @@ get_birth_cohort <- function(data) {
 #' modelled. This does not account for the future disease burden averted through
 #' current vaccine activities.
 #'
-#' @param baseline_burden Data frame of baseline impact data this needs to have
+#' @param baseline_burden Data frame of baseline burden data this needs to have
 #' columns country, burden_outcome, year, age, value
-#' @param focal_burden Data frame of focal impact data this needs to have
+#' @param focal_burden Data frame of focal burden data this needs to have
 #' columns country, burden_outcome, year, age, value
 #'
 #' @return Vaccine impact by country and year for burden outcomes as a data
@@ -356,9 +356,9 @@ impact_by_calendar_year <- function(baseline_burden, focal_burden) {
 #' impact of vaccinating a cohort outside the cohort vaccinated (e.g.
 #' because of herd protection).
 #'
-#' @param baseline_burden Data frame of baseline impact data this needs to have
+#' @param baseline_burden Data frame of baseline burden data this needs to have
 #' columns country, burden_outcome, year, age, value
-#' @param focal_burden Data frame of focal impact data this needs to have
+#' @param focal_burden Data frame of focal burden data this needs to have
 #' columns country, burden_outcome, year, age, value
 #'
 #' @return Vaccine impact by country and birth year for burden outcomes as a
@@ -397,9 +397,9 @@ impact_by_birth_year <- function(baseline_burden, focal_burden) {
 #' activity-specific impact ratios which we then multiply by the number of
 #' FVPs (fully vaccinated persons) to calculate impact.
 #'
-#' @param baseline_burden Data frame of baseline impact data this needs to have
+#' @param baseline_burden Data frame of baseline burden data this needs to have
 #' columns country, burden_outcome, vaccine_delivery, year, age, value
-#' @param focal_burden Data frame of focal impact data this needs to have
+#' @param focal_burden Data frame of focal burden data this needs to have
 #' columns country, burden_outcome, vaccine_delivery, year, age, value
 #' @param fvps Data frame of FVPs (fully vaccinated persons) needs to have
 #' columns country, year, activity_type, fvps other columns can be included
@@ -419,7 +419,7 @@ impact_by_year_of_vaccination_activity_type <- function(
     c("country", "burden_outcome", "activity_type", "year", "age", "value"))
   assert_has_columns(
     fvps,
-    c("country", "year", "activity_type", "age", "fvps"))
+    c("country", "year", "vaccine", "activity_type", "age", "fvps"))
   activity_types <- c("novax", "routine", "campaign")
   assert_allowed_values(baseline_burden, "activity_type", activity_types)
   assert_allowed_values(focal_burden, "activity_type", activity_types)
@@ -452,7 +452,6 @@ impact_by_year_of_vaccination_activity_type <- function(
     raw_impact$activity_type <- "campaign"
   }
 
-  ## Merge routine & campaign impacts
   tot_impact <- stats::aggregate(
     impact ~ country + burden_outcome + activity_type,
     raw_impact, sum, na.rm = TRUE)
@@ -492,9 +491,9 @@ impact_by_year_of_vaccination_activity_type <- function(
 #' disease improve over time, we may expect the impact of vaccination in 2050
 #' to be less than that now as the population is generally healthier.
 #'
-#' @param baseline_burden Data frame of baseline impact data this needs to have
+#' @param baseline_burden Data frame of baseline burden data this needs to have
 #' columns country, burden_outcome, vaccine_delivery, year, age, value
-#' @param focal_burden Data frame of focal impact data this needs to have
+#' @param focal_burden Data frame of focal burden data this needs to have
 #' columns country, burden_outcome, vaccine_delivery, year, age, value
 #' @param fvps Data frame of FVPs (fully vaccinated persons) needs to have
 #' columns country, year, activity_type, fvps other columns can be included
@@ -514,7 +513,7 @@ impact_by_year_of_vaccination_birth_cohort <- function(
     c("country", "burden_outcome", "year", "age", "value"))
   assert_has_columns(
     fvps,
-    c("country", "year", "age", "fvps"))
+    c("country", "year", "vaccine", "activity_type", "age", "fvps"))
 
   ## Get impact for birth cohort
   raw_impact <- impact_by_birth_year(baseline_burden, focal_burden)
