@@ -21,6 +21,7 @@ Suggests:
     ggplot2,
     knitr,
     testthat,
+    retry,
     rmarkdown,
     RSQLite,
     withr

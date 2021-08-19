@@ -9,7 +9,11 @@ get_db_info <- function() {
 prepare_example_postgres_db <- function() {
   info <- get_db_info()
   tryCatch({
-    con <- get_postgres_connection(info$dbname, info$user, info$host)
+    con <- retry::retry(
+      get_postgres_connection(info$dbname, info$user, info$host),
+      until = function(val, cnd) !is.null(val),
+      max_tries = 25,
+      interval = 0.2)
     add_dummy_data(con)
     DBI::dbDisconnect(con)
   }, error = function(e) {
