@@ -18,7 +18,12 @@ Imports:
     RPostgres,
     vaultr
 Suggests:
+    ggplot2,
+    knitr,
     testthat,
+    retry,
+    rmarkdown,
     RSQLite,
     withr
 RoxygenNote: 7.1.1
+VignetteBuilder: knitr

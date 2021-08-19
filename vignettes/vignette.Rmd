@@ -1,0 +1,157 @@
+---
+title: "Using vimpact for estimating vaccine impact - VIMC members"
+author: "Xiang Li"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+library(vimpact)
+```
+
+This vignette describes how to use vimpact to estiamte vaccine impact for members of the VIMC team. It describes how to use methods which require access to the montagu database and so cannot be used by external users.
+
+Vimpact provides a set of methodologies developed by VIMC Science Team for quantifying vaccination impact in terms of cases averted, deaths averted and DALYs (disability-adjusted life years) averted. It also stores functions that extract frequently used data sets from Montagu and Annex database. 
+
+**[todo]**
+Add a link to our impact calculation methods
+
+Vimpact is primarily developed for VIMC internal users. It contains various functions for reporting and analytic purposes. 
+
+### Frequently used functions communicating with Montagu database
+There are a set of frequently used functions that extracts data from VIMC databases. 
+
+**Determine latest touchstone version**
+
+Montagu data is touchstone based. Each touchstone may contain multiple versions as it is developed. The most recent version of touchstone can be determined by `get_touchstone` where `con` specifies the database machine, and `touchstone_name` indicates the touchstone of interest.
+
+```
+get_touchstone(con, touchstone_name = "201710gavi")
+```
+
+This will return `201710gavi-6`. `201710gavi` touchstone has 6 versions. And Version 6 has the most recent coverage scenarios.
+
+**Extract demographic data**
+Demographic data is frequently used for analysis. It is therefore useful to have a standardized function extracting demographic data from Montagu. 
+
+```
+get_population(con, touchstone_pop = "201710gavi-5", demographic_statistic = "int_pop", gender = "Both",
+               country_ = NULL, year_ = NULL, age_ = NULL)
+```
+
+`demographic_statistic` is demographic_statistic_type code; `gender` can be `Female, Male or Both` if specified or all three selections if NULL; `country_` is all VIMC countries if NULL or an array of selected countries; similar for `year_` and `age_`. 
+
+
+**Extract vaccination coverage data**
+```
+extract_vaccination_history(con, touchstone_cov = "201710gavi", touchstone_pop = NULL,
+                            year_min = 2000, year_max = 2100,
+                            vaccine_to_ignore = c("DTP3", "HepB_BD_home", "none"),
+                            disease_to_extract = NULL,
+                            countries_to_extract = NULL,
+                            gavi_support_levels = c("with", "bestminus"),
+                            scenario_type = "default", external_population_estimates = NULL, full_description = TRUE)
+```
+
+
+### Annex views (Susy to add)
+
+
+### Vaccine impact calculations
+
+**prepare impact calculation recipe**
+Impact calculation differs according to vaccination scenarios under investigation. Vimpact compares two distinct scenarios, namely the baseline and the focal. Vaccination impact is evaluated as excessive disease burden of focal scenario compared to the baseline. A impact recipe contains meta information of the two scenarios for each particular disease, touchstone and modelling group.
+
+Firstly, `recipe_tempate` generates a sample impact recipe, from which users can develop their own recipes. Current vimpact allows four views of impact recipes (method0, method1, method2a and method2b) representing vaccine impact by calendar year, year of birth, year of vaccination (vaccination activity perspective) and year of vaccination (birth cohort perspective). The following row of code gives an example recipe of impact by year of birth.
+
+```
+recipe_template(template_version = "201710", method = "method1")
+```
+
+Once impact recipes are complete, vimpact prepares meta data needed for communicating with VIMC databases via `get_meta_from_recipe function`. Each pair of scenarios (focal and baseline) are indexed for further impact calculation.
+
+```
+get_meta_from_recipe(default_recipe = TRUE, method = "method1", recipe_version = "201710", recipe = NULL, con, disease = "Hib")
+```
+
+`default_recipe, method and recipe_version` combined determine default VIMC impact recipes commonly used for reporting. If user specified recipe is used (a recipe developed from recipe_template), the recipe csv file path should be specified as `recipe = <file_path>``. `disease` can help to allow focused evaluation of vaccine impact. If it is NULL, all diseases will be considered.
+
+
+**impact by calendar year**
+```
+meta <- get_meta_from_recipe(default_recipe = TRUE, method = "method0", recipe_version = "201710", recipe = NULL, con, disease = "Hib")
+
+meta_s <- split(meta, meta$index)
+
+dat <- lapply(meta_s, function(meta1) get_raw_impact_details(con = con_test, meta1, burden_outcome = "deaths"))
+
+dat <- do.call(rbind, dat)
+```
+
+**impact by year of birth**
+
+```
+meta <- get_meta_from_recipe(default_recipe = TRUE, method = "method1", recipe_version = "201710", recipe = NULL, con, disease = "Hib")
+
+meta_s <- split(meta, meta$index)
+
+dat <- lapply(meta_s, function(meta1) get_raw_impact_details(con = con_test, meta1, burden_outcome = "deaths"))
+
+dat <- do.call(rbind, dat)
+```
+
+
+**impact by year of vaccination: impact ratio stratified by activity type (method 2a)**
+
+```
+vaccination_years <- 2000:2018
+
+meta <- get_meta_from_recipe(default_recipe = TRUE, method = "method2a", recipe_version = "201710", recipe = NULL, con, disease = "Hib")
+
+meta_s <- split(meta, meta$index)
+
+dat <- lapply(metas, function(meta1) get_raw_impact_details(con = con_test, meta1, burden_outcome = "deaths"))
+
+dat <- do.call(rbind, dat)
+
+fvps <- extract_vaccination_history(con, touchstone_cov = "201710gavi", touchstone_pop = NULL,
+                                    year_min = min(vaccination_years), year_max = max(vaccination_years),
+                                    disease_to_extract = "Hib",
+                                    countries_to_extract = "AFG")
+
+dat2 <- lapply(metas, function(meta1) impact_by_year_of_vaccination(meta1, raw_impact = dat, fvps = fvps,
+                                                                    vaccination_years = vaccination_years))
+
+dat2 <- do.call(rbind, dat2)
+
+```
+
+**impact by year of vaccination: impact ratio stratified by birth cohort (method 2b)**
+```
+meta <- get_meta_from_recipe(default_recipe = TRUE, method = "method2b", recipe_version = "201710", recipe = NULL, con, disease = "Hib")
+
+meta_s <- split(meta, meta$index)
+
+dat <- lapply(metas, function(meta1) get_raw_impact_details(con = con_test, meta1, burden_outcome = "deaths"))
+
+dat <- do.call(rbind, dat)
+
+fvps <- extract_vaccination_history(con, touchstone_cov = "201710gavi", touchstone_pop = NULL,
+                                    year_min = min(vaccination_years), year_max = max(vaccination_years),
+                                    disease_to_extract = "Hib",
+                                    countries_to_extract = "AFG")
+
+dat2 <- lapply(metas, function(meta1) impact_by_year_of_vaccination(meta1, raw_impact = dat, fvps = fvps,
+                                                                    vaccination_years = vaccination_years))
+
+dat2 <- do.call(rbind, dat2)
+
+```

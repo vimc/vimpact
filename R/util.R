@@ -5,7 +5,7 @@
 data_frame <- function(...){
   data.frame(..., stringsAsFactors = FALSE)
 }
-  
+
 read_sql <- function(filename) {
   paste(readLines(filename), collapse = "\n")
 }
@@ -32,25 +32,21 @@ set_as_na <- function(x) {
 grepv <- function(patterns, value) {
   stopifnot(length(patterns) >= 1)
   j <- rep(0, length(value))
-  
+
   for(i in patterns) {
     j <- j + grepl(i, value)
   }
-  
+
   v <- j == length(patterns)
-  
+
   if(!all(v)) {
     stop("not all patterns exit in value.")
   }
   return(v)
 }
 
-assert_has_columns <- function(d, cols_must_have){
-  stopifnot(all(cols_must_have %in% names(d)))
-}
-
 squote <- function(x){
-sprintf("'%s'", x)  
+sprintf("'%s'", x)
 }
 
 sql_in <- function(items, text_item = TRUE) {
@@ -65,4 +61,27 @@ system_file <- function(...) {
 
 vcapply <- function(X, FUN, ...) {
   vapply(X, FUN, character(1), ...)
+}
+
+assert_has_columns <- function(data, col_names,
+                               name = deparse(substitute(data))) {
+  missing_names <- setdiff(col_names, colnames(data))
+  if (length(missing_names) > 0) {
+    stop(sprintf("Required column names %s are missing from %s",
+                 paste(missing_names, collapse = ", "),
+                 name))
+  }
+  invisible(TRUE)
+}
+
+assert_allowed_values <- function(data, column, values) {
+  present_values <- unique(data[[column]])
+  additional_values <- setdiff(present_values, values)
+  if (length(additional_values) > 0) {
+    stop(sprintf("Column '%s' contains values %s. Allowed values are %s.",
+                 column,
+                 paste(sprintf("'%s'", additional_values), collapse = ", "),
+                 paste(sprintf("'%s'", values), collapse = ", ")))
+  }
+  invisible(TRUE)
 }

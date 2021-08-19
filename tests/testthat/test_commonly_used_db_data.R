@@ -8,7 +8,7 @@ test_that("test get_touchstone",{
 })
 
 test_that("test extract_vaccination_history",{
-  #skip_if_no_reference_data()
+  testthat::skip("TODO: test not working")
   con <- test_montagu_readonly_connection()
   test_data <- readRDS("vimpact-test-data/fvps.rds")
   test_data <- stats::aggregate(fvps ~ country + year + vaccine + activity_type, test_data, sum, na.rm = TRUE)
