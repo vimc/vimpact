@@ -190,8 +190,8 @@ impact_by_year_of_vaccination <- function(meta1, raw_impact, fvps, fvps_updates 
 }
 
 determine_vaccine_delivery <- function(meta1){
-  setdiff(unlist(strsplit(as.character(meta1$vaccine_delivery[meta1$meta_type == "focal"]), ",")),
-          unlist(strsplit(as.character(meta1$vaccine_delivery[meta1$meta_type=="baseline"]), ",")))
+  setdiff(unlist(strsplit(meta1$vaccine_delivery[meta1$meta_type == "focal"], ",")),
+          unlist(strsplit(meta1$vaccine_delivery[meta1$meta_type=="baseline"], ",")))
 }
 
 ## todo: hepb xili method2 impact needs de-double-counting
