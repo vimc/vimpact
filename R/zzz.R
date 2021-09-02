@@ -1,3 +1,4 @@
-#' @importFrom magrittr %>%
-#' @export
+##' @importFrom magrittr %>%
+##' @importFrom rlang .data
+##' @export
 magrittr::`%>%`
