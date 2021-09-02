@@ -1,6 +1,6 @@
 Package: vimpact
 Title: Vaccine Impact Calculation
-Version: 0.0.4
+Version: 0.0.5
 Authors@R:
     c(person(given = "Rich",
              family = "FitzJohn",
@@ -14,7 +14,9 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 Imports:
     DBI,
+    dplyr,
     glue,
+    magrittr,
     RPostgres,
     vaultr
 Suggests:
