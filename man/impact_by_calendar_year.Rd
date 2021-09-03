@@ -7,10 +7,10 @@
 impact_by_calendar_year(baseline_burden, focal_burden)
 }
 \arguments{
-\item{baseline_burden}{Data frame of baseline impact data this needs to have
+\item{baseline_burden}{Data frame of baseline burden data this needs to have
 columns country, burden_outcome, year, age, value}
 
-\item{focal_burden}{Data frame of focal impact data this needs to have
+\item{focal_burden}{Data frame of focal burden data this needs to have
 columns country, burden_outcome, year, age, value}
 }
 \value{

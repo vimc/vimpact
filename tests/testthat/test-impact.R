@@ -234,7 +234,7 @@ test_that("impact calculation by year of vaccination cohort perspective", {
 test_that("impact by calendar year can be calculated", {
   impact <- impact_by_calendar_year(impact_test_data_baseline,
                                     impact_test_data_focal)
-  expected_data <- data_frame(
+  expected_data <- dplyr::tibble(
     country = c(rep("ETH", 3), rep("PAK", 3)),
     burden_outcome = rep("deaths", 6),
     year = rep(2001:2003, 2),
@@ -294,7 +294,7 @@ test_that("impact by calendar year: external and internal functions agree", {
 test_that("impact by birth year can be caluclated", {
   impact <- impact_by_birth_year(impact_test_data_baseline,
                                     impact_test_data_focal)
-  expected_data <- data_frame(
+  expected_data <- dplyr::tibble(
     country = c(rep("ETH", 3), rep("PAK", 3)),
     burden_outcome = rep("deaths", 6),
     birth_cohort = rep(2000:2002, 2),
@@ -308,7 +308,7 @@ test_that("impact by birth year only returns rows where birth year match", {
   focal_data$year <- rep(2002:2006, 2)
   impact <- impact_by_birth_year(impact_test_data_baseline, focal_data)
   expect_equal(nrow(impact), 2)
-  expect_equal(impact, data_frame(
+  expect_equal(impact, dplyr::tibble(
     country = c("ETH", "PAK"),
     burden_outcome = rep("deaths", 2),
     birth_cohort = rep(2002, 2),

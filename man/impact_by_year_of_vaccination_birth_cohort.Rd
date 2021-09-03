@@ -12,10 +12,10 @@ impact_by_year_of_vaccination_birth_cohort(
 )
 }
 \arguments{
-\item{baseline_burden}{Data frame of baseline impact data this needs to have
+\item{baseline_burden}{Data frame of baseline burden data this needs to have
 columns country, burden_outcome, vaccine_delivery, year, age, value}
 
-\item{focal_burden}{Data frame of focal impact data this needs to have
+\item{focal_burden}{Data frame of focal burden data this needs to have
 columns country, burden_outcome, vaccine_delivery, year, age, value}
 
 \item{fvps}{Data frame of FVPs (fully vaccinated persons) needs to have
