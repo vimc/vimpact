@@ -16,7 +16,7 @@ extract_vaccination_history(
   gavi_support_levels = c("with", "bestminus"),
   scenario_type = "default",
   external_population_estimates = NULL,
-  full_description = TRUE
+  full_description = FALSE
 )
 }
 \arguments{
@@ -43,7 +43,7 @@ extract_vaccination_history(
 \item{external_population_estimates}{The rationales are 1. we can use external population estimates if any and if necessary;
 2. demographic uncertainty not only affects models, but also FVPs. If we are to conduct sensitivity analysis on impact_by_year_of_vaccination, we need to vary population input for adjusting FVPs.}
 
-\item{full_description}{TRUE if including scenario_descriptions (coverage estiamtes will be duplicated for scenarios); and FALSE if only providing coverage estimates}
+\item{full_description}{TRUE if including scenario_descriptions (coverage estimates will be duplicated for scenarios); and FALSE if only providing coverage estimates}
 }
 \description{
 Replace jenner:::fix_covreage_fvps() function

@@ -8,13 +8,12 @@ test_that("test get_touchstone",{
 })
 
 test_that("test extract_vaccination_history",{
-  testthat::skip("TODO: test not working")
   con <- test_montagu_readonly_connection()
   test_data <- readRDS("vimpact-test-data/fvps.rds")
   test_data <- stats::aggregate(fvps ~ country + year + vaccine + activity_type, test_data, sum, na.rm = TRUE)
   dat <- extract_vaccination_history(con, touchstone_cov = "201710gavi", year_min = 2000, year_max = 2100,
                                      countries_to_extract = unique(test_data$country),
-                                     disease_to_extract = c("HepB", "Measles", "YF"))
+                                     disease_to_extract = c("HepB", "Measles", "YF"), full_description = FALSE)
   dat <- stats::aggregate(fvps_adjusted ~ country + year + vaccine + activity_type, dat, sum, na.rm = TRUE)
 
   d <- merge(dat, test_data, by = intersect(names(dat), names(test_data)), all = TRUE)
@@ -23,7 +22,9 @@ test_that("test extract_vaccination_history",{
   d$diff <- round(d$fvps_adjusted - d$fvps)
 
   expect_true(all(d$diff[d$activity_type == "routine"] == 0))
-  message("Only PAK 2015 Measles SIA has discrepancy. Please double check.")
+  message("Only PAK 2015 Measles SIA has discrepancy.
+          It is because previous and current approach cap campaign coverage at 100% differently.
+          Current approahc is more accurate.")
 
 })
 
