@@ -119,6 +119,7 @@ get_meta_from_recipe <- function(default_recipe = TRUE, method = "method0", reci
                    t$modelling_group,
                    t$disease)
 
+    browser()
     meta_all <- DBI::dbGetQuery(con, sql)
     ## remove yf reactive sias - otherwise cannot match with recipe
     j <- meta_all$vaccine == "YF" & meta_all$gavi_support_level == "none"
