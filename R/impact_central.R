@@ -339,14 +339,19 @@ impact_by_calendar_year <- function(baseline_burden, focal_burden) {
   focal <- focal_burden %>%
     dplyr::group_by(year, country, burden_outcome) %>%
     dplyr::summarise(focal_val = sum(value, na.rm = TRUE))
-  baseline %>%
+  out <- baseline %>%
     dplyr::inner_join(focal, by = c("country", "burden_outcome", "year")) %>%
-    dplyr::mutate(impact = baseline_val - focal_val) %>%
     dplyr::select(country, burden_outcome, year,
-                  impact) %>%
+                  baseline_val, focal_val) %>%
     dplyr::arrange(country, burden_outcome, year) %>%
     dplyr::ungroup() %>%
-    dplyr::as_tibble()
+    dplyr::collect()
+
+  ## Calculate impact outside of Postgres otherwise get weird
+  ## precision errors on 0 value entries
+  out %>%
+    dplyr::mutate(impact = baseline_val - focal_val) %>%
+    dplyr::select(-baseline_val, -focal_val)
 }
 
 #' Calculate impact by birth year (lifetime impact)

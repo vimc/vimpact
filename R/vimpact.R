@@ -41,8 +41,9 @@
 #' @return Impact for this set of parameters.
 #' @export
 calculate_impact <- function(con, method, touchstone, modelling_group, disease,
-                             focal_scenario_type, focal_vaccine_delivery,
-                             baseline_scenario_type, baseline_vaccine_delivery,
+                             focal_scenario_type, focal_vaccine_delivery = NULL,
+                             baseline_scenario_type,
+                             baseline_vaccine_delivery = NULL,
                              burden_outcomes = c("deaths", "cases", "dalys"),
                              countries = NULL, is_under5 = FALSE,
                              vaccination_years = 2000:2030) {
@@ -53,7 +54,8 @@ calculate_impact <- function(con, method, touchstone, modelling_group, disease,
   ## Check other inputs are valid?
 
   ## Map touchstone name to ID if touchstone name given
-  touchstones <- DBI::dbGetQuery(con, "SELECT id, name FROM touchstone")
+  touchstones <- DBI::dbGetQuery(con,
+                                 "SELECT id, touchstone_name FROM touchstone")
   if (!touchstone %in% touchstones[["id"]]) {
     touchstone <- get_touchstone(con, touchstone)
   }
@@ -64,8 +66,8 @@ calculate_impact <- function(con, method, touchstone, modelling_group, disease,
   }
   burden_outcome <- dplyr::tbl(con, "burden_outcome")
   outcomes <- burden_outcome %>%
-    dplyr::filter(name %in% burden_outcomes) %>%
-    dplyr::select(id, name)
+    dplyr::filter(code %in% burden_outcomes) %>%
+    dplyr::select(id, code)
 
   ## We need to locate unique ID for burden_estimate_set for
   ## this cominbation of touchstone, modelling_group, disease, vaccine, etc.
@@ -139,7 +141,11 @@ calculate_impact <- function(con, method, touchstone, modelling_group, disease,
         dplyr::select(burden_estimate_set, country = id, year, burden_outcome,
                       value, age, scenario)
     } else {
-      df
+      ## Map country to readable ID
+      df %>%
+        dplyr::left_join(country, by = c("country" = "nid")) %>%
+        dplyr::select(burden_estimate_set, country = id, year, burden_outcome,
+                      value, age, scenario)
     }
   }
 
@@ -158,23 +164,19 @@ calculate_impact <- function(con, method, touchstone, modelling_group, disease,
                       by = c("burden_estimate_set" = "burden_estimate_set")) %>%
     dplyr::inner_join(outcomes,
                       by = c("burden_outcome" = "id")) %>%
+    dplyr::select(-burden_outcome) %>%
+    dplyr::rename(burden_outcome = code) %>%
     filter_country %>%
     filter_age %>%
     dplyr::group_by(country, burden_outcome, year, age, scenario) %>%
     dplyr::summarise(value = sum(value, na.rm = TRUE), .groups = "keep") %>%
     dplyr::select(country, year, age, burden_outcome, scenario, value)
 
-  ## Is this necessary??
-  raw_impact <- raw_impact %>%
-    dplyr::mutate(activity_type = dplyr::case_when(activity_type == "none" ~ "routine",
-                                                   TRUE ~ activity_type))
-
   baseline <- raw_impact %>%
-    dplyr::filter(scenario = "baseline")
+    dplyr::filter(scenario == "baseline")
   focal <- raw_impact %>%
-    dplyr::filter(scenario = "focal")
+    dplyr::filter(scenario == "focal")
 
-  ## country, burden_outcome, year, age, value, activity_type
   if (method == "calendar_year") {
     impact_by_calendar_year(baseline, focal)
   } else if (method == "birth_year") {
