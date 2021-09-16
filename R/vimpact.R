@@ -130,34 +130,6 @@ calculate_impact <- function(con, method, touchstone, modelling_group, disease,
     dplyr::filter(!is.na(scenario)) %>%
     dplyr::select(scenario, burden_estimate_set = current_burden_estimate_set)
 
-  ## If yov also need to get fvps for
-  ## country, year, vaccine, activity_type, age, fvps
-  country <- dplyr::tbl(con, "country")
-  filter_country <- function(df) {
-    if (!is.null(countries)) {
-      df %>%
-        dplyr::left_join(country, by = c("country" = "nid")) %>%
-        dplyr::filter(id %in% countries) %>%
-        dplyr::select(burden_estimate_set, country = id, year, burden_outcome,
-                      value, age, scenario)
-    } else {
-      ## Map country to readable ID
-      df %>%
-        dplyr::left_join(country, by = c("country" = "nid")) %>%
-        dplyr::select(burden_estimate_set, country = id, year, burden_outcome,
-                      value, age, scenario)
-    }
-  }
-
-  filter_age <- function(df) {
-    if (is_under5) {
-      df %>%
-        dplyr::filter(age < 5)
-    } else {
-      df
-    }
-  }
-
   burden_estimate <- dplyr::tbl(con, "burden_estimate")
   raw_impact <- burden_estimate %>%
     dplyr::inner_join(burden_estimate_sets,
@@ -166,8 +138,8 @@ calculate_impact <- function(con, method, touchstone, modelling_group, disease,
                       by = c("burden_outcome" = "id")) %>%
     dplyr::select(-burden_outcome) %>%
     dplyr::rename(burden_outcome = code) %>%
-    filter_country %>%
-    filter_age %>%
+    filter_country(countries) %>%
+    filter_age(is_under5) %>%
     dplyr::group_by(country, burden_outcome, year, age, scenario) %>%
     dplyr::summarise(value = sum(value, na.rm = TRUE), .groups = "keep") %>%
     dplyr::select(country, year, age, burden_outcome, scenario, value)
@@ -198,7 +170,40 @@ calculate_impact <- function(con, method, touchstone, modelling_group, disease,
   }
 }
 
+filter_country <- function(df, countries) {
+  country <- dplyr::tbl(con, "country")
+  if (!is.null(countries)) {
+    df %>%
+      dplyr::left_join(country, by = c("country" = "nid")) %>%
+      dplyr::filter(id %in% countries) %>%
+      dplyr::select(burden_estimate_set, country = id, year, burden_outcome,
+                    value, age, scenario)
+  } else {
+    ## Map country to readable ID
+    df %>%
+      dplyr::left_join(country, by = c("country" = "nid")) %>%
+      dplyr::select(burden_estimate_set, country = id, year, burden_outcome,
+                    value, age, scenario)
+  }
+}
+
+filter_age <- function(df, is_under5) {
+  if (is_under5) {
+    df %>%
+      dplyr::filter(age < 5)
+  } else {
+    df
+  }
+}
+
 ## country, year, vaccine, activity_type, age, fvps
-get_fvps <- function(con, touchstone ) {
+get_fvps <- function(con, touchstone, countries, vaccination_years) {
+  ## 2 paths to getting relevant cov_set - where do we need 2 and why?
   ## Do some stuff to get FVP data
+  coverage <- dplyr::tbl(con, "coverage")
+  gender <- dplyr::tbl(con, "gender")
+  cov <- coverage %>%
+    dplyr::left_join(gender, by = c("gender" = "id")) %>%
+    dplyr::filter(year %in% vaccination_years) %>%
+    filter_country(countries)
 }
