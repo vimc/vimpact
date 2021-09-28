@@ -29,8 +29,7 @@
 #'   a list of lists, each element containing vaccination and activity type. If
 #'   `baseline_vaccine_delivery` is `novac` then this should be NULL.
 #' @param burden_outcomes List of burden outcomes, defaults to "deaths", "cases"
-#'   and "dalys". "dalys" are always included so this does not need to be
-#'   specified.
+#'   and "dalys".
 #' @param countries Vector of countries to get impact for. If NULL then impact
 #'   calculated for all countries.
 #' @param is_under5 If TRUE then only include data for age under 5, otherwise
@@ -60,10 +59,6 @@ calculate_impact <- function(con, method, touchstone, modelling_group, disease,
     touchstone <- get_touchstone(con, touchstone)
   }
 
-  ## Add dalys to burden_outcomes if not included already
-  if (!("dalys" %in% burden_outcomes)) {
-    burden_outcomes <- c(burden_outcomes, "dalys")
-  }
   burden_outcome <- dplyr::tbl(con, "burden_outcome")
   outcomes <- burden_outcome %>%
     dplyr::filter(code %in% burden_outcomes) %>%
