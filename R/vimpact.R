@@ -136,6 +136,16 @@ filter_country <- function(df, countries) {
   }
 }
 
+filter_population_country <- function(df, countries) {
+  country <- dplyr::tbl(con, "country")
+  if (!is.null(countries)) {
+    df %>%
+      dplyr::filter(country %in% countries)
+  } else {
+    df
+  }
+}
+
 filter_age <- function(df, is_under5) {
   if (is_under5) {
     df %>%
@@ -145,16 +155,53 @@ filter_age <- function(df, is_under5) {
   }
 }
 
+filter_year <- function(df, vaccination_years) {
+  if (!is.null(vaccination_years)) {
+    df %>%
+      dplyr::filter(year %in% vaccination_years)
+  } else {
+    df
+  }
+}
+
 ## country, year, vaccine, activity_type, age, fvps
 get_fvps <- function(con, touchstone, countries, vaccination_years) {
-  ## 2 paths to getting relevant cov_set - where do we need 2 and why?
-  ## Do some stuff to get FVP data
+  population <- get_population(con, touchstone, vaccination_years, countries)
+  coverage_set <- dplyr::tbl(con, "coverage_set")
   coverage <- dplyr::tbl(con, "coverage")
   gender <- dplyr::tbl(con, "gender")
-  cov <- coverage %>%
+  cov <- coverage_set %>%
+    dbplyr::filter(touchstone == !!touchstone & gavi_support_level != "none")
     dplyr::left_join(gender, by = c("gender" = "id")) %>%
     dplyr::filter(year %in% vaccination_years) %>%
     filter_country(countries)
+}
+
+get_population <- function(con, touchstone, vaccination_years = NULL,
+                           countries = NULL) {
+  demographic_statistic <- dplyr::tbl(con, "demographic_statistic")
+  touchstone_demographic_dataset <- dplyr::tbl(con,
+                                               "touchstone_demographic_dataset")
+  demographic_statistic_type <- dplyr::tbl(con, "demographic_statistic_type")
+  gender <- dplyr::tbl(con, "gender")
+
+  demographic_statistic %>%
+    dplyr::left_join(touchstone_demographic_dataset,
+                     by = c("demographic_dataset" = "demographic_dataset")) %>%
+    dplyr::left_join(demographic_statistic_type,
+                     by = c("demographic_statistic_type" = "id")) %>%
+    dplyr::select(country, year, gender, age = age_from,
+                  statistic_type = code, value) %>%
+    dplyr::left_join(gender,
+                     by = c("gender" = "id")) %>%
+    dplyr::select(-gender) %>%
+    dplyr::rename(gender = name) %>%
+    dplyr::filter(touchstone == !!touchstone &
+                    statistic_type == "int_pop" &
+                    gender %in% c("Male", "Female", "Both")) %>%
+    filter_population_country(countries) %>%
+    filter_year(vaccination_years) %>%
+    dplyr::select(country, year, age, gender, value)
 }
 
 get_burden_outcome_ids <- function(con, burden_outcomes) {
