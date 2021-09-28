@@ -9,8 +9,7 @@ test_that("can calculate impact by calendar year from db", {
     ),
     baseline_scenario_type = "novac",
     burden_outcomes = c("hepb_deaths_acute", "hepb_deaths_dec_cirrh",
-                        "hepb_deaths_hcc", "hepb_cases_acute_severe",
-                        "hepb_cases_dec_cirrh", "hepb_cases_hcc"))
+                        "hepb_deaths_hcc"))
 
   recipe <- data.frame(
     touchstone = "201710gavi-5",
@@ -22,9 +21,17 @@ test_that("can calculate impact by calendar year from db", {
   write.csv(recipe, t, row.names = FALSE)
   meta <- get_meta_from_recipe(default_recipe = FALSE, recipe = t, con = con)
   old_impact <- get_raw_impact_details(con, meta, "deaths")
+  country <- dplyr::tbl(con, "country")
+  old_impact <- old_impact %>%
+    dplyr::left_join(country, by = c("country" = "nid"), copy = TRUE) %>%
+    dplyr::select(-country, -name) %>%
+    dplyr::select(country = id, burden_outcome, year = time, impact = value) %>%
+    dplyr::arrange(country, year)
+
+  expect_equal(impact, old_impact, tolerance = 1e-5, ignore_attr = TRUE)
 })
 
-test_that("can calculate impact by calendar year from db", {
+test_that("can calculate impact by calendar year from db: dalys", {
   con <- test_montagu_readonly_connection()
   impact <- calculate_impact(
     con, "calendar_year", touchstone = "201710gavi-5",
@@ -44,7 +51,8 @@ test_that("can calculate impact by calendar year from db", {
     burden_outcome = "hepb_deaths_acute;hepb_cases_acute_severe")
   t <- tempfile(fileext = ".csv")
   write.csv(recipe, t, row.names = FALSE)
-  meta <- get_meta_from_recipe(default_recipe = FALSE, recipe = t, method = "method0", con = con)
+  meta <- get_meta_from_recipe(default_recipe = FALSE, recipe = t,
+                               method = "method0", con = con)
   old_impact <- get_raw_impact_details(con, meta, "dalys")
   country <- dplyr::tbl(con, "country")
   old_impact <- old_impact %>%
@@ -53,7 +61,7 @@ test_that("can calculate impact by calendar year from db", {
     dplyr::select(country = id, burden_outcome, year = time, impact = value) %>%
     dplyr::arrange(country, year)
 
-  expect_equal(impact, old_impact)
+  expect_equal(impact, old_impact, tolerance = 1e-5, ignore_attr = TRUE)
 })
 
 test_that("can calculate impact by birth year from db", {
@@ -76,7 +84,8 @@ test_that("can calculate impact by birth year from db", {
     burden_outcome = "hepb_deaths_acute;hepb_cases_acute_severe")
   t <- tempfile(fileext = ".csv")
   write.csv(recipe, t, row.names = FALSE)
-  meta <- get_meta_from_recipe(default_recipe = FALSE, recipe = t, method = "method1", con = con)
+  meta <- get_meta_from_recipe(default_recipe = FALSE, recipe = t,
+                               method = "method1", con = con)
   old_impact <- get_raw_impact_details(con, meta, "dalys")
   country <- dplyr::tbl(con, "country")
   old_impact <- old_impact %>%
@@ -85,5 +94,5 @@ test_that("can calculate impact by birth year from db", {
     dplyr::select(country = id, burden_outcome, year = time, impact = value) %>%
     dplyr::arrange(country, year)
 
-  expect_equal(impact, old_impact)
+  expect_equal(impact, old_impact, tolerance = 1e-5, ignore_attr = TRUE)
 })

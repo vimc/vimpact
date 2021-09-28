@@ -59,10 +59,7 @@ calculate_impact <- function(con, method, touchstone, modelling_group, disease,
     touchstone <- get_touchstone(con, touchstone)
   }
 
-  burden_outcome <- dplyr::tbl(con, "burden_outcome")
-  outcomes <- burden_outcome %>%
-    dplyr::filter(code %in% burden_outcomes) %>%
-    dplyr::select(id, code)
+  outcomes <- get_burden_outcome_ids(con, burden_outcomes)
 
   ## We need to locate unique ID for burden_estimate_set for
   ## this cominbation of touchstone, modelling_group, disease, vaccine, etc.
@@ -88,56 +85,13 @@ calculate_impact <- function(con, method, touchstone, modelling_group, disease,
   })
   baseline_scenario <- paste0(baseline_scenario, collapse = ";")
 
-  ## Get IDs for burden_estimate_set
-  scenario <- dplyr::tbl(con, "scenario")
-  scenario_description <- dplyr::tbl(con, "scenario_description")
-  responsibility <- dplyr::tbl(con, "responsibility")
-  responsibility_set <- dplyr::tbl(con, "responsibility_set")
-  scenario_coverage_set <- dplyr::tbl(con, "scenario_coverage_set")
-  coverage_set <- dplyr::tbl(con, "coverage_set")
+  burden_estimate_sets <- get_burden_estimate_set_ids(
+    con, baseline_scenario_type, baseline_scenario,
+    focal_scenario_type, focal_scenario,
+    touchstone, modelling_group, disease)
 
-  burden_estimate_sets <- scenario %>%
-    dplyr::left_join(scenario_description,
-                     by = c("scenario_description" = "id")) %>%
-    dplyr::filter(scenario_type %in%
-                    c(!!baseline_scenario_type, !!focal_scenario_type)) %>%
-    dplyr::select(scenario_id = id, scenario_type, disease) %>%
-    dplyr::inner_join(scenario_coverage_set,
-                      by = c("scenario_id" = "scenario")) %>%
-    dplyr::inner_join(coverage_set,
-                      by = c("coverage_set" = "id")) %>%
-    dplyr::select(scenario_id, scenario_type, disease, vaccine, activity_type) %>%
-    dplyr::inner_join(responsibility, by = c("scenario_id" = "scenario")) %>%
-    dplyr::inner_join(responsibility_set,
-                     by = c("responsibility_set" = "id")) %>%
-    dplyr::filter(touchstone == !!touchstone &
-                    modelling_group == !!modelling_group &
-                    disease == !!disease) %>%
-    dplyr::mutate("delivery" = CONCAT(scenario_type, "-",
-                                      vaccine, "-", activity_type)) %>%
-    dplyr::group_by(current_burden_estimate_set) %>%
-    dplyr::summarise(delivery = dplyr::str_flatten(delivery, collapse = ";"),
-                     .groups = "keep") %>%
-    dplyr::mutate(scenario = dplyr::case_when(
-      delivery == focal_scenario ~ "focal",
-      delivery == baseline_scenario ~ "baseline"
-    )) %>%
-    dplyr::filter(!is.na(scenario)) %>%
-    dplyr::select(scenario, burden_estimate_set = current_burden_estimate_set)
-
-  burden_estimate <- dplyr::tbl(con, "burden_estimate")
-  raw_impact <- burden_estimate %>%
-    dplyr::inner_join(burden_estimate_sets,
-                      by = c("burden_estimate_set" = "burden_estimate_set")) %>%
-    dplyr::inner_join(outcomes,
-                      by = c("burden_outcome" = "id")) %>%
-    dplyr::select(-burden_outcome) %>%
-    dplyr::rename(burden_outcome = code) %>%
-    filter_country(countries) %>%
-    filter_age(is_under5) %>%
-    dplyr::group_by(country, burden_outcome, year, age, scenario) %>%
-    dplyr::summarise(value = sum(value, na.rm = TRUE), .groups = "keep") %>%
-    dplyr::select(country, year, age, burden_outcome, scenario, value)
+  raw_impact <- get_impact_for_burden_estimate_set(
+    con, burden_estimate_sets, outcomes, countries, is_under5)
 
   baseline <- raw_impact %>%
     dplyr::filter(scenario == "baseline")
@@ -149,7 +103,7 @@ calculate_impact <- function(con, method, touchstone, modelling_group, disease,
   } else if (method == "birth_year") {
     impact_by_birth_year(baseline, focal)
   } else {
-    get_fvps(con)
+    fvps <- get_fvps(con)
     if (method == "yov_activity_type") {
       ## This won't work yet until we get activity_type out too
       ## but there is seemingly multiple activity types per scenario
@@ -201,4 +155,77 @@ get_fvps <- function(con, touchstone, countries, vaccination_years) {
     dplyr::left_join(gender, by = c("gender" = "id")) %>%
     dplyr::filter(year %in% vaccination_years) %>%
     filter_country(countries)
+}
+
+get_burden_outcome_ids <- function(con, burden_outcomes) {
+  burden_outcome <- dplyr::tbl(con, "burden_outcome")
+  burden_outcome %>%
+    dplyr::filter(code %in% burden_outcomes) %>%
+    dplyr::select(id, code)
+}
+
+get_burden_estimate_set_ids <- function(
+  con, baseline_scenario_type, baseline_scenario, focal_scenario_type,
+  focal_scenario, touchstone, modelling_group, disease) {
+
+  scenario <- dplyr::tbl(con, "scenario")
+  scenario_description <- dplyr::tbl(con, "scenario_description")
+  responsibility <- dplyr::tbl(con, "responsibility")
+  responsibility_set <- dplyr::tbl(con, "responsibility_set")
+  scenario_coverage_set <- dplyr::tbl(con, "scenario_coverage_set")
+  coverage_set <- dplyr::tbl(con, "coverage_set")
+
+  scenario %>%
+    dplyr::left_join(scenario_description,
+                     by = c("scenario_description" = "id")) %>%
+    dplyr::filter(scenario_type %in%
+                    c(!!baseline_scenario_type, !!focal_scenario_type)) %>%
+    dplyr::select(scenario_id = id, scenario_type, disease) %>%
+    dplyr::inner_join(scenario_coverage_set,
+                      by = c("scenario_id" = "scenario")) %>%
+    dplyr::inner_join(coverage_set,
+                      by = c("coverage_set" = "id")) %>%
+    dplyr::select(scenario_id, scenario_type, disease, vaccine, activity_type) %>%
+    dplyr::inner_join(responsibility, by = c("scenario_id" = "scenario")) %>%
+    dplyr::inner_join(responsibility_set,
+                      by = c("responsibility_set" = "id")) %>%
+    dplyr::filter(touchstone == !!touchstone &
+                    modelling_group == !!modelling_group &
+                    disease == !!disease) %>%
+    dplyr::mutate("delivery" = CONCAT(scenario_type, "-",
+                                      vaccine, "-", activity_type)) %>%
+    dplyr::group_by(current_burden_estimate_set) %>%
+    dplyr::summarise(delivery = dplyr::str_flatten(delivery, collapse = ";"),
+                     .groups = "keep") %>%
+    dplyr::mutate(scenario = dplyr::case_when(
+      delivery == focal_scenario ~ "focal",
+      delivery == baseline_scenario ~ "baseline"
+    )) %>%
+    dplyr::filter(!is.na(scenario)) %>%
+    dplyr::select(scenario, burden_estimate_set = current_burden_estimate_set)
+}
+
+get_impact_for_burden_estimate_set <- function(
+  con, burden_estimate_sets, outcomes, countries, is_under5) {
+
+  burden_estimate <- dplyr::tbl(con, "burden_estimate")
+  burden_estimate %>%
+    dplyr::inner_join(burden_estimate_sets,
+                      by = c("burden_estimate_set" = "burden_estimate_set")) %>%
+    dplyr::inner_join(outcomes,
+                      by = c("burden_outcome" = "id")) %>%
+    dplyr::select(-burden_outcome) %>%
+    dplyr::rename(burden_outcome = code) %>%
+    filter_country(countries) %>%
+    filter_age(is_under5) %>%
+    dplyr::mutate(
+      burden_outcome = dplyr::case_when(
+        grepl("deaths", burden_outcome) ~ "deaths",
+        grepl("cases", burden_outcome) ~ "cases",
+        grepl("dalys", burden_outcome) ~ "dalys"
+      )
+    ) %>%
+    dplyr::group_by(country, burden_outcome, year, age, scenario) %>%
+    dplyr::summarise(value = sum(value, na.rm = TRUE), .groups = "keep") %>%
+    dplyr::select(country, year, age, burden_outcome, scenario, value)
 }
