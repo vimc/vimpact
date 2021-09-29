@@ -96,3 +96,64 @@ test_that("can calculate impact by birth year from db", {
 
   expect_equal(impact, old_impact, tolerance = 1e-5, ignore_attr = TRUE)
 })
+
+test_that("can calculate impact by yov: birth cohort", {
+  con <- test_montagu_readonly_connection()
+  impact <- calculate_impact(
+    con, "yov_birth_cohort", touchstone = "201710gavi-5",
+    modelling_group = "CDA-Razavi",  disease = "HepB",
+    focal_scenario_type = "default", focal_vaccine_delivery = list(
+      list(vaccine = "HepB_BD", activity_type = "routine"),
+      list(vaccine = "HepB", activity_type = "routine")
+    ),
+    baseline_scenario_type = "novac",
+    burden_outcomes = c("dalys"))
+
+  recipe <- data.frame(
+    touchstone = "201710gavi-5",
+    modelling_group = "CDA-Razavi", disease = "HepB",
+    focal = "default:HepB_BD-routine;HepB-routine",
+    baseline = "novac",
+    burden_outcome = "hepb_deaths_acute;hepb_cases_acute_severe")
+  t <- tempfile(fileext = ".csv")
+  write.csv(recipe, t, row.names = FALSE)
+  meta <- get_meta_from_recipe(default_recipe = FALSE, recipe = t,
+                               method = "method2b", con = con)
+  old_impact <- get_raw_impact_details(con, meta, "dalys")
+  country <- dplyr::tbl(con, "country")
+  old_impact <- old_impact %>%
+    dplyr::left_join(country, by = c("country" = "nid"), copy = TRUE) %>%
+    dplyr::select(-country, -name) %>%
+    dplyr::select(country = id, burden_outcome, year = time, impact = value) %>%
+    dplyr::arrange(country, year)
+
+  expect_equal(impact, old_impact, tolerance = 1e-5, ignore_attr = TRUE)
+})
+
+test_that("can get FVPS", {
+  con <- test_montagu_readonly_connection()
+  touchstone <- "201710gavi-5"
+  focal_vaccine_delivery <- list(
+    list(vaccine = "YF", activity_type = "routine"),
+    list(vaccine = "YF", activity_type = "campaign"))
+  baseline_vaccine_delivery <- list(
+    list(vaccine = "none", activity_type = "none"))
+  countries <- "UGA"
+  vaccination_years <- 2000:2030
+  ## TODO: What about if vaccines != diseases? Getting FVPs for HepB where there
+  ## are multiple vaccines tis probably works because of Xiangs magic file
+  new_fvps <- get_fvps(
+    con, touchstone, baseline_vaccine_delivery = baseline_vaccine_delivery,
+    focal_vaccine_delivery = focal_vaccine_delivery, countries = countries,
+    vaccination_years = vaccination_years) %>%
+    dplyr::arrange(activity_type, year, age) %>%
+    dplyr::collect()
+  old_fvps <- extract_vaccination_history(
+    con, touchstone, year_min = 2000, year_max = 2030,
+    disease_to_extract = "YF", countries_to_extract = "UGA")
+  old_fvps <- old_fvps %>%
+    dplyr::select(country, year, vaccine, activity_type, age,
+                  fvps = fvps_adjusted) %>%
+    dplyr::arrange(activity_type, year, age)
+  expect_equal(new_fvps, old_fvps, ignore_attr = TRUE)
+})

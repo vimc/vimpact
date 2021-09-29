@@ -302,10 +302,7 @@ impact_by_year_of_vaccination_cohort_perspective <- function(
 }
 
 get_birth_cohort <- function(data) {
-  if ("birth_cohort" %in% colnames(data)) {
-    return(data$birth_cohort)
-  }
-  data$year - data$age
+  dplyr::mutate(dplyr::if_else(is.na(birth_cohort), year - age, birth_cohort))
 }
 
 #' Calculate impact by calendar year
@@ -545,6 +542,7 @@ impact_by_year_of_vaccination_birth_cohort <- function(
 
   ## Get FVP totals for birth year/birth cohort
   fvps$birth_cohort <- get_birth_cohort(fvps)
+  browser()
   tot_fvps <- fvps %>%
     dplyr::filter(year %in% vaccination_years) %>%
     dplyr::group_by(country, birth_cohort) %>%
