@@ -120,8 +120,7 @@ calculate_impact <- function(con, method, touchstone, modelling_group, disease,
   }
 }
 
-filter_country_impact <- function(df, countries) {
-  country <- dplyr::tbl(con, "country")
+filter_country_impact <- function(df, countries, country) {
   if (!is.null(countries)) {
     df %>%
       dplyr::left_join(country, by = c("country" = "nid")) %>%
@@ -137,8 +136,7 @@ filter_country_impact <- function(df, countries) {
   }
 }
 
-filter_country <- function(df, countries) {
-  country <- dplyr::tbl(con, "country")
+filter_country <- function(df, countries, country) {
   if (!is.null(countries)) {
     df %>%
       dplyr::filter(country %in% countries)
@@ -220,6 +218,7 @@ get_coverage_data <- function(con, touchstone, baseline_vaccine_delivery,
   coverage_set <- dplyr::tbl(con, "coverage_set")
   coverage <- dplyr::tbl(con, "coverage")
   gender <- dplyr::tbl(con, "gender")
+  country <- dplyr::tbl(con, "country")
   cov_set <- coverage_set %>%
     dplyr::filter(touchstone == !!touchstone &
                     gavi_support_level != "none") %>%
@@ -231,7 +230,7 @@ get_coverage_data <- function(con, touchstone, baseline_vaccine_delivery,
     dplyr::left_join(coverage, by = c("coverage_set" = "coverage_set")) %>%
     dplyr::left_join(gender, by = c("gender" = "id")) %>%
     dplyr::filter(coverage > 0) %>%
-    filter_country(countries) %>%
+    filter_country(countries, country) %>%
     filter_year(vaccination_years) %>%
     dplyr::select(coverage_set, vaccine, country, year, activity_type,
                   age_from, age_to, gender = name, target, coverage)
@@ -244,6 +243,7 @@ get_population_dplyr <- function(con, touchstone, countries = NULL,
                                                "touchstone_demographic_dataset")
   demographic_statistic_type <- dplyr::tbl(con, "demographic_statistic_type")
   gender <- dplyr::tbl(con, "gender")
+  country <- dplyr::tbl(con, "country")
 
   demographic_statistic %>%
     dplyr::left_join(touchstone_demographic_dataset,
@@ -259,7 +259,7 @@ get_population_dplyr <- function(con, touchstone, countries = NULL,
     dplyr::filter(touchstone == !!touchstone &
                     statistic_type == "int_pop" &
                     gender %in% c("Male", "Female", "Both")) %>%
-    filter_country(countries) %>%
+    filter_country(countries, country) %>%
     filter_year(vaccination_years) %>%
     dplyr::select(country, year, age = age_from, gender, value)
 }
@@ -315,6 +315,7 @@ get_burden_estimate_set_ids <- function(
 
 get_impact_for_burden_estimate_set <- function(
   con, burden_estimate_sets, outcomes, countries, is_under5) {
+  country <- dplyr::tbl(con, "country")
   burden_estimate <- dplyr::tbl(con, "burden_estimate")
   burden_estimate %>%
     dplyr::inner_join(burden_estimate_sets,
@@ -323,7 +324,7 @@ get_impact_for_burden_estimate_set <- function(
                       by = c("burden_outcome" = "id")) %>%
     dplyr::select(-burden_outcome) %>%
     dplyr::rename(burden_outcome = code) %>%
-    filter_country_impact(countries) %>%
+    filter_country_impact(countries, country) %>%
     filter_age(is_under5) %>%
     dplyr::mutate(
       burden_outcome = dplyr::case_when(
