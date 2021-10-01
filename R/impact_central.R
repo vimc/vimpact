@@ -302,7 +302,10 @@ impact_by_year_of_vaccination_cohort_perspective <- function(
 }
 
 get_birth_cohort <- function(data) {
-  dplyr::mutate(dplyr::if_else(is.na(birth_cohort), year - age, birth_cohort))
+  if ("birth_cohort" %in% colnames(data)) {
+    return(data$birth_cohort)
+  }
+  data$year - data$age
 }
 
 #' Calculate impact by calendar year
@@ -364,9 +367,9 @@ impact_by_calendar_year <- function(baseline_burden, focal_burden) {
 #' because of herd protection).
 #'
 #' @param baseline_burden Data frame of baseline burden data this needs to have
-#' columns country, burden_outcome, year, age, value
+#'   columns country, burden_outcome, year, age, value
 #' @param focal_burden Data frame of focal burden data this needs to have
-#' columns country, burden_outcome, year, age, value
+#'   columns country, burden_outcome, year, age, value
 #'
 #' @return Vaccine impact by country and birth year for burden outcomes as a
 #' data frame with columns country, year, burden_outcome and impact
@@ -395,7 +398,7 @@ impact_by_birth_year <- function(baseline_burden, focal_burden) {
     dplyr::select(country, burden_outcome, birth_cohort, impact) %>%
     dplyr::arrange(country, burden_outcome, birth_cohort) %>%
     dplyr::ungroup() %>%
-    dplyr::as_tibble()
+    dplyr::collect()
 }
 
 #' Calculate impact by year of vaccination: activity type
@@ -439,10 +442,15 @@ impact_by_year_of_vaccination_activity_type <- function(
   assert_allowed_values(baseline_burden, "activity_type", activity_types)
   assert_allowed_values(focal_burden, "activity_type", c("routine", "campaign"))
   assert_allowed_values(fvps, "activity_type", activity_types)
-  activity <- unique(focal_burden$activity_type)
+  activity <- focal_burden %>%
+    dplyr::ungroup() %>%
+    dplyr::select(activity_type) %>%
+    dplyr::distinct() %>%
+    dplyr::collect()
   if (length(activity) != 1L) {
     stop("Focal burden must have only one activity_type.")
   }
+  activity <- as.character(activity)
 
   year <- country <- activity_type <- time <- age <- burden_outcome <- NULL
   impact <- vaccine <- birth_cohort <- NULL
@@ -450,11 +458,13 @@ impact_by_year_of_vaccination_activity_type <- function(
   tot_fvps <- fvps %>%
     dplyr::filter(year %in% vaccination_years) %>%
     dplyr::group_by(country, activity_type) %>%
-    dplyr::summarise(fvps = sum(fvps, na.rm = TRUE))
+    dplyr::summarise(fvps = sum(fvps, na.rm = TRUE)) %>%
+    dplyr::collect()
   if (nrow(tot_fvps) == 0) {
     stop("No FVP data for this range of vaccination years")
   }
 
+  fvps <- fvps %>% dplyr::collect()
   ## Routine
   if (activity == "routine") {
     raw_impact <- baseline_burden %>%
@@ -491,7 +501,7 @@ impact_by_year_of_vaccination_activity_type <- function(
                   impact) %>%
     dplyr::arrange(country, vaccine, activity_type, burden_outcome, year) %>%
     dplyr::ungroup() %>%
-    dplyr::as_tibble()
+    dplyr::collect()
 }
 
 #' Calculate impact by year of vaccination: birth cohort
@@ -541,13 +551,17 @@ impact_by_year_of_vaccination_birth_cohort <- function(
     dplyr::summarise(impact = sum(impact, na.rm = TRUE))
 
   ## Get FVP totals for birth year/birth cohort
-  fvps$birth_cohort <- get_birth_cohort(fvps)
-  browser()
+  fvps <- fvps %>%
+    dplyr::mutate(birth_cohort = year - age)
   tot_fvps <- fvps %>%
     dplyr::filter(year %in% vaccination_years) %>%
     dplyr::group_by(country, birth_cohort) %>%
-    dplyr::summarise(fvps = sum(fvps, na.rm = TRUE))
-  if (nrow(tot_fvps) == 0) {
+    dplyr::summarise(fvps = sum(fvps, na.rm = TRUE)) %>%
+    dplyr::collect()
+
+  ## Throw error if invalid range, but let continue if we're
+  ## working with dbplyr and haven't pulled data yet
+  if (!inherits(tot_fvps, "tbl_lazy") && nrow(tot_fvps) == 0) {
     stop("No FVP data for this range of vaccination years")
   }
 
@@ -562,6 +576,7 @@ impact_by_year_of_vaccination_birth_cohort <- function(
     dplyr::group_by(country, birth_cohort, year,
                     vaccine, activity_type) %>%
     dplyr::summarise(fvps = sum(fvps, na.rm = TRUE)) %>%
+    dplyr::collect() %>%
     dplyr::inner_join(impact_ratio, by = c("country", "birth_cohort")) %>%
     dplyr::mutate(impact = impact_ratio * fvps) %>%
     dplyr::group_by(country, year, burden_outcome,

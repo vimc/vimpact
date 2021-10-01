@@ -127,13 +127,13 @@ filter_country_impact <- function(df, countries) {
       dplyr::left_join(country, by = c("country" = "nid")) %>%
       dplyr::filter(id %in% countries) %>%
       dplyr::select(burden_estimate_set, country = id, year, burden_outcome,
-                    value, age, scenario)
+                    activity_type, value, age, scenario)
   } else {
     ## Map country to readable ID
     df %>%
       dplyr::left_join(country, by = c("country" = "nid")) %>%
       dplyr::select(burden_estimate_set, country = id, year, burden_outcome,
-                    value, age, scenario)
+                    activity_type, value, age, scenario)
   }
 }
 
@@ -301,7 +301,7 @@ get_burden_estimate_set_ids <- function(
                     disease == !!disease) %>%
     dplyr::mutate("delivery" = CONCAT(scenario_type, "-",
                                       vaccine, "-", activity_type)) %>%
-    dplyr::group_by(current_burden_estimate_set) %>%
+    dplyr::group_by(current_burden_estimate_set, activity_type) %>%
     dplyr::summarise(delivery = dplyr::str_flatten(delivery, collapse = ";"),
                      .groups = "keep") %>%
     dplyr::mutate(scenario = dplyr::case_when(
@@ -309,12 +309,12 @@ get_burden_estimate_set_ids <- function(
       delivery == baseline_scenario ~ "baseline"
     )) %>%
     dplyr::filter(!is.na(scenario)) %>%
-    dplyr::select(scenario, burden_estimate_set = current_burden_estimate_set)
+    dplyr::select(scenario, activity_type,
+                  burden_estimate_set = current_burden_estimate_set)
 }
 
 get_impact_for_burden_estimate_set <- function(
   con, burden_estimate_sets, outcomes, countries, is_under5) {
-
   burden_estimate <- dplyr::tbl(con, "burden_estimate")
   burden_estimate %>%
     dplyr::inner_join(burden_estimate_sets,
@@ -332,7 +332,8 @@ get_impact_for_burden_estimate_set <- function(
         grepl("dalys", burden_outcome) ~ "dalys"
       )
     ) %>%
-    dplyr::group_by(country, burden_outcome, year, age, scenario) %>%
+    dplyr::group_by(country, activity_type, burden_outcome, year, age, scenario) %>%
     dplyr::summarise(value = sum(value, na.rm = TRUE), .groups = "keep") %>%
-    dplyr::select(country, year, age, burden_outcome, scenario, value)
+    dplyr::select(country, year, age, burden_outcome, scenario, activity_type,
+                  value)
 }
