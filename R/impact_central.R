@@ -458,13 +458,11 @@ impact_by_year_of_vaccination_activity_type <- function(
   tot_fvps <- fvps %>%
     dplyr::filter(year %in% vaccination_years) %>%
     dplyr::group_by(country, activity_type) %>%
-    dplyr::summarise(fvps = sum(fvps, na.rm = TRUE)) %>%
-    dplyr::collect()
+    dplyr::summarise(fvps = sum(fvps, na.rm = TRUE))
   if (nrow(tot_fvps) == 0) {
     stop("No FVP data for this range of vaccination years")
   }
 
-  fvps <- fvps %>% dplyr::collect()
   ## Routine
   if (activity == "routine") {
     raw_impact <- baseline_burden %>%
@@ -576,7 +574,6 @@ impact_by_year_of_vaccination_birth_cohort <- function(
     dplyr::group_by(country, birth_cohort, year,
                     vaccine, activity_type) %>%
     dplyr::summarise(fvps = sum(fvps, na.rm = TRUE)) %>%
-    dplyr::collect() %>%
     dplyr::inner_join(impact_ratio, by = c("country", "birth_cohort")) %>%
     dplyr::mutate(impact = impact_ratio * fvps) %>%
     dplyr::group_by(country, year, burden_outcome,

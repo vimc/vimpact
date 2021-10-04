@@ -46,11 +46,8 @@ calculate_impact <- function(con, method, touchstone, modelling_group, disease,
                              burden_outcomes = c("deaths", "cases", "dalys"),
                              countries = NULL, is_under5 = FALSE,
                              vaccination_years = 2000:2030) {
-  ## Check method is valid
   assert_one_of(method, c("calendar_year", "birth_year", "yov_activity_type",
                           "yov_birth_cohort"))
-  ## Check focal and baseline params are valid
-  ## Check other inputs are valid?
 
   ## Map touchstone name to ID if touchstone name given
   touchstones <- DBI::dbGetQuery(con,
@@ -61,13 +58,6 @@ calculate_impact <- function(con, method, touchstone, modelling_group, disease,
 
   outcomes <- get_burden_outcome_ids(con, burden_outcomes)
 
-  ## We need to locate unique ID for burden_estimate_set for
-  ## this combination of touchstone, modelling_group, disease, vaccine, etc.
-  ## There might be multiple scenarios which match the
-  ## touchstone, modelling_group, disease, vaccine and activity_type
-  ## e.g. default HepB-routine vs default HepB_BD-routine & HepB-routine
-  ## We need to go burden-estimate-set-wise and identify which scenario matches
-  ## the vaccine_delivery we are interested in
   none_vaccine_delivery <- list(list(activity_type = "none",
                                      vaccine = "none"))
   if (is.null(focal_vaccine_delivery)) {
@@ -106,11 +96,6 @@ calculate_impact <- function(con, method, touchstone, modelling_group, disease,
     fvps <- get_fvps(con, touchstone, baseline_vaccine_delivery,
                      focal_vaccine_delivery, countries, vaccination_years)
     if (method == "yov_activity_type") {
-      ## This won't work yet until we get activity_type out too
-      ## but there is seemingly multiple activity types per scenario
-      ## e.g. see scenario 494 has campaign and routine
-      ## and has same burden estimate set for both campaign and routine
-      ## so what should activity_type be for this?
       impact_by_year_of_vaccination_activity_type(baseline, focal,
                                                   fvps, vaccination_years)
     } else if (method == "yov_birth_cohort") {
@@ -119,6 +104,7 @@ calculate_impact <- function(con, method, touchstone, modelling_group, disease,
     }
   }
 }
+
 
 filter_country_impact <- function(df, countries, country) {
   if (!is.null(countries)) {
@@ -136,6 +122,7 @@ filter_country_impact <- function(df, countries, country) {
   }
 }
 
+
 filter_country <- function(df, countries, country) {
   if (!is.null(countries)) {
     df %>%
@@ -144,6 +131,7 @@ filter_country <- function(df, countries, country) {
     df
   }
 }
+
 
 filter_age <- function(df, is_under5) {
   if (is_under5) {
@@ -154,6 +142,7 @@ filter_age <- function(df, is_under5) {
   }
 }
 
+
 filter_year <- function(df, vaccination_years) {
   if (!is.null(vaccination_years)) {
     df %>%
@@ -163,12 +152,22 @@ filter_year <- function(df, vaccination_years) {
   }
 }
 
-## country, year, vaccine, activity_type, age, fvps
+#' Get adjusted fvps for particular touchstone and vaccine delivery methods
+#'
+#' @param con DB connection
+#' @param touchtonse Touchstone to get data for
+#' @param baseline_vaccine_delivery A list of lists containing vaccine and
+#'   activity_type (routine or campaign) describing delivery
+#' @param focal_vaccine_delivery A list of lists containing vaccine and
+#'   activity_type (routine or campaign) describing delivery
+#' @param countries Optional vector of countries to filter data
+#' @param vaccination_years Option vector of years to filter data
+#'
+#' @return Tibble containing fvp data
+#' @keywords internal
 get_fvps <- function(con, touchstone, baseline_vaccine_delivery,
-                     focal_vaccine_delivery, countries, vaccination_years) {
-  ## Q whatare fvps if vaccine delivery is none-none
-  ## Need to return "country", "year", "disease", "vaccine", "activity_type",
-  ## "age", "fvps"
+                     focal_vaccine_delivery, countries = NULL,
+                     vaccination_years = NULL) {
   population <- get_population_dplyr(con, touchstone, countries,
                                      vaccination_years)
   coverage <- get_coverage_data(con, touchstone, baseline_vaccine_delivery,
@@ -177,7 +176,7 @@ get_fvps <- function(con, touchstone, baseline_vaccine_delivery,
 
   ## We have pop data for each age group
   ## But coverage might be for a range of ages e.g. 1 to 100
-  ## We need total pop over this range to calculate fvps =
+  ## We need total pop over this range of years
   aggregate_pop <- coverage %>%
     dplyr::left_join(population, by = c("country" = "country",
                                      "year" = "year",
@@ -205,12 +204,26 @@ get_fvps <- function(con, touchstone, baseline_vaccine_delivery,
     dplyr::mutate(fvps_source = (coverage * target * value) / population) %>%
     dplyr::mutate(fvps =
                     dplyr::if_else(fvps_source > value, value, fvps_source)) %>%
-    dplyr::select(country, year, vaccine, activity_type, age, fvps)
+    dplyr::select(country, year, vaccine, activity_type, age, fvps) %>%
+    dplyr::collect()
 }
 
+#' Get coverage data for a particular touchstone and vaccine delivery method
+#'
+#' @param con DB connection
+#' @param touchtonse Touchstone to get data for
+#' @param baseline_vaccine_delivery A list of lists containing vaccine and
+#'   activity_type (routine or campaign) describing delivery
+#' @param focal_vaccine_delivery A list of lists containing vaccine and
+#'   activity_type (routine or campaign) describing delivery
+#' @param countries Optional vector of countries to filter data
+#' @param vaccination_years Option vector of years to filter data
+#'
+#' @return dbplyr lazy db connection containing coverage data
+#' @keywords internal
 get_coverage_data <- function(con, touchstone, baseline_vaccine_delivery,
-                              focal_vaccine_delivery, countries,
-                              vaccination_years) {
+                              focal_vaccine_delivery, countries = NULL,
+                              vaccination_years = NULL) {
   delivery <-  vcapply(c(focal_vaccine_delivery, baseline_vaccine_delivery),
                        function(x) {
                          paste(x$vaccine, x$activity_type, sep = "-")
@@ -236,8 +249,20 @@ get_coverage_data <- function(con, touchstone, baseline_vaccine_delivery,
                   age_from, age_to, gender = name, target, coverage)
 }
 
+#' Get population data for a particular touchstone
+#'
+#' Pull "int_pop" demographic statistic from db for a particular touchstone.
+#' Optionally filter on country and years.
+#'
+#' @param con DB connection
+#' @param touchtonse Touchstone to get data for
+#' @param countries Optional vector of countries to filter data
+#' @param years Option vector of years to filter data
+#'
+#' @return Tibble of population data
+#' @keywords internal
 get_population_dplyr <- function(con, touchstone, countries = NULL,
-                                 vaccination_years = NULL) {
+                                 years = NULL) {
   demographic_statistic <- dplyr::tbl(con, "demographic_statistic")
   touchstone_demographic_dataset <- dplyr::tbl(con,
                                                "touchstone_demographic_dataset")
@@ -260,10 +285,20 @@ get_population_dplyr <- function(con, touchstone, countries = NULL,
                     statistic_type == "int_pop" &
                     gender %in% c("Male", "Female", "Both")) %>%
     filter_country(countries, country) %>%
-    filter_year(vaccination_years) %>%
-    dplyr::select(country, year, age = age_from, gender, value)
+    filter_year(years) %>%
+    dplyr::select(country, year, age = age_from, gender, value) %>%
+    dplyr::collect()
 }
 
+#' Get burden outcome code and ID from a set of codes
+#'
+#' e.g. from "cases" return data frame of id - 1 and code - cases
+#'
+#' @param con DB connection
+#' @param burden_outcomes Burden outcome codes to lookup in the database
+#'
+#' @return dbplyr lazy db connection containing burden_outcome ids and codes
+#' @keywords internal
 get_burden_outcome_ids <- function(con, burden_outcomes) {
   burden_outcome <- dplyr::tbl(con, "burden_outcome")
   burden_outcome %>%
@@ -271,6 +306,31 @@ get_burden_outcome_ids <- function(con, burden_outcomes) {
     dplyr::select(id, code)
 }
 
+
+#' Get burden estimate set ids
+#'
+#' We need to locate unique ID for burden_estimate_set for
+#' this combination of touchstone, modelling_group, disease, vaccine, etc.
+#' There might be multiple scenarios which match the
+#' touchstone, modelling_group, disease, vaccine and activity_type
+#' e.g. default HepB-routine vs default HepB_BD-routine & HepB-routine
+#' We need to go burden-estimate-set-wise and identify which scenario matches
+#' the vaccine_delivery we are interested in.
+#'
+#' @param con DB connection
+#' @param baseline_scenario_type Baseling scenario type, e.g. default, novac
+#' @param baseline_scenario Scenario specification a string with form e.g.
+#'   scenario_type-vaccine1-activity_type1;scenario_type-vaccine2-activity_type2
+#' @param focal_scenario_type Focal scenario type e.g. default, novac
+#' @param focal_scenario Scenario specification a string with form e.g.
+#'   scenario_type-vaccine1-activity_type1;scenario_type-vaccine2-activity_type2
+#' @param touchstone The touchstone to get data for
+#' @param modelling_group The modelling group to get data for
+#' @param disease The disease to get data for
+#'
+#' @return Tibble containing the burden estimate set ids which match the
+#'   baseline and focal scenarios
+#' @keywords internal
 get_burden_estimate_set_ids <- function(
   con, baseline_scenario_type, baseline_scenario, focal_scenario_type,
   focal_scenario, touchstone, modelling_group, disease) {
@@ -310,9 +370,26 @@ get_burden_estimate_set_ids <- function(
     )) %>%
     dplyr::filter(!is.na(scenario)) %>%
     dplyr::select(scenario, activity_type,
-                  burden_estimate_set = current_burden_estimate_set)
+                  burden_estimate_set = current_burden_estimate_set) %>%
+    dplyr::collect()
 }
 
+
+#' Get burden estimate data from db for a burden estimate set and outcome
+#'
+#' Given one or more burden estimate set ids and outcome ids return the
+#' raw impact data fr that burden estimate. Optionally filter to get only
+#' under 5 ages or for a particular country
+#'
+#' @param con DB connection
+#' @param burden_estimate_sets Burden estimate set ids to get data from
+#' @param outcomes Burden outcome ids to get data for
+#' @param countries Optional filter of countries to pull data for
+#' @param is_under5 If TRUE only gets burden estimate data for under 5
+#'   ages
+#'
+#' @return dbplyr lazy db connection containing the raw impact data
+#' @keywords internal
 get_impact_for_burden_estimate_set <- function(
   con, burden_estimate_sets, outcomes, countries, is_under5) {
   country <- dplyr::tbl(con, "country")
