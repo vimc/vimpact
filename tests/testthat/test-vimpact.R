@@ -107,7 +107,7 @@ test_that("can calculate impact by yov: birth cohort", {
       list(vaccine = "HepB", activity_type = "routine")
     ),
     baseline_scenario_type = "novac",
-    burden_outcomes = c("dalys"))
+    burden_outcomes = "dalys")
 
   recipe <- data.frame(
     touchstone = "201710gavi-5",

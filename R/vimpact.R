@@ -219,7 +219,7 @@ get_fvps <- function(con, touchstone, baseline_vaccine_delivery,
 #' @param countries Optional vector of countries to filter data
 #' @param vaccination_years Option vector of years to filter data
 #'
-#' @return dbplyr lazy db connection containing coverage data
+#' @return Tibble of coverage data
 #' @keywords internal
 get_coverage_data <- function(con, touchstone, baseline_vaccine_delivery,
                               focal_vaccine_delivery, countries = NULL,
@@ -246,7 +246,8 @@ get_coverage_data <- function(con, touchstone, baseline_vaccine_delivery,
     filter_country(countries, country) %>%
     filter_year(vaccination_years) %>%
     dplyr::select(coverage_set, vaccine, country, year, activity_type,
-                  age_from, age_to, gender = name, target, coverage)
+                  age_from, age_to, gender = name, target, coverage) %>%
+    dplyr::collect()
 }
 
 #' Get population data for a particular touchstone
@@ -328,8 +329,8 @@ get_burden_outcome_ids <- function(con, burden_outcomes) {
 #' @param modelling_group The modelling group to get data for
 #' @param disease The disease to get data for
 #'
-#' @return Tibble containing the burden estimate set ids which match the
-#'   baseline and focal scenarios
+#' @return dbplyr lazy db connection containing the burden estimate set ids
+#'   which match the baseline and focal scenarios
 #' @keywords internal
 get_burden_estimate_set_ids <- function(
   con, baseline_scenario_type, baseline_scenario, focal_scenario_type,
@@ -362,7 +363,7 @@ get_burden_estimate_set_ids <- function(
     dplyr::mutate("delivery" = CONCAT(scenario_type, "-",
                                       vaccine, "-", activity_type)) %>%
     dplyr::group_by(current_burden_estimate_set, activity_type) %>%
-    dplyr::summarise(delivery = stringr::str_flatten(delivery, collapse = ";"),
+    dplyr::summarise(delivery = str_flatten(delivery, collapse = ";"),
                      .groups = "keep") %>%
     dplyr::mutate(scenario = dplyr::case_when(
       delivery == focal_scenario ~ "focal",
@@ -370,8 +371,7 @@ get_burden_estimate_set_ids <- function(
     )) %>%
     dplyr::filter(!is.na(scenario)) %>%
     dplyr::select(scenario, activity_type,
-                  burden_estimate_set = current_burden_estimate_set) %>%
-    dplyr::collect()
+                  burden_estimate_set = current_burden_estimate_set)
 }
 
 

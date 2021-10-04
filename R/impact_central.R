@@ -347,7 +347,7 @@ impact_by_calendar_year <- function(baseline_burden, focal_burden) {
     dplyr::ungroup() %>%
     dplyr::collect()
 
-  ## Calculate impact outside of Postgres otherwise get weird
+  ## Calculate impact outside of Postgres otherwise get
   ## precision errors on 0 value entries
   out %>%
     dplyr::mutate(impact = baseline_val - focal_val) %>%
