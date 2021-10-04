@@ -541,7 +541,7 @@ impact_by_year_of_vaccination_birth_cohort <- function(
     c("country", "year", "vaccine", "activity_type", "age", "fvps"))
 
   country <- burden_outcome <- birth_cohort <- impact <- year <- NULL
-  vaccine <- activity_type <- NULL
+  vaccine <- activity_type <- age <- NULL
   ## Get impact for birth cohort
   tot_impact <- baseline_burden %>%
     impact_by_birth_year(focal_burden) %>%

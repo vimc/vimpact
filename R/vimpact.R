@@ -48,6 +48,7 @@ calculate_impact <- function(con, method, touchstone, modelling_group, disease,
                              vaccination_years = 2000:2030) {
   assert_one_of(method, c("calendar_year", "birth_year", "yov_activity_type",
                           "yov_birth_cohort"))
+  scenario <- NULL
 
   ## Map touchstone name to ID if touchstone name given
   touchstones <- DBI::dbGetQuery(con,
@@ -107,6 +108,8 @@ calculate_impact <- function(con, method, touchstone, modelling_group, disease,
 
 
 filter_country_impact <- function(df, countries, country) {
+  burden_estimate_set <- id <- year <- burden_outcome <- activity_type <- NULL
+  value <- age <- scenario <- NULL
   if (!is.null(countries)) {
     df %>%
       dplyr::left_join(country, by = c("country" = "nid")) %>%
@@ -134,6 +137,7 @@ filter_country <- function(df, countries, country) {
 
 
 filter_age <- function(df, is_under5) {
+  age <- NULL
   if (is_under5) {
     df %>%
       dplyr::filter(age < 5)
@@ -144,6 +148,7 @@ filter_age <- function(df, is_under5) {
 
 
 filter_year <- function(df, vaccination_years) {
+  year <- NULL
   if (!is.null(vaccination_years)) {
     df %>%
       dplyr::filter(year %in% vaccination_years)
@@ -168,6 +173,9 @@ filter_year <- function(df, vaccination_years) {
 get_fvps <- function(con, touchstone, baseline_vaccine_delivery,
                      focal_vaccine_delivery, countries = NULL,
                      vaccination_years = NULL) {
+  age_from <- age <- age_to <- coverage_set <- country <- year <- NULL
+  gender <- activity_type <- value <- target <- fvps_source <- NULL
+  vaccine <- fvps <- NULL
   population <- get_population_dplyr(con, touchstone, countries,
                                      vaccination_years)
   coverage <- get_coverage_data(con, touchstone, baseline_vaccine_delivery,
@@ -224,6 +232,8 @@ get_fvps <- function(con, touchstone, baseline_vaccine_delivery,
 get_coverage_data <- function(con, touchstone, baseline_vaccine_delivery,
                               focal_vaccine_delivery, countries = NULL,
                               vaccination_years = NULL) {
+  gavi_support_level <- CONCAT <- vaccine <- activity_type <- id <- year <- NULL
+  age_from <- age_to <- name <- target <- NULL
   delivery <-  vcapply(c(focal_vaccine_delivery, baseline_vaccine_delivery),
                        function(x) {
                          paste(x$vaccine, x$activity_type, sep = "-")
@@ -264,6 +274,7 @@ get_coverage_data <- function(con, touchstone, baseline_vaccine_delivery,
 #' @keywords internal
 get_population_dplyr <- function(con, touchstone, countries = NULL,
                                  years = NULL) {
+  name <- code <- statistic_type <- year <- age_from <- value <- NULL
   demographic_statistic <- dplyr::tbl(con, "demographic_statistic")
   touchstone_demographic_dataset <- dplyr::tbl(con,
                                                "touchstone_demographic_dataset")
@@ -301,6 +312,7 @@ get_population_dplyr <- function(con, touchstone, countries = NULL,
 #' @return dbplyr lazy db connection containing burden_outcome ids and codes
 #' @keywords internal
 get_burden_outcome_ids <- function(con, burden_outcomes) {
+  code <- id <- NULL
   burden_outcome <- dplyr::tbl(con, "burden_outcome")
   burden_outcome %>%
     dplyr::filter(code %in% burden_outcomes) %>%
@@ -335,6 +347,9 @@ get_burden_outcome_ids <- function(con, burden_outcomes) {
 get_burden_estimate_set_ids <- function(
   con, baseline_scenario_type, baseline_scenario, focal_scenario_type,
   focal_scenario, touchstone, modelling_group, disease) {
+
+  scenario_type <- id <- scenario_id <- vaccine <- activity_type <- NULL
+  CONCAT <- current_burden_estimate_set <- str_flatten <- delivery <- NULL
 
   scenario <- dplyr::tbl(con, "scenario")
   scenario_description <- dplyr::tbl(con, "scenario_description")
@@ -392,6 +407,9 @@ get_burden_estimate_set_ids <- function(
 #' @keywords internal
 get_impact_for_burden_estimate_set <- function(
   con, burden_estimate_sets, outcomes, countries, is_under5) {
+  burden_outcome <- code <- activity_type <- year <- age <- NULL
+  scenario <- value <- NULL
+
   country <- dplyr::tbl(con, "country")
   burden_estimate <- dplyr::tbl(con, "burden_estimate")
   burden_estimate %>%
