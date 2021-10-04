@@ -302,7 +302,7 @@ get_burden_estimate_set_ids <- function(
     dplyr::mutate("delivery" = CONCAT(scenario_type, "-",
                                       vaccine, "-", activity_type)) %>%
     dplyr::group_by(current_burden_estimate_set, activity_type) %>%
-    dplyr::summarise(delivery = dplyr::str_flatten(delivery, collapse = ";"),
+    dplyr::summarise(delivery = stringr::str_flatten(delivery, collapse = ";"),
                      .groups = "keep") %>%
     dplyr::mutate(scenario = dplyr::case_when(
       delivery == focal_scenario ~ "focal",
