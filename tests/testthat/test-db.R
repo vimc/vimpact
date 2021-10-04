@@ -1,5 +1,3 @@
-context("db")
-
 test_that("test db has been setup correctly", {
   con <- get_test_connection()
 

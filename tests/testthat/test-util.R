@@ -1,5 +1,3 @@
-context("util")
-
 test_that("null-or-value works", {
   expect_equal(1 %||% NULL, 1)
   expect_equal(1 %||% 2, 1)
@@ -17,9 +15,14 @@ test_that("not_if_finite works", {
 test_that("merge_by_common_cols works", {
   x <- data_frame(id = c(1, 2), name = c("a", "b"), hight = c(1.75, 1.80))
   y <- data_frame(id = c(1, 3), name = c("a", "c"), age = c(20, 30))
-  expect_equivalent(merge_by_common_cols(x, y), merge(x, y, by = c("id", "name")))
-  expect_equivalent(merge_by_common_cols(x, y, all.x = TRUE), merge(x, y, by = c("id", "name"), all.x = TRUE))
-  expect_equivalent(merge_by_common_cols(x, y, all = TRUE), merge(x, y, by = c("id", "name"), all = TRUE))
+  expect_equal(merge_by_common_cols(x, y), merge(x, y, by = c("id", "name")),
+               ignore_attr = TRUE)
+  expect_equal(merge_by_common_cols(x, y, all.x = TRUE),
+               merge(x, y, by = c("id", "name"), all.x = TRUE),
+               ignore_attr = TRUE)
+  expect_equal(merge_by_common_cols(x, y, all = TRUE),
+               merge(x, y, by = c("id", "name"), all = TRUE),
+               ignore_attr = TRUE)
 
 })
 

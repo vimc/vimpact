@@ -447,7 +447,7 @@ impact_by_year_of_vaccination_activity_type <- function(
     dplyr::select(activity_type) %>%
     dplyr::distinct() %>%
     dplyr::collect()
-  if (length(activity) != 1L) {
+  if (nrow(activity) != 1L) {
     stop("Focal burden must have only one activity_type.")
   }
   activity <- as.character(activity)

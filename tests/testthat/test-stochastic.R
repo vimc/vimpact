@@ -1,5 +1,3 @@
-context("stochastic")
-
 test_that("can get summary data of stochastic table", {
   con <- get_test_connection()
 
