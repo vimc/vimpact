@@ -7,6 +7,7 @@ on:
     branches:
       - main
       - master
+      - vimc-4883
 
 name: test-coverage
 
