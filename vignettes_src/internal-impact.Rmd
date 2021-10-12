@@ -34,7 +34,7 @@ This vignette describes how to use vimpact to calculate impact as a member of VI
 
 ```{r}
 impact <- vimpact::calculate_impact(
-  con, method = "calendar_year", touchstone = "201710gavi-5",
+  con, method = "calendar_year", touchstone = "201910gavi-5",
   modelling_group = "CDA-Razavi",  disease = "HepB",
   focal_scenario_type = "default", focal_vaccine_delivery = list(
     list(vaccine = "HepB_BD", activity_type = "routine"),
@@ -56,7 +56,7 @@ Define a recipe either as a csv or using `recipe_template`
 
 ```{r}
 recipe <- data.frame(
-  touchstone = "201710gavi-5",
+  touchstone = "201910gavi-5",
   modelling_group = "CDA-Razavi", disease = "HepB",
   focal = "default:HepB_BD-routine;HepB-routine",
   baseline = "novac",
@@ -86,7 +86,7 @@ Very similar to examples for calendar year and birth year, to calculate impact b
 
 ```{r}
 impact <- vimpact::calculate_impact(
-  con, method = "yov_activity_type", touchstone = "201710gavi-5",
+  con, method = "yov_activity_type", touchstone = "201910gavi-5",
   modelling_group = "CDA-Razavi",  disease = "HepB",
   focal_scenario_type = "default", focal_vaccine_delivery = list(
     list(vaccine = "HepB_BD", activity_type = "routine"),
@@ -117,7 +117,7 @@ old_raw_impact <- vimpact:::get_raw_impact_details(con, meta, "dalys")
 Extract the fvp data and map output to required interface
 
 ```{r}
-fvps <- vimpact::extract_vaccination_history(con, "201710gavi-5", year_min = 2000,
+fvps <- vimpact::extract_vaccination_history(con, "201910gavi-5", year_min = 2000,
                                              year_max = 2030,
                                              disease_to_extract = "HepB")
 fvps$fvps <- fvps$fvps_adjusted
