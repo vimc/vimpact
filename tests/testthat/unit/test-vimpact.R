@@ -134,19 +134,3 @@ test_that("filter_year can handle nulls", {
   result <- filter_year(df, NULL)
   expect_equal(result, df)
 })
-
-test_that("calculate_impact fails if method is not recognised", {
-  expect_error(calculate_impact(con = NULL,
-                                method = "badmethod",
-                                touchstone = NULL,
-                                modelling_group = NULL, disease = NULL,
-                                focal_scenario_type = NULL,
-                                baseline_scenario_type = NULL,
-                                focal_vaccine_delivery = NULL,
-                                baseline_vaccine_delivery = NULL,
-                                burden_outcomes = c("deaths", "cases", "dalys"),
-                                countries = NULL, is_under5 = FALSE,
-                                vaccination_years = 2000:2030),
-               "'method' must be one of calendar_year, birth_year, yov_activity_type, yov_birth_cohort got badmethod")
-})
-

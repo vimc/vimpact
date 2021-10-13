@@ -120,6 +120,13 @@ mock_impact_by_calendar_year <- function(baseline, focal) {
   "success"
 }
 
+test_that("calculate_impact fails if method is not recognised", {
+  args <- test_args
+  args$method <- "badmethod"
+  expect_error(do.call(calculate_impact, args),
+               "'method' must be one of calendar_year, birth_year, yov_activity_type, yov_birth_cohort got badmethod")
+})
+
 test_that("calculate_impact retrieves touchstone id if name given", {
   mock <- mockery::mock(test_outputs$touchstone)
   mockery::stub(calculate_impact, "get_touchstone_id", mock)
