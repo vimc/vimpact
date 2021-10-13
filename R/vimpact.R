@@ -50,13 +50,7 @@ calculate_impact <- function(con, method, touchstone, modelling_group, disease,
                           "yov_birth_cohort"))
   scenario <- NULL
 
-  ## Map touchstone name to ID if touchstone name given
-  touchstones <- DBI::dbGetQuery(con,
-                                 "SELECT id, touchstone_name FROM touchstone")
-  if (!touchstone %in% touchstones[["id"]]) {
-    touchstone <- get_touchstone(con, touchstone)
-  }
-
+  touchstone <- get_touchstone_id(con, touchstone)
   outcomes <- get_burden_outcome_ids(con, burden_outcomes)
 
   none_vaccine_delivery <- list(list(activity_type = "none",
@@ -319,7 +313,6 @@ get_burden_outcome_ids <- function(con, burden_outcomes) {
     dplyr::select(id, code)
 }
 
-
 #' Get burden estimate set ids
 #'
 #' We need to locate unique ID for burden_estimate_set for
@@ -386,7 +379,7 @@ get_burden_estimate_set_ids <- function(
     )) %>%
     dplyr::filter(!is.na(scenario)) %>%
     dplyr::select(scenario, activity_type,
-                  burden_estimate_set = current_burden_estimate_set)
+                  burden_estimate_set = current_burden_estimate_set) %>% dplyr::show_query()
 }
 
 

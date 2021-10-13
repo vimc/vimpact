@@ -9,7 +9,7 @@
 ##' @param con Database connection.
 ##' @param touchstone_name touchstone_name
 ##' @export
-get_touchstone <- function(con, touchstone_name){
+get_touchstone <- function(con, touchstone_name) {
   d <- DBI::dbGetQuery(con, "SELECT touchstone_name, MAX(touchstone.version) as version FROM touchstone
                        WHERE touchstone_name = $1 AND version != 42 GROUP BY touchstone_name", touchstone_name)
   if (nrow(d) == 0L) {
@@ -17,6 +17,24 @@ get_touchstone <- function(con, touchstone_name){
   }
   paste(d, collapse = "-")
 }
+
+##' Find latest touchstone if touchstone name is provided
+##'
+##' @title Determine touchstone id
+##'
+##' @param con Database connection.
+##' @param touchstone touchstone name or id
+get_touchstone_id <- function(con, touchstone) {
+  touchstones <- DBI::dbGetQuery(con,
+                                 "SELECT id, touchstone_name FROM touchstone")
+  if (!touchstone %in% touchstones[["id"]]) {
+    get_touchstone(con, touchstone)
+  }
+  else {
+    touchstone
+  }
+}
+
 
 ##' Replace jenner:::fix_covreage_fvps() function
 ##'
@@ -49,9 +67,9 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
 
   ## 1. touchstone specification
   ## which coverage touchstone to use - given touchstone name, use the latest version touchstone
-  if(grepl("-", touchstone_cov)){
+  if (grepl("-", touchstone_cov)) {
     tmp <- DBI::dbGetQuery(con, "SELECT * FROM touchstone WHERE id = $1", touchstone_cov)
-    if(nrow(tmp) == 1L){
+    if (nrow(tmp) == 1L) {
       message("User defined touchstone version is used.")
     } else {
       stop("User defined touchstone does not exist.")
@@ -70,7 +88,7 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
   message("Converting input coverage data......")
 
   # extract interpolated population
-  if(is.null(external_population_estimates)){
+  if (is.null(external_population_estimates)) {
     p_int_pop <- get_population(con, touchstone_pop = touchstone_pop, demographic_statistic = 'int_pop',
 
                                 year_ = year_min:year_max, gender = c('Male', 'Female', 'Both'), country_ = countries_to_extract)
@@ -78,7 +96,7 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
     p_int_pop <- external_population_estimates
   }
 
-  if(nrow(p_int_pop) == 0){
+  if (nrow(p_int_pop) == 0) {
     stop("No population data extracted - you might have specified invalid touchstone_pop.")
   }
   message("Extracted interpolated population.")
@@ -103,7 +121,7 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
                                                  sql_in(vaccine_to_ignore)),
                                          "AND scenario_description NOT LIKE '%LiST%'"),
                               touchstone_cov)
-  if(nrow(cov_sets) == 0L){
+  if (nrow(cov_sets) == 0L) {
     # this is not a model run touchstone, need to extract coverage set directly
     cov_sets2 <- DBI::dbGetQuery(con, "SELECT coverage_set.id AS coverage_set, vaccine, activity_type, gavi_support_level
                                 FROM coverage_set
@@ -118,8 +136,8 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
     cov_sets <- cov_sets2[names(cov_sets)]
   }
 
-  if(!is.null(disease_to_extract)){
-    cov_sets <- cov_sets[cov_sets$disease %in% disease_to_extract, ]
+  if (!is.null(disease_to_extract)) {
+    cov_sets <- cov_sets[cov_sets$disease %in% disease_to_extract,]
   }
 
   country_ <- ifelse(is.null(countries_to_extract),
@@ -143,7 +161,7 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
   cov$activity_id <- seq_along(cov$activity_type) # attach an id to avoid combining national target population from multiple sias
 
   i <- cov$age_from > cov$age_to
-  if (any(i)){
+  if (any(i)) {
     message("---> detected age_from > age_to")
     cov$age_from_tmp <- cov$age_from
     cov$age_from[i] <- cov$age_to[i]
@@ -153,15 +171,15 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
   }
 
   ## spliting coverage data by age groups
-  cov1 <- cov[cov$activity_type == "routine", ]
+  cov1 <- cov[cov$activity_type == "routine",]
   cov1$age <- cov1$age_from
-  cov2 <- cov[cov$activity_type == "campaign", ]
+  cov2 <- cov[cov$activity_type == "campaign",]
 
   d <- list(NULL)
-  for(i in seq_along(cov2$activity_id)){
-    t <- cov2[i, ]
+  for (i in seq_along(cov2$activity_id)) {
+    t <- cov2[i,]
     idx <- rep(1, times = t$age_to - t$age_from + 1)
-    t <- t[idx, ]
+    t <- t[idx,]
     t$age <- t$age_from + seq_along(t$activity_type) - 1
     d[[i]] <- t
   }
@@ -187,19 +205,19 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
                    "gender", "age", "age_from", "age_to", "gavi_support", "target_source",
                    "coverage_source", "delivery_id", "cohort_size", "delivery_population", "fvps_source",
                    "fvps_adjusted", "coverage_adjusted")
-  cov2 <- cov2[c("scenario_description", "coverage_set", "delivery_id", "country", "disease", "scenario_type","vaccine", "activity_type", "gavi_support_level", "year",
-                 "gavi_support", "gender", "age", "target_source", "coverage_source",  "cohort_size", "delivery_population",
+  cov2 <- cov2[c("scenario_description", "coverage_set", "delivery_id", "country", "disease", "scenario_type", "vaccine", "activity_type", "gavi_support_level", "year",
+                 "gavi_support", "gender", "age", "target_source", "coverage_source", "cohort_size", "delivery_population",
                  "fvps_source", "fvps_adjusted", "coverage_adjusted")]
   message("Transformed coverage data.")
 
   country_id <- DBI::dbReadTable(con, "country")
   cov2$country_nid <- country_id$nid[match(cov2$country, country_id$id)]
 
-  if(!full_description){
+  if (!full_description) {
     cov2$scenario_description <- "best-estimates"
     cov2 <- unique(cov2)
   }
-  cov2 <- cov2[order(cov2$scenario_description, cov2$delivery_id), ]
+  cov2 <- cov2[order(cov2$scenario_description, cov2$delivery_id),]
 
   return(cov2)
   ### this function gives differnet fvps_adjusted comparing to fix_coverage_fvps()
@@ -207,7 +225,6 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
   ### https://gitbub.com/vimc/jenner/blob/master/R/impact_method2.R#L419
   ### see measles for example (bdi, 2015)
 }
-
 
 
 ##' Extract demographic data
@@ -224,7 +241,7 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
 ##' @export
 get_population <- function(con, touchstone_pop = "201710gavi-5", demographic_statistic = "int_pop", gender = "Both",
                            country_ = NULL, year_ = NULL, age_ = NULL) {
-  if(!grepl("-", touchstone_pop)){
+  if (!grepl("-", touchstone_pop)) {
     touchstone_pop <- get_touchstone(con, touchstone_pop)
     message("touchstone version is not specified. Lateset version is used.")
   }
@@ -248,7 +265,7 @@ sql_constrains <- function(country_ = NULL, year_ = NULL, age_ = NULL, burden_es
 
   country_ <- ifelse(is.null(country_),
                      "\t",
-                     sprintf("AND %s IN %s",country_id, sql_in(country_)))
+                     sprintf("AND %s IN %s", country_id, sql_in(country_)))
 
   year_ <- ifelse(is.null(year_),
                   "\t",
@@ -272,7 +289,7 @@ sql_constrains <- function(country_ = NULL, year_ = NULL, age_ = NULL, burden_es
 ##' @param under_5 whether constrain to under5 mortality
 ##' @export
 cohort_deaths_all_cause <- function(con, touchstone_pop, cohorts, under_5 = TRUE) {
-  if (!under_5){
+  if (!under_5) {
     stop("The function currently only works for under5 mortality.")
   }
 
@@ -280,10 +297,10 @@ cohort_deaths_all_cause <- function(con, touchstone_pop, cohorts, under_5 = TRUE
   ### population
   P <- get_population(con, touchstone_pop = touchstone_pop, country_ = NULL, year_ = year, age_ = NULL, demographic_statistic = "int_pop")
 
-  P <- stats::aggregate(value~country + year, data = P, sum)
+  P <- stats::aggregate(value ~ country + year, data = P, sum)
 
   ### live birth
-  cbr <- get_population(con, touchstone_pop = touchstone_pop, country_ = NULL, year_ = year, age_ = NULL, demographic_statistic = "cbr")[c("country","year", "value")]
+  cbr <- get_population(con, touchstone_pop = touchstone_pop, country_ = NULL, year_ = year, age_ = NULL, demographic_statistic = "cbr")[c("country", "year", "value")]
   d <- merge(P, cbr, by = c("country", "year"), all.x = TRUE)
   d$birth <- d$value.x * d$value.y
 
