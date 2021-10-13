@@ -127,20 +127,11 @@ test_that("calculate_impact retrieves touchstone id if name given", {
   mockery::stub(calculate_impact, "get_burden_estimate_set_ids", mock_get_burden_estimate_set_ids)
   mockery::stub(calculate_impact, "get_impact_for_burden_estimate_set", mock_get_impact_for_burden_estimate_set)
   mockery::stub(calculate_impact, "impact_by_calendar_year", mock_impact_by_calendar_year)
-  expect_equal(calculate_impact(test_args$con,
-                                test_args$method,
-                                test_args$touchstone,
-                                test_args$modelling_group,
-                                test_args$disease,
-                                test_args$focal_scenario_type,
-                                test_args$baseline_scenario_type,
-                                test_args$focal_vaccine_delivery,
-                                test_args$baseline_vaccine_delivery,
-                                test_args$burden_outcomes,
-                                test_args$countries,
-                                test_args$is_under5,
-                                test_args$vaccination_years0), "success")
+
+  expect_equal(do.call(calculate_impact, test_args), "success")
   mockery::expect_called(mock, 1)
+  args <- mockery::mock_args(mock)
+  expect_equal(as.character(args[[1]][[2]]), test_args$touchstone)
 })
 
 test_that("calculate_impact gets burden outcome ids from burden outcomes", {
@@ -150,20 +141,11 @@ test_that("calculate_impact gets burden outcome ids from burden outcomes", {
   mockery::stub(calculate_impact, "get_burden_estimate_set_ids", mock_get_burden_estimate_set_ids)
   mockery::stub(calculate_impact, "get_impact_for_burden_estimate_set", mock_get_impact_for_burden_estimate_set)
   mockery::stub(calculate_impact, "impact_by_calendar_year", mock_impact_by_calendar_year)
-  expect_equal(calculate_impact(test_args$con,
-                                test_args$method,
-                                test_args$touchstone,
-                                test_args$modelling_group,
-                                test_args$disease,
-                                test_args$focal_scenario_type,
-                                test_args$baseline_scenario_type,
-                                test_args$focal_vaccine_delivery,
-                                test_args$baseline_vaccine_delivery,
-                                test_args$burden_outcomes,
-                                test_args$countries,
-                                test_args$is_under5,
-                                test_args$vaccination_years0), "success")
+
+  expect_equal(do.call(calculate_impact, test_args), "success")
   mockery::expect_called(mock, 1)
+  args <- mockery::mock_args(mock)
+  expect_equal(as.character(args[[1]][[2]]), test_args$burden_outcomes)
 })
 
 test_that("calculate_impact gets burden estimate set ids", {
@@ -173,20 +155,18 @@ test_that("calculate_impact gets burden estimate set ids", {
   mockery::stub(calculate_impact, "get_burden_estimate_set_ids", mock)
   mockery::stub(calculate_impact, "get_impact_for_burden_estimate_set", mock_get_impact_for_burden_estimate_set)
   mockery::stub(calculate_impact, "impact_by_calendar_year", mock_impact_by_calendar_year)
-  expect_equal(calculate_impact(test_args$con,
-                                test_args$method,
-                                test_args$touchstone,
-                                test_args$modelling_group,
-                                test_args$disease,
-                                test_args$focal_scenario_type,
-                                test_args$baseline_scenario_type,
-                                test_args$focal_vaccine_delivery,
-                                test_args$baseline_vaccine_delivery,
-                                test_args$burden_outcomes,
-                                test_args$countries,
-                                test_args$is_under5,
-                                test_args$vaccination_years0), "success")
+
+  expect_equal(do.call(calculate_impact, test_args), "success")
   mockery::expect_called(mock, 1)
+  args <- mockery::mock_args(mock)
+  expect_equal(as.character(args[[1]][[2]]), test_args$baseline_scenario_type)
+  expect_equal(as.character(args[[1]][[3]]), "novac-HepB-routine;novac-HepB_BD-routine")
+  expect_equal(as.character(args[[1]][[4]]), test_args$focal_scenario_type)
+  expect_equal(as.character(args[[1]][[5]]), "default-HepB-campaign;default-HepB_BD-campaign")
+  expect_equal(as.character(args[[1]][[6]]), test_outputs$touchstone)
+  expect_equal(as.character(args[[1]][[7]]), test_args$modelling_group)
+  expect_equal(as.character(args[[1]][[8]]), test_args$disease)
+
 })
 
 test_that("calculate_impact gets impact by calendar year when method is calendar_year", {
@@ -196,20 +176,13 @@ test_that("calculate_impact gets impact by calendar year when method is calendar
   mockery::stub(calculate_impact, "get_burden_estimate_set_ids", mock_get_burden_estimate_set_ids)
   mockery::stub(calculate_impact, "get_impact_for_burden_estimate_set", mock_get_impact_for_burden_estimate_set)
   mockery::stub(calculate_impact, "impact_by_calendar_year", mock)
-  calculate_impact(test_args$con,
-                   test_args$method,
-                   test_args$touchstone,
-                   test_args$modelling_group,
-                   test_args$disease,
-                   test_args$focal_scenario_type,
-                   test_args$baseline_scenario_type,
-                   test_args$focal_vaccine_delivery,
-                   test_args$baseline_vaccine_delivery,
-                   test_args$burden_outcomes,
-                   test_args$countries,
-                   test_args$is_under5,
-                   test_args$vaccination_years)
+
+  do.call(calculate_impact, test_args)
+
   mockery::expect_called(mock, 1)
+  args <- mockery::mock_args(mock)
+  expect_equal(as.character(args[[1]][[1]]$scenario), "baseline")
+  expect_equal(as.character(args[[1]][[2]]$scenario), "focal")
 })
 
 test_that("calculate_impact gets impact by birth year when method is birth_year", {
@@ -219,20 +192,15 @@ test_that("calculate_impact gets impact by birth year when method is birth_year"
   mockery::stub(calculate_impact, "get_burden_estimate_set_ids", mock_get_burden_estimate_set_ids)
   mockery::stub(calculate_impact, "get_impact_for_burden_estimate_set", mock_get_impact_for_burden_estimate_set)
   mockery::stub(calculate_impact, "impact_by_birth_year", mock)
-  calculate_impact(test_args$con,
-                   "birth_year",
-                   test_args$touchstone,
-                   test_args$modelling_group,
-                   test_args$disease,
-                   test_args$focal_scenario_type,
-                   test_args$baseline_scenario_type,
-                   test_args$focal_vaccine_delivery,
-                   test_args$baseline_vaccine_delivery,
-                   test_args$burden_outcomes,
-                   test_args$countries,
-                   test_args$is_under5,
-                   test_args$vaccination_years)
+
+  args <- test_args
+  args$method <- "birth_year"
+  do.call(calculate_impact, args)
+
   mockery::expect_called(mock, 1)
+  args <- mockery::mock_args(mock)
+  expect_equal(as.character(args[[1]][[1]]$scenario), "baseline")
+  expect_equal(as.character(args[[1]][[2]]$scenario), "focal")
 })
 
 test_that("calculate_impact calls impact_by_year_of_vaccination_activity_type when method is yov_activity_type", {
@@ -243,19 +211,11 @@ test_that("calculate_impact calls impact_by_year_of_vaccination_activity_type wh
   mockery::stub(calculate_impact, "get_impact_for_burden_estimate_set", mock_get_impact_for_burden_estimate_set)
   mockery::stub(calculate_impact, "impact_by_year_of_vaccination_activity_type", mock)
   mockery::stub(calculate_impact, "get_fvps", "test_fvps")
-  calculate_impact(test_args$con,
-                   "yov_activity_type",
-                   test_args$touchstone,
-                   test_args$modelling_group,
-                   test_args$disease,
-                   test_args$focal_scenario_type,
-                   test_args$baseline_scenario_type,
-                   test_args$focal_vaccine_delivery,
-                   test_args$baseline_vaccine_delivery,
-                   test_args$burden_outcomes,
-                   test_args$countries,
-                   test_args$is_under5,
-                   test_args$vaccination_years)
+
+  args <- test_args
+  args$method <- "yov_activity_type"
+  do.call(calculate_impact, args)
+
   mockery::expect_called(mock, 1)
   args <- mockery::mock_args(mock)
   expect_equal(as.character(args[[1]][[1]]$scenario), "baseline")
@@ -272,19 +232,11 @@ test_that("calculate_impact calls impact_by_year_of_vaccination_birth_cohort whe
   mockery::stub(calculate_impact, "get_impact_for_burden_estimate_set", mock_get_impact_for_burden_estimate_set)
   mockery::stub(calculate_impact, "impact_by_year_of_vaccination_birth_cohort", mock)
   mockery::stub(calculate_impact, "get_fvps", "test_fvps")
-  calculate_impact(test_args$con,
-                   "yov_birth_cohort",
-                   test_args$touchstone,
-                   test_args$modelling_group,
-                   test_args$disease,
-                   test_args$focal_scenario_type,
-                   test_args$baseline_scenario_type,
-                   test_args$focal_vaccine_delivery,
-                   test_args$baseline_vaccine_delivery,
-                   test_args$burden_outcomes,
-                   test_args$countries,
-                   test_args$is_under5,
-                   test_args$vaccination_years)
+
+  args <- test_args
+  args$method <- "yov_birth_cohort"
+  do.call(calculate_impact, args)
+
   mockery::expect_called(mock, 1)
   args <- mockery::mock_args(mock)
   expect_equal(as.character(args[[1]][[1]]$scenario), "baseline")
