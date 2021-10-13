@@ -121,27 +121,6 @@ mock_impact_by_calendar_year <- function(baseline, focal) {
 }
 
 test_that("calculate_impact retrieves touchstone id if name given", {
-  mockery::stub(calculate_impact, "get_touchstone_id", mock_get_touchstone_id)
-  mockery::stub(calculate_impact, "get_burden_outcome_ids", mock_get_burden_outcome_ids)
-  mockery::stub(calculate_impact, "get_burden_estimate_set_ids", mock_get_burden_estimate_set_ids)
-  mockery::stub(calculate_impact, "get_impact_for_burden_estimate_set", mock_get_impact_for_burden_estimate_set)
-  mockery::stub(calculate_impact, "impact_by_calendar_year", mock_impact_by_calendar_year)
-  expect_equal(calculate_impact(test_args$con,
-                                test_args$method,
-                                test_args$touchstone,
-                                test_args$modelling_group,
-                                test_args$disease,
-                                test_args$focal_scenario_type,
-                                test_args$baseline_scenario_type,
-                                test_args$focal_vaccine_delivery,
-                                test_args$baseline_vaccine_delivery,
-                                test_args$burden_outcomes,
-                                test_args$countries,
-                                test_args$is_under5,
-                                test_args$vaccination_years0), "success")
-})
-
-test_that("calculate_impact uses touchstone id if name given", {
   mock <- mockery::mock(test_outputs$touchstone)
   mockery::stub(calculate_impact, "get_touchstone_id", mock)
   mockery::stub(calculate_impact, "get_burden_outcome_ids", mock_get_burden_outcome_ids)

@@ -379,7 +379,7 @@ get_burden_estimate_set_ids <- function(
     )) %>%
     dplyr::filter(!is.na(scenario)) %>%
     dplyr::select(scenario, activity_type,
-                  burden_estimate_set = current_burden_estimate_set) %>% dplyr::show_query()
+                  burden_estimate_set = current_burden_estimate_set)
 }
 
 
