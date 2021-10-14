@@ -40,8 +40,8 @@
 #' @return Impact for this set of parameters.
 #' @export
 calculate_impact <- function(con, method, touchstone, modelling_group, disease,
-                             focal_scenario_type, focal_vaccine_delivery = NULL,
-                             baseline_scenario_type,
+                             focal_scenario_type, baseline_scenario_type,
+                             focal_vaccine_delivery = NULL,
                              baseline_vaccine_delivery = NULL,
                              burden_outcomes = c("deaths", "cases", "dalys"),
                              countries = NULL, is_under5 = FALSE,
