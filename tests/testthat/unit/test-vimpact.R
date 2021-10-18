@@ -134,3 +134,49 @@ test_that("filter_year can handle nulls", {
   result <- filter_year(df, NULL)
   expect_equal(result, df)
 })
+
+test_that("can aggregate population", {
+  coverage <- data.frame(coverage_set = 1, vaccine = "HepB", country = "AFG", year = "2020", activity_type = "routine",
+                         age_from = 1, age_to = 3, gender = "male", target = 1000, coverage = 1000)
+
+  # test only correct ages included
+  population <- data.frame(country = "AFG",
+                           year = "2020",
+                           age = c(1, 2, 3, 4),
+                           gender = "male",
+                           value = 10000)
+
+  result <- aggregate_pop(coverage, population)
+  expect_equal(result$population, 30000)
+
+  # test only correct years included
+  population <- data.frame(country = "AFG",
+                           year = c("2020", "2020", "2021"),
+                           age = 1,
+                           gender = "male",
+                           value = 10000)
+
+  result <- aggregate_pop(coverage, population)
+  expect_equal(result$population, 20000)
+
+  # test only correct gender included
+  population <- data.frame(country = "AFG",
+                           year = "2020",
+                           age = c(1, 2, 1),
+                           gender = c("female", "male", "male"),
+                           value = 10000)
+
+  result <- aggregate_pop(coverage, population)
+  expect_equal(result$population, 20000)
+
+  # test only correct country included
+  population <- data.frame(country = c("AFG", "AFG", "UGA"),
+                           year = "2020",
+                           age = 1,
+                           gender = "male",
+                           value = 10000)
+
+  result <- aggregate_pop(coverage, population)
+  expect_equal(result$population, 20000)
+
+})
