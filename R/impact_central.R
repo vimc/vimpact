@@ -339,14 +339,19 @@ impact_by_calendar_year <- function(baseline_burden, focal_burden) {
   focal <- focal_burden %>%
     dplyr::group_by(year, country, burden_outcome) %>%
     dplyr::summarise(focal_val = sum(value, na.rm = TRUE))
-  baseline %>%
+  out <- baseline %>%
     dplyr::inner_join(focal, by = c("country", "burden_outcome", "year")) %>%
-    dplyr::mutate(impact = baseline_val - focal_val) %>%
     dplyr::select(country, burden_outcome, year,
-                  impact) %>%
+                  baseline_val, focal_val) %>%
     dplyr::arrange(country, burden_outcome, year) %>%
     dplyr::ungroup() %>%
-    dplyr::as_tibble()
+    dplyr::collect()
+
+  ## Calculate impact outside of Postgres otherwise get
+  ## precision errors on 0 value entries
+  out %>%
+    dplyr::mutate(impact = baseline_val - focal_val) %>%
+    dplyr::select(-baseline_val, -focal_val)
 }
 
 #' Calculate impact by birth year (lifetime impact)
@@ -362,9 +367,9 @@ impact_by_calendar_year <- function(baseline_burden, focal_burden) {
 #' because of herd protection).
 #'
 #' @param baseline_burden Data frame of baseline burden data this needs to have
-#' columns country, burden_outcome, year, age, value
+#'   columns country, burden_outcome, year, age, value
 #' @param focal_burden Data frame of focal burden data this needs to have
-#' columns country, burden_outcome, year, age, value
+#'   columns country, burden_outcome, year, age, value
 #'
 #' @return Vaccine impact by country and birth year for burden outcomes as a
 #' data frame with columns country, year, burden_outcome and impact
@@ -393,7 +398,7 @@ impact_by_birth_year <- function(baseline_burden, focal_burden) {
     dplyr::select(country, burden_outcome, birth_cohort, impact) %>%
     dplyr::arrange(country, burden_outcome, birth_cohort) %>%
     dplyr::ungroup() %>%
-    dplyr::as_tibble()
+    dplyr::collect()
 }
 
 #' Calculate impact by year of vaccination: activity type
@@ -437,10 +442,15 @@ impact_by_year_of_vaccination_activity_type <- function(
   assert_allowed_values(baseline_burden, "activity_type", activity_types)
   assert_allowed_values(focal_burden, "activity_type", c("routine", "campaign"))
   assert_allowed_values(fvps, "activity_type", activity_types)
-  activity <- unique(focal_burden$activity_type)
-  if (length(activity) != 1L) {
+  activity <- focal_burden %>%
+    dplyr::ungroup() %>%
+    dplyr::select(activity_type) %>%
+    dplyr::distinct() %>%
+    dplyr::collect()
+  if (nrow(activity) != 1L) {
     stop("Focal burden must have only one activity_type.")
   }
+  activity <- as.character(activity)
 
   year <- country <- activity_type <- time <- age <- burden_outcome <- NULL
   impact <- vaccine <- birth_cohort <- NULL
@@ -489,7 +499,7 @@ impact_by_year_of_vaccination_activity_type <- function(
                   impact) %>%
     dplyr::arrange(country, vaccine, activity_type, burden_outcome, year) %>%
     dplyr::ungroup() %>%
-    dplyr::as_tibble()
+    dplyr::collect()
 }
 
 #' Calculate impact by year of vaccination: birth cohort
@@ -531,7 +541,7 @@ impact_by_year_of_vaccination_birth_cohort <- function(
     c("country", "year", "vaccine", "activity_type", "age", "fvps"))
 
   country <- burden_outcome <- birth_cohort <- impact <- year <- NULL
-  vaccine <- activity_type <- NULL
+  vaccine <- activity_type <- age <- NULL
   ## Get impact for birth cohort
   tot_impact <- baseline_burden %>%
     impact_by_birth_year(focal_burden) %>%
@@ -539,12 +549,17 @@ impact_by_year_of_vaccination_birth_cohort <- function(
     dplyr::summarise(impact = sum(impact, na.rm = TRUE))
 
   ## Get FVP totals for birth year/birth cohort
-  fvps$birth_cohort <- get_birth_cohort(fvps)
+  fvps <- fvps %>%
+    dplyr::mutate(birth_cohort = year - age)
   tot_fvps <- fvps %>%
     dplyr::filter(year %in% vaccination_years) %>%
     dplyr::group_by(country, birth_cohort) %>%
-    dplyr::summarise(fvps = sum(fvps, na.rm = TRUE))
-  if (nrow(tot_fvps) == 0) {
+    dplyr::summarise(fvps = sum(fvps, na.rm = TRUE)) %>%
+    dplyr::collect()
+
+  ## Throw error if invalid range, but let continue if we're
+  ## working with dbplyr and haven't pulled data yet
+  if (!inherits(tot_fvps, "tbl_lazy") && nrow(tot_fvps) == 0) {
     stop("No FVP data for this range of vaccination years")
   }
 

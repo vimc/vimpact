@@ -14,6 +14,7 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 Imports:
     DBI,
+    dbplyr,
     dplyr,
     glue,
     magrittr,
@@ -22,6 +23,7 @@ Imports:
     vaultr
 Suggests:
     ggplot2,
+    htmltools,
     knitr,
     testthat,
     retry,
@@ -30,3 +32,4 @@ Suggests:
     withr
 RoxygenNote: 7.1.1
 VignetteBuilder: knitr
+Config/testthat/edition: 3

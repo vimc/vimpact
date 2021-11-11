@@ -85,3 +85,39 @@ assert_allowed_values <- function(data, column, values) {
   }
   invisible(TRUE)
 }
+
+assert_scalar_character <- function(x, name = deparse(substitute(x))) {
+  assert_character(x, name)
+  assert_scalar(x, name)
+  assert_nonmissing(x, name)
+  if (!nzchar(x)) {
+    stop(sprintf("'%s' must be nonempty", name), call. = FALSE)
+  }
+}
+
+assert_character <- function(x, name = deparse(substitute(x))) {
+  if (!is.character(x)) {
+    stop(sprintf("'%s' must be a character", name), call. = FALSE)
+  }
+}
+
+assert_scalar <- function(x, name = deparse(substitute(x))) {
+  if (length(x) != 1) {
+    stop(sprintf("'%s' must be a scalar", name), call. = FALSE)
+  }
+}
+
+assert_nonmissing <- function(x, name = deparse(substitute(x))) {
+  if (any(is.na(x))) {
+    stop(sprintf("'%s' must not be NA", name), call. = FALSE)
+  }
+}
+
+assert_one_of <- function(x, options, name = deparse(substitute(x))) {
+  assert_scalar_character(x)
+  if (!x %in% options) {
+    stop(sprintf("'%s' must be one of %s got %s", name,
+                 paste(options, collapse = ", "), x),
+         call. = FALSE)
+  }
+}

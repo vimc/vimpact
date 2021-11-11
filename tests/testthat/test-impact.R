@@ -1,5 +1,3 @@
-context("Test Impact Calculations")
-
 test_that("test if vimpact functions are working as expected for central estimates", {
   #skip_if_no_reference_data()
   standardise_impact_output_for_test <- function(meta, dat){
@@ -288,7 +286,7 @@ test_that("impact by calendar year: external and internal functions agree", {
   ## Throw away columns we don't care about
   vimc_impact <- vimc_impact[, c("country", "burden_outcome", "time", "value")]
   ## column names slightly different time vs year and value vs impact
-  expect_equivalent(vimc_impact, public_impact)
+  expect_equal(vimc_impact, public_impact, ignore_attr = TRUE)
 })
 
 test_that("impact by birth year can be caluclated", {
@@ -348,7 +346,7 @@ test_that("impact by birth year: external and internal functions agree", {
   ## Throw away columns we don't care about
   vimc_impact <- vimc_impact[, c("country", "burden_outcome", "time", "value")]
   ## column names slightly different time vs year and value vs impact
-  expect_equivalent(vimc_impact, public_impact)
+  expect_equal(vimc_impact, public_impact, ignore_attr = TRUE)
 })
 
 test_that("impact by year of vaccination activity type: only campaign", {
@@ -457,7 +455,7 @@ test_that("impact activity type: functions agree - routine", {
   vimc_impact <- vimc_impact[, colnames(public_impact)]
   vimc_impact <- vimc_impact[
     order(vimc_impact$country, vimc_impact$activity_type, vimc_impact$year), ]
-  expect_equal(public_impact, vimc_impact, check.attributes = FALSE)
+  expect_equal(public_impact, vimc_impact, ignore_attr = TRUE)
 })
 
 test_that("impact activity type: functions agree - campaign", {
@@ -506,7 +504,7 @@ test_that("impact activity type: functions agree - campaign", {
   vimc_impact <- vimc_impact[, colnames(public_impact)]
   vimc_impact <- vimc_impact[
     order(vimc_impact$country, vimc_impact$activity_type, vimc_impact$year), ]
-  expect_equal(public_impact, vimc_impact, check.attributes = FALSE)
+  expect_equal(public_impact, vimc_impact, ignore_attr = TRUE)
 })
 
 test_that("impact by year of vaccination birth cohort", {
@@ -574,5 +572,5 @@ test_that("impact birth cohort: internal and external functions agree", {
     vimc_impact, sum, na.rm = TRUE)
   vimc_impact <- vimc_impact[
     order(vimc_impact$country, vimc_impact$activity_type, vimc_impact$year), ]
-  expect_equal(public_impact, vimc_impact, check.attributes = FALSE)
+  expect_equal(public_impact, vimc_impact, ignore_attr = TRUE)
 })
