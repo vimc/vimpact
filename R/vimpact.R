@@ -433,3 +433,74 @@ get_impact_for_burden_estimate_set <- function(
     dplyr::select(country, year, age, burden_outcome, scenario, activity_type,
                   value)
 }
+
+#' Calculate impact from a recipe - requires a DB connection to montagu.
+#'
+#' This depends on the DB format of VIMC and so is for internal use only.
+#'
+#' @param con Connection to database
+#' @param recipe Path to file containing recipe for burden outcome calculation.
+#'   TODO: Add a vignette with more info about the recipe and reference here
+#' @param method Impact method to use one of calendar_year, birth_year,
+#'   yov_activity_type, yov_birth_cohort.
+#' @param countries Vector of countries to get impact for. If NULL then impact
+#'   calculated for all countries.
+#' @param is_under5 If TRUE then only include data for age under 5, otherwise
+#'   calculate impact for all ages
+#' @param vaccination_years Years of vaccination of interest, only used for
+#'   year of vaccination (yov) methods
+#'
+#' @return The impact for each row in the recipe
+calculate_impact_from_recipe <- function(con, recipe_path, method,
+                                         countries = NULL, is_under5 = FALSE,
+                                         vaccination_years = 2000:2030) {
+  recipe <- read.csv(recipe_path)
+  full_impact <- lapply(seq_len(nrow(recipe)), function(row_number) {
+    row <- recipe[row_number, ]
+    focal <- split_scenario_vaccine_delivery(row$focal)
+    baseline <- split_scenario_vaccine_delivery(row$baseline)
+    if (row$burden_outcome == "*") {
+      burden_outcomes <- c("deaths", "cases", "dalys")
+    } else {
+      burden_outcomes <- unlist(strsplit(
+        strsplit(row$burden_outcome, ";")[[1]], ","))
+      ## Always include dalys
+      burden_outcomes <- unique(c(burden_outcomes, "dalys"))
+    }
+    impact <- calculate_impact(
+      con, method,
+      touchstone = row$touchstone,
+      modelling_group = row$modelling_group,
+      disease = row$disease,
+      focal_scenario_type = focal$scenario_type,
+      baseline_scenario_type = baseline$scenario_type,
+      focal_vaccine_delivery = focal$vaccine_delivery,
+      baseline_vaccine_delivery = baseline$vaccine_delivery,
+      burden_outcomes = burden_outcomes,
+      countries = countries,
+      is_under5 = is_under5,
+      vaccination_years = vaccination_years)
+    impact$index <- row_number
+    impact
+  })
+  do.call(rbind, full_impact)
+}
+
+split_scenario_vaccine_delivery <- function(string) {
+  if (string == "novac") {
+    return(list(
+      scenario_type = "novac",
+      vaccine_delivery = NULL
+    ))
+  }
+  type_and_delivery <- strsplit(string, ":")
+  scenario_type <- type_and_delivery[[1]][1]
+  delivery <- strsplit(type_and_delivery[[1]][2], ";")
+  vaccine_delivery <- lapply(delivery[[1]], function(item) {
+    vaccine_activity <- strsplit(item, "-")[[1]]
+    list(vaccine = vaccine_activity[1],
+         activity_type = vaccine_activity[2])
+  })
+  list(scenario_type = scenario_type,
+       vaccine_delivery = vaccine_delivery)
+}

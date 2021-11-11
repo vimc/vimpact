@@ -214,3 +214,92 @@ test_that("can get FVPS", {
     dplyr::arrange(activity_type, year, age)
   expect_equal(new_fvps, old_fvps, ignore_attr = TRUE)
 })
+
+test_that("can use wrapper function to run impact for a recipe", {
+  mock_data_1 <- data.frame(
+    country = c("AFG", "AFG"),
+    vaccine = c("HepB", "HepB"),
+    activity_type = c("routine", "routine"),
+    year = c(2000, 2001),
+    burden_outcome = c("dalys", "dalys"),
+    impact = c(2342, 3543)
+  )
+  mock_data_2 <- data.frame(
+    country = c("AGO", "AGO"),
+    vaccine = c("YF", "YF"),
+    activity_type = c("campaign", "campaign"),
+    year = c(2000, 2001),
+    burden_outcome = c("dalys", "dalys"),
+    impact = c(653, 765)
+  )
+  mock_calculate_impact <- mockery::mock(mock_data_1,
+                                         mock_data_2, cycle = TRUE)
+  mockery::stub(calculate_impact_from_recipe, "calculate_impact",
+                mock_calculate_impact)
+
+  recipe <- data.frame(
+    touchstone = c("201710gavi-5", "201710gavi-6"),
+    modelling_group = c("CDA-Razavi", "XYZ-someone"),
+    disease = c("HepB", "YF"),
+    focal = c("default:HepB_BD-routine;HepB-routine",
+              "default:YF-routine;YF-campaign"),
+    baseline = c("novac", "novac:YF-routine"),
+    burden_outcome = c("hepb_deaths_acute;hepb_cases_acute_severe", "*"))
+  t <- tempfile(fileext = ".csv")
+  write.csv(recipe, t, row.names = FALSE)
+
+  impact <- calculate_impact_from_recipe("con", t, "calendar_year",
+                                         countries = c("AFG", "AGO"),
+                                         is_under5 = TRUE,
+                                         vaccination_years = 2000:2005)
+  mock_data_1$index <- 1
+  mock_data_2$index <- 2
+  expected <- rbind(mock_data_1, mock_data_2)
+  expect_equal(impact, expected)
+
+  mockery::expect_called(mock_calculate_impact, 2)
+  args <- mockery::mock_args(mock_calculate_impact)
+
+  expect_equal(args[[1]][[1]], "con")
+  expect_equal(args[[1]][[2]], "calendar_year")
+  expect_equal(args[[1]]$touchstone, "201710gavi-5")
+  expect_equal(args[[1]]$modelling_group, "CDA-Razavi")
+  expect_equal(args[[1]]$disease, "HepB")
+  expect_equal(args[[1]]$focal_scenario_type, "default")
+  expect_equal(args[[1]]$baseline_scenario_type, "novac")
+  expect_equal(args[[1]]$focal_vaccine_delivery, list(
+    list(vaccine = "HepB_BD",
+         activity_type = "routine"),
+    list(vaccine = "HepB",
+         activity_type = "routine")
+  ))
+  expect_null(args[[1]]$baseline_vaccine_delivery)
+  expect_equal(args[[1]]$burden_outcomes,
+               c("hepb_deaths_acute", "hepb_cases_acute_severe", "dalys"))
+  expect_equal(args[[2]]$countries, c("AFG", "AGO"))
+  expect_true(args[[2]]$is_under5)
+  expect_equal(args[[2]]$vaccination_years, 2000:2005)
+
+  expect_equal(args[[2]][[1]], "con")
+  expect_equal(args[[2]][[2]], "calendar_year")
+  expect_equal(args[[2]]$touchstone, "201710gavi-6")
+  expect_equal(args[[2]]$modelling_group, "XYZ-someone")
+  expect_equal(args[[2]]$disease, "YF")
+  expect_equal(args[[2]]$focal_scenario_type, "default")
+  expect_equal(args[[2]]$baseline_scenario_type, "novac")
+  expect_equal(args[[2]]$focal_vaccine_delivery, list(
+    list(vaccine = "YF",
+         activity_type = "routine"),
+    list(vaccine = "YF",
+         activity_type = "campaign")
+  ))
+  expect_equal(args[[2]]$baseline_vaccine_delivery, list(
+    list(vaccine = "YF",
+         activity_type = "routine")
+  ))
+  expect_equal(args[[2]]$burden_outcomes,
+               c("deaths", "cases", "dalys"))
+  expect_equal(args[[2]]$countries, c("AFG", "AGO"))
+  expect_true(args[[2]]$is_under5)
+  expect_equal(args[[2]]$vaccination_years, 2000:2005)
+})
