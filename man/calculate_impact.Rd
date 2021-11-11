@@ -11,8 +11,8 @@ calculate_impact(
   modelling_group,
   disease,
   focal_scenario_type,
-  focal_vaccine_delivery = NULL,
   baseline_scenario_type,
+  focal_vaccine_delivery = NULL,
   baseline_vaccine_delivery = NULL,
   burden_outcomes = c("deaths", "cases", "dalys"),
   countries = NULL,
@@ -35,6 +35,9 @@ touchstone ID or touchstone name.}
 
 \item{focal_scenario_type}{The focal scenario scenario type e.g. "default"}
 
+\item{baseline_scenario_type}{The baseline scenario scenario type e.g.
+"novac"}
+
 \item{focal_vaccine_delivery}{The focal vaccine delivery methods. This should
 be a list of lists or NULL if scenario type is novac. Each element of first
 list needs to specify the vaccination and activity type. e.g.
@@ -48,9 +51,6 @@ list(
     activity_type = "routine"
   )
  )}
-
-\item{baseline_scenario_type}{The baseline scenario scenario type e.g.
-"novac"}
 
 \item{baseline_vaccine_delivery}{Like `focal_vaccine_delivery` this should be
 a list of lists, each element containing vaccination and activity type. If

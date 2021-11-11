@@ -1,0 +1,208 @@
+---
+title: "Using vimpact for estimating vaccine impact - internal"
+author: "Rob Ashton"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Using vimpact for estimating vaccine impact - internal}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+<!-- HEADER -->
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+library(magrittr)
+
+con <- DBI::dbConnect(RPostgres::Postgres(),
+                      dbname = "montagu",
+                      host = Sys.getenv("MONTAGU_HOST", "support.montagu.dide.ic.ac.uk"),
+                      port = Sys.getenv("MONTAGU_PORT", 5432),
+                      password = Sys.getenv("MONTAGU_PASSWORD"),
+                      user = "readonly")
+```
+
+This vignette describes how to use vimpact to calculate impact as a member of VIMC. This requires a connection to the montagu database so can only be used internally. Note that this is all in development and the interface is likely to change.
+
+## Impact by calendar year & impact by birth year
+
+### Function interface
+
+```{r}
+impact <- vimpact::calculate_impact(
+  con, method = "calendar_year", touchstone = "201910gavi-5",
+  modelling_group = "CDA-Razavi",  disease = "HepB",
+  focal_scenario_type = "default", focal_vaccine_delivery = list(
+    list(vaccine = "HepB_BD", activity_type = "routine"),
+    list(vaccine = "HepB", activity_type = "routine")
+  ),
+  baseline_scenario_type = "novac",
+  burden_outcomes = c("hepb_deaths_acute", "hepb_deaths_dec_cirrh",
+                      "hepb_deaths_hcc"))
+str(impact)
+```
+
+Or for impact by birth year, use `method = "birth_year"`. This will get `burden_estimate_set` ids for the baseline and focal scenarios for this particular touchstone, modelling group, disease. Then uses those to pull the `burden_estimate` data for specified `burden_outcomes`. Optionally filtering on country via `countries` arg, year via `vaccination_years` and under 5 age groups if `is_under5 = TRUE`. We then use raw impact from `burden_estimate` table and call relevant public facing impact method. For `method = "calendar_year"` `impact_by_calendar_year`. For `method = "birth_year"` `impact_by_birth_year`.
+
+
+
+### Recipe interface
+
+Define a recipe either as a csv or using `recipe_template`
+
+```{r}
+recipe <- data.frame(
+  touchstone = "201910gavi-5",
+  modelling_group = "CDA-Razavi", disease = "HepB",
+  focal = "default:HepB_BD-routine;HepB-routine",
+  baseline = "novac",
+  burden_outcome = "hepb_deaths_acute,hepb_deaths_dec_cirrh,hepb_deaths_hcc;hepb_cases_acute_severe,hepb_cases_dec_cirrh,hepb_cases_hcc")
+t <- tempfile(fileext = ".csv")
+write.csv(recipe, t, row.names = FALSE)
+```
+
+This is a set of properties defining what data we want to extract from the db e.g. `touchstone`, `modelling_group`, `disease`, focal and baseline scenarios and `burden_outcome`. It captures the same info as the args to `calculate_impact` above. Then use the recipe to define meta data frame
+
+```{r}
+meta <- vimpact:::get_meta_from_recipe(default_recipe = FALSE, recipe = t, con = con)
+```
+
+And use this to calculate impact
+
+```{r}
+old_impact <- vimpact:::get_raw_impact_details(con, meta, "deaths")
+str(old_impact)
+```
+
+## Impact by year of vaccination
+
+### Function interface
+
+Very similar to examples for calendar year and birth year, to calculate impact by year of vaccination stratified by activity type run
+
+```{r}
+impact <- vimpact::calculate_impact(
+  con, method = "yov_activity_type", touchstone = "201910gavi-5",
+  modelling_group = "CDA-Razavi",  disease = "HepB",
+  focal_scenario_type = "default", focal_vaccine_delivery = list(
+    list(vaccine = "HepB_BD", activity_type = "routine"),
+    list(vaccine = "HepB", activity_type = "routine")
+  ),
+  baseline_scenario_type = "novac",
+  burden_outcomes = "dalys")
+str(impact)
+```
+
+or use `method = "yov_birth_cohort` for impact by year of vaccination stratified by birth cohort. This uses the same logic as other impact methods but before calling the public facing impact function it will also extract FVP data from the data base for this `touchstone` and vaccine delivery. It then calls either `impact_by_year_of_vaccination_activity_type` or `impact_by_year_of_vaccination_birth_cohort` to get impact.
+
+### Recipe interface
+
+We can re-use the recipe from above and get meta table for this method
+
+```{r}
+meta <- vimpact:::get_meta_from_recipe(default_recipe = FALSE, recipe = t,
+                                      method = "method2a", con = con)
+```
+
+Then use this to get raw impact
+
+```{r}
+old_raw_impact <- vimpact:::get_raw_impact_details(con, meta, "dalys")
+```
+
+Extract the fvp data and map output to required interface
+
+```{r}
+fvps <- vimpact::extract_vaccination_history(con, "201910gavi-5", year_min = 2000,
+                                             year_max = 2030,
+                                             disease_to_extract = "HepB")
+fvps$fvps <- fvps$fvps_adjusted
+fvps$country <- fvps$country_nid
+```
+
+Then can use `meta`, `raw_impact` and `fvps` to calculate impact by year of vaccination
+
+```{r}
+old_impact <- vimpact:::impact_by_year_of_vaccination(
+  meta, old_raw_impact, fvps, vaccination_years = 2000:2030)
+str(old_impact)
+```
+
+## Comparison
+
+`calculate_impact` has a very similar interface as a single row in an impact recipe. The output is slightly different format but output from previous method can be transformed into same format.
+
+```{r}
+country <- dplyr::tbl(con, "country")
+old_impact <- old_impact %>%
+  dplyr::left_join(country, by = c("country" = "nid"), copy = TRUE) %>%
+  dplyr::select(country = id, vaccine, activity_type, year = time,
+                burden_outcome, impact) %>%
+  dplyr::filter(!is.na(impact)) %>%
+  dplyr::arrange(activity_type, country, year, vaccine)
+str(old_impact)
+```
+
+and we can see from a plot that the output is very similar
+
+```{r}
+impact_plot <- merge(old_impact, impact, all.x = TRUE, all.y = TRUE,
+                     by = c("country", "vaccine", "activity_type", "year",
+                            "burden_outcome"))
+countries <- unique(impact_plot$country)
+impact_plot <- impact_plot %>%
+  dplyr::rename(recipe_impact = impact.x, function_impact = impact.y) %>%
+  tidyr::pivot_wider(names_from = country, 
+                     values_from = c(recipe_impact, function_impact))
+impact_plot <- as.data.frame(impact_plot)
+countries_filter <- lapply(unique(countries), function(country) {
+  button <- list(
+    method = "restyle",
+    args = list("y", c(
+      list(impact_plot[, paste0("recipe_impact_", country)]),
+      list(impact_plot[, paste0("function_impact_", country)]))),
+    label = country
+  )
+})
+plot <- plotly::plot_ly(data = impact_plot) %>%
+  plotly::add_trace(x = ~year, y = ~recipe_impact_AFG, name = "recipe", 
+                    type = "scatter", mode = "markers", text = ~vaccine,
+                    marker = list(
+                      color = "rgb(235, 204, 42)",
+                      size = 10
+                    )) %>%
+  plotly::add_trace(x = ~year, y = ~function_impact_AFG, name = "function",
+                    type = "scatter", mode = "markers", text = ~vaccine,
+                    marker = list(
+                      color = "rgb(60, 154, 178)",
+                      symbol = "circle-open",
+                      size = 10,
+                      line = list(
+                        color = "rgb(60, 154, 178)",
+                        width = 2
+                      )
+                    )) %>%
+  plotly::layout(
+    yaxis = list(title = "impact"),
+    updatemenus = list(
+      list(
+        y = 0.7,
+        buttons = countries_filter
+      )
+    ))
+```
+
+```{r include = FALSE}
+htmlwidgets::saveWidget(plotly::partial_bundle(plot), 
+                        "impact_comparisons.html")
+```
+
+<!-- WIDGET -->
+
+There are small differences in impact because of differences in precision. `calculate_impact` tries to do large parts of the aggregation on the database where `burden_estimate` values are stored as Postgres `real` type which has 4 bytes of storage size and 6 decimal digits of precision. Whereas if we pull this before aggregation the values are stored in R as doubles which are much higher precision leading to small differences when aggregated. 
+
+`calculate_impact` at the moment won't be able to generate impact for you for more than 1 set of scenario comparisons. Next steps will be to add a wrapper which can take some data like the impact recipe and call `calculate_imapct` for multiple scenarios.

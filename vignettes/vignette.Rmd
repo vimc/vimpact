@@ -4,7 +4,7 @@ author: "Xiang Li"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{vignette}
+  %\VignetteIndexEntry{Using vimpact for estimating vaccine impact - VIMC members}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

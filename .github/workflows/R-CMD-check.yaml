@@ -9,6 +9,7 @@ on:
     branches:
       - main
       - master
+      - vimc-4833
 
 name: R-CMD-check
 
