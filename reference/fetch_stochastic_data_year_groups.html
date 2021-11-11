@@ -75,7 +75,7 @@ individual years to get mean and quantiles for a year alone.d" />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">vimpact</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.6</span>
       </span>
     </div>
 
@@ -139,14 +139,14 @@ a set of year groups to initially aggregate over a range of years. Pass
 individual years to get mean and quantiles for a year alone.d</p>
     </div>
 
-    <pre class="usage"><span class='fu'>fetch_stochastic_data_year_groups</span>(
-  <span class='kw'>annex</span>,
-  <span class='kw'>table</span>,
-  groups = <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"disease"</span>, <span class='st'>"country"</span>),
-  filters = <span class='kw'>NULL</span>,
-  year_groups = <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>2000</span><span class='op'>:</span><span class='fl'>2019</span>)),
-  include_proportion_averted = <span class='fl'>FALSE</span>
-)</pre>
+    <pre class="usage"><span class='fu'>fetch_stochastic_data_year_groups</span><span class='op'>(</span>
+  <span class='va'>annex</span>,
+  <span class='va'>table</span>,
+  groups <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"disease"</span>, <span class='st'>"country"</span><span class='op'>)</span>,
+  filters <span class='op'>=</span> <span class='cn'>NULL</span>,
+  year_groups <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>2000</span><span class='op'>:</span><span class='fl'>2019</span><span class='op'>)</span><span class='op'>)</span>,
+  include_proportion_averted <span class='op'>=</span> <span class='cn'>FALSE</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">

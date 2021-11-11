@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">vimpact</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.6</span>
       </span>
     </div>
 
@@ -103,20 +103,20 @@
 <p>There are a set of frequently used functions that extracts data from VIMC databases.</p>
 <p><strong>Determine latest touchstone version</strong></p>
 <p>Montagu data is touchstone based. Each touchstone may contain multiple versions as it is developed. The most recent version of touchstone can be determined by <code>get_touchstone</code> where <code>con</code> specifies the database machine, and <code>touchstone_name</code> indicates the touchstone of interest.</p>
-<pre><code><a href="../reference/get_touchstone.html">get_touchstone(con, touchstone_name = "201710gavi")</a></code></pre>
+<pre><code>get_touchstone(con, touchstone_name = "201710gavi")</code></pre>
 <p>This will return <code>201710gavi-6</code>. <code>201710gavi</code> touchstone has 6 versions. And Version 6 has the most recent coverage scenarios.</p>
 <p><strong>Extract demographic data</strong> Demographic data is frequently used for analysis. It is therefore useful to have a standardized function extracting demographic data from Montagu.</p>
-<pre><code><a href="../reference/get_population.html">get_population(con, touchstone_pop = "201710gavi-5", demographic_statistic = "int_pop", gender = "Both",
-               country_ = NULL, year_ = NULL, age_ = NULL)</a></code></pre>
+<pre><code>get_population(con, touchstone_pop = "201710gavi-5", demographic_statistic = "int_pop", gender = "Both",
+               country_ = NULL, year_ = NULL, age_ = NULL)</code></pre>
 <p><code>demographic_statistic</code> is demographic_statistic_type code; <code>gender</code> can be <code>Female, Male or Both</code> if specified or all three selections if NULL; <code>country_</code> is all VIMC countries if NULL or an array of selected countries; similar for <code>year_</code> and <code>age_</code>.</p>
 <p><strong>Extract vaccination coverage data</strong></p>
-<pre><code><a href="../reference/extract_vaccination_history.html">extract_vaccination_history(con, touchstone_cov = "201710gavi", touchstone_pop = NULL,
+<pre><code>extract_vaccination_history(con, touchstone_cov = "201710gavi", touchstone_pop = NULL,
                             year_min = 2000, year_max = 2100,
                             vaccine_to_ignore = c("DTP3", "HepB_BD_home", "none"),
                             disease_to_extract = NULL,
                             countries_to_extract = NULL,
                             gavi_support_levels = c("with", "bestminus"),
-                            scenario_type = "default", external_population_estimates = NULL, full_description = TRUE)</a></code></pre>
+                            scenario_type = "default", external_population_estimates = NULL, full_description = TRUE)</code></pre>
 </div>
 <div id="annex-views-susy-to-add" class="section level3">
 <h3 class="hasAnchor">
@@ -127,7 +127,7 @@
 <a href="#vaccine-impact-calculations" class="anchor"></a>Vaccine impact calculations</h3>
 <p><strong>prepare impact calculation recipe</strong> Impact calculation differs according to vaccination scenarios under investigation. Vimpact compares two distinct scenarios, namely the baseline and the focal. Vaccination impact is evaluated as excessive disease burden of focal scenario compared to the baseline. A impact recipe contains meta information of the two scenarios for each particular disease, touchstone and modelling group.</p>
 <p>Firstly, <code>recipe_tempate</code> generates a sample impact recipe, from which users can develop their own recipes. Current vimpact allows four views of impact recipes (method0, method1, method2a and method2b) representing vaccine impact by calendar year, year of birth, year of vaccination (vaccination activity perspective) and year of vaccination (birth cohort perspective). The following row of code gives an example recipe of impact by year of birth.</p>
-<pre><code><a href="../reference/recipe_template.html">recipe_template(template_version = "201710", method = "method1")</a></code></pre>
+<pre><code>recipe_template(template_version = "201710", method = "method1")</code></pre>
 <p>Once impact recipes are complete, vimpact prepares meta data needed for communicating with VIMC databases via <code>get_meta_from_recipe function</code>. Each pair of scenarios (focal and baseline) are indexed for further impact calculation.</p>
 <pre><code>get_meta_from_recipe(default_recipe = TRUE, method = "method1", recipe_version = "201710", recipe = NULL, con, disease = "Hib")</code></pre>
 <p><code>default_recipe, method and recipe_version</code> combined determine default VIMC impact recipes commonly used for reporting. If user specified recipe is used (a recipe developed from recipe_template), the recipe csv file path should be specified as <code>recipe = &lt;file_path&gt;``.</code>disease` can help to allow focused evaluation of vaccine impact. If it is NULL, all diseases will be considered.</p>

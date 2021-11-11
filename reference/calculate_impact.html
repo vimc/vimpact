@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">vimpact</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.6</span>
       </span>
     </div>
 
@@ -133,21 +133,21 @@
     <p>This depends on the DB format of VIMC and so is for internal use only.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>calculate_impact</span>(
-  <span class='kw'>con</span>,
-  <span class='kw'>method</span>,
-  <span class='kw'>touchstone</span>,
-  <span class='kw'>modelling_group</span>,
-  <span class='kw'>disease</span>,
-  <span class='kw'>focal_scenario_type</span>,
-  <span class='kw'>baseline_scenario_type</span>,
-  focal_vaccine_delivery = <span class='kw'>NULL</span>,
-  baseline_vaccine_delivery = <span class='kw'>NULL</span>,
-  burden_outcomes = <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"deaths"</span>, <span class='st'>"cases"</span>, <span class='st'>"dalys"</span>),
-  countries = <span class='kw'>NULL</span>,
-  is_under5 = <span class='fl'>FALSE</span>,
-  vaccination_years = <span class='fl'>2000</span><span class='op'>:</span><span class='fl'>2030</span>
-)</pre>
+    <pre class="usage"><span class='fu'>calculate_impact</span><span class='op'>(</span>
+  <span class='va'>con</span>,
+  <span class='va'>method</span>,
+  <span class='va'>touchstone</span>,
+  <span class='va'>modelling_group</span>,
+  <span class='va'>disease</span>,
+  <span class='va'>focal_scenario_type</span>,
+  <span class='va'>baseline_scenario_type</span>,
+  focal_vaccine_delivery <span class='op'>=</span> <span class='cn'>NULL</span>,
+  baseline_vaccine_delivery <span class='op'>=</span> <span class='cn'>NULL</span>,
+  burden_outcomes <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"deaths"</span>, <span class='st'>"cases"</span>, <span class='st'>"dalys"</span><span class='op'>)</span>,
+  countries <span class='op'>=</span> <span class='cn'>NULL</span>,
+  is_under5 <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  vaccination_years <span class='op'>=</span> <span class='fl'>2000</span><span class='op'>:</span><span class='fl'>2030</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
