@@ -36,4 +36,12 @@ pkgdown:
 website: pkgdown
 	./scripts/update_web.sh
 
+vignettes/internal-impact.Rmd: vignettes_src/internal-impact.Rmd
+	./scripts/build_impact_vignette
+
+vignettes: vignettes/using-vimpact.Rmd vignettes/vignette.Rmd
+	${RSCRIPT} -e 'tools::buildVignettes(dir = ".")'
+	mkdir -p inst/doc
+	cp vignettes/*.html vignettes/*.Rmd inst/doc
+
 .PHONY: all test document install vignettes

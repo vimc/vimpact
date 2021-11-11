@@ -35,8 +35,8 @@ scenario_type-vaccine1-activity_type1;scenario_type-vaccine2-activity_type2}
 \item{disease}{The disease to get data for}
 }
 \value{
-Tibble containing the burden estimate set ids which match the
-  baseline and focal scenarios
+dbplyr lazy db connection containing the burden estimate set ids
+  which match the baseline and focal scenarios
 }
 \description{
 We need to locate unique ID for burden_estimate_set for
