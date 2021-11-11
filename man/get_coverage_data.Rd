@@ -29,7 +29,7 @@ activity_type (routine or campaign) describing delivery}
 \item{touchtonse}{Touchstone to get data for}
 }
 \value{
-dbplyr lazy db connection containing coverage data
+Tibble of coverage data
 }
 \description{
 Get coverage data for a particular touchstone and vaccine delivery method
