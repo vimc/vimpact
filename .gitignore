@@ -3,5 +3,5 @@ docs
 .Renviron
 .Rhistory
 .DS_Store
-vignettes_src/internal-impact.md
-vignettes_src/impact_comparisons.html
+vignettes_src/*.md
+vignettes_src/*.html
