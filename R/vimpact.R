@@ -439,8 +439,9 @@ get_impact_for_burden_estimate_set <- function(
 #' This depends on the DB format of VIMC and so is for internal use only.
 #'
 #' @param con Connection to database
-#' @param recipe Path to file containing recipe for burden outcome calculation.
-#'   TODO: Add a vignette with more info about the recipe and reference here
+#' @param recipe_path Path to file containing recipe for burden outcome
+#'    calculation. TODO: Add a vignette with more info about the recipe and
+#'    reference here.d
 #' @param method Impact method to use one of calendar_year, birth_year,
 #'   yov_activity_type, yov_birth_cohort.
 #' @param countries Vector of countries to get impact for. If NULL then impact
@@ -454,7 +455,7 @@ get_impact_for_burden_estimate_set <- function(
 calculate_impact_from_recipe <- function(con, recipe_path, method,
                                          countries = NULL, is_under5 = FALSE,
                                          vaccination_years = 2000:2030) {
-  recipe <- read.csv(recipe_path)
+  recipe <- utils::read.csv(recipe_path)
   full_impact <- lapply(seq_len(nrow(recipe)), function(row_number) {
     row <- recipe[row_number, ]
     focal <- split_scenario_vaccine_delivery(row$focal)

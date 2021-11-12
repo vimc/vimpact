@@ -16,6 +16,10 @@ calculate_impact_from_recipe(
 \arguments{
 \item{con}{Connection to database}
 
+\item{recipe_path}{Path to file containing recipe for burden outcome
+calculation. TODO: Add a vignette with more info about the recipe and
+reference here.d}
+
 \item{method}{Impact method to use one of calendar_year, birth_year,
 yov_activity_type, yov_birth_cohort.}
 
@@ -27,9 +31,6 @@ calculate impact for all ages}
 
 \item{vaccination_years}{Years of vaccination of interest, only used for
 year of vaccination (yov) methods}
-
-\item{recipe}{Path to file containing recipe for burden outcome calculation.
-TODO: Add a vignette with more info about the recipe and reference here}
 }
 \value{
 The impact for each row in the recipe
