@@ -456,7 +456,7 @@ calculate_impact_from_recipe <- function(con, recipe_path, method,
                                          countries = NULL, is_under5 = FALSE,
                                          vaccination_years = 2000:2030) {
   recipe <- utils::read.csv(recipe_path)
-  full_impact <- lapply(seq_len(nrow(recipe)), function(row_number) {
+  impact_per_scenario <- function(row_number) {
     row <- recipe[row_number, ]
     focal <- split_scenario_vaccine_delivery(row$focal)
     baseline <- split_scenario_vaccine_delivery(row$baseline)
@@ -483,10 +483,41 @@ calculate_impact_from_recipe <- function(con, recipe_path, method,
       vaccination_years = vaccination_years)
     impact$index <- row_number
     impact
-  })
-  do.call(rbind, full_impact)
+  }
+  impact_scenarios <- lapply(seq_len(nrow(recipe)), impact_per_scenario)
+  dplyr::bind_rows(impact_scenarios)
 }
 
+
+##' Take a string describing scenario & vaccine delivery and return in list form
+##'
+##' Take a string of scenario and vaccine delivery from recipe and convert
+##' into list representation for calling calculate_impact. If this
+##' is a novac scenario will return
+##' list(
+##'   scenario_type = "novac",
+##'   vaccine_delivery = NULL
+##' )
+##'
+##' @param string String from a recipe describing a scenario type and vaccine
+##'   delivery method e.g. default:YF-routine;YF-campaign
+##'
+##' @return List representation of scenario type and vaccine delivery method
+##'   as required by calculate_impact. e.g.
+##'   list(
+##'     scenario_type = "default",
+##'     vaccine_delivery = list(
+##'       list(
+##'         vaccine = "YF",
+##'         activity_type = "routine"
+##'       ),
+##'       list(
+##'         vaccine = "YF",
+##'         activity_type = "campaign"
+##'       )
+##'   )
+##'
+##' @keywords internal
 split_scenario_vaccine_delivery <- function(string) {
   if (string == "novac") {
     return(list(
