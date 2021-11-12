@@ -244,7 +244,7 @@ get_coverage_data <- function(con, touchstone, baseline_vaccine_delivery,
   country <- dplyr::tbl(con, "country")
   cov_set <- coverage_set %>%
     dplyr::filter(touchstone == !!touchstone &
-                    gavi_support_level != "none") %>%
+                    gavi_support_level %in% c("with", "bestminus")) %>%
     dplyr::mutate("delivery" = CONCAT(vaccine, "-", activity_type)) %>%
     dplyr::filter(delivery %in% !!delivery) %>%
     dplyr::select(coverage_set = id, vaccine, activity_type)
