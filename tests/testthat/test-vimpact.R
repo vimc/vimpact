@@ -232,10 +232,8 @@ test_that("can use wrapper function to run impact for a recipe", {
     burden_outcome = c("dalys", "dalys"),
     impact = c(653, 765)
   )
-  mock_calculate_impact <- mockery::mock(mock_data_1,
-                                         mock_data_2, cycle = TRUE)
-  mockery::stub(calculate_impact_from_recipe, "calculate_impact",
-                mock_calculate_impact)
+  mock_calculate_impact <- mockery::mock(mock_data_1, mock_data_2,
+                                         cycle = TRUE)
 
   recipe <- data.frame(
     touchstone = c("201710gavi-5", "201710gavi-6"),
@@ -248,10 +246,13 @@ test_that("can use wrapper function to run impact for a recipe", {
   t <- tempfile(fileext = ".csv")
   write.csv(recipe, t, row.names = FALSE)
 
-  impact <- calculate_impact_from_recipe("con", t, "calendar_year",
-                                         countries = c("AFG", "AGO"),
-                                         is_under5 = TRUE,
-                                         vaccination_years = 2000:2005)
+  with_mock(calculate_impact = mock_calculate_impact, {
+    impact <- calculate_impact_from_recipe("con", t, "calendar_year",
+                                           countries = c("AFG", "AGO"),
+                                           is_under5 = TRUE,
+                                           vaccination_years = 2000:2005)
+  })
+
   mock_data_1$index <- 1
   mock_data_2$index <- 2
   expected <- rbind(mock_data_1, mock_data_2)

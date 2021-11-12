@@ -26,6 +26,7 @@ Suggests:
     htmltools,
     knitr,
     mockery,
+    mockr,
     testthat,
     retry,
     rmarkdown,
