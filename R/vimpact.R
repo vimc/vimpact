@@ -440,8 +440,7 @@ get_impact_for_burden_estimate_set <- function(
 #'
 #' @param con Connection to database
 #' @param recipe_path Path to file containing recipe for burden outcome
-#'    calculation. TODO: Add a vignette with more info about the recipe and
-#'    reference here.d
+#'    calculation. For more details see \code{vignette} vignette.
 #' @param method Impact method to use one of calendar_year, birth_year,
 #'   yov_activity_type, yov_birth_cohort.
 #' @param countries Vector of countries to get impact for. If NULL then impact
@@ -452,6 +451,7 @@ get_impact_for_burden_estimate_set <- function(
 #'   year of vaccination (yov) methods
 #'
 #' @return The impact for each row in the recipe
+#' @export
 calculate_impact_from_recipe <- function(con, recipe_path, method,
                                          countries = NULL, is_under5 = FALSE,
                                          vaccination_years = 2000:2030) {
