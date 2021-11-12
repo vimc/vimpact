@@ -496,6 +496,12 @@ split_scenario_vaccine_delivery <- function(string) {
   }
   type_and_delivery <- strsplit(string, ":")
   scenario_type <- type_and_delivery[[1]][1]
+  if (scenario_type == "novac") {
+    return(list(
+      scenario_type = "novac",
+      vaccine_delivery = NULL
+    ))
+  }
   delivery <- strsplit(type_and_delivery[[1]][2], ";")
   vaccine_delivery <- lapply(delivery[[1]], function(item) {
     vaccine_activity <- strsplit(item, "-")[[1]]

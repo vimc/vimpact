@@ -293,10 +293,7 @@ test_that("can use wrapper function to run impact for a recipe", {
     list(vaccine = "YF",
          activity_type = "campaign")
   ))
-  expect_equal(args[[2]]$baseline_vaccine_delivery, list(
-    list(vaccine = "YF",
-         activity_type = "routine")
-  ))
+  expect_null(args[[2]]$baseline_vaccine_delivery)
   expect_equal(args[[2]]$burden_outcomes,
                c("deaths", "cases", "dalys"))
   expect_equal(args[[2]]$countries, c("AFG", "AGO"))
