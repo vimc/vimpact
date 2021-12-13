@@ -225,7 +225,7 @@ get_fvps <- function(con, touchstone, baseline_vaccine_delivery,
 #' @keywords internal
 get_coverage_data <- function(con, touchstone, delivery_methods, countries = NULL, vaccination_years = NULL) {
   CONCAT <- vaccine <- activity_type <- id <- year <- NULL
-  age_from <- age_to <- name <- target <- NULL
+  age_from <- age_to <- name <- target <- delivery <- NULL
   coverage_set <- get_coverage_set_by_touchstone(con, touchstone)
   coverage <- get_coverage(con)
   gender <- get_gender(con)
