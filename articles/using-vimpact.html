@@ -19,6 +19,8 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -31,18 +33,12 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">vimpact</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.0.5</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-<li>
-  <a href="../index.html">
-    <span class="fas fa-home fa-lg"></span>
-     
-  </a>
-</li>
 <li>
   <a href="../reference/index.html">Reference</a>
 </li>
@@ -82,9 +78,9 @@
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Using vimpact for estimating vaccine impact</h1>
-                        <h4 class="author">Rob Ashton, Xiang Li, Katy Gaythorpe</h4>
+                        <h4 data-toc-skip class="author">Rob Ashton, Xiang Li, Katy Gaythorpe</h4>
             
-            <h4 class="date">2021-11-11</h4>
+            <h4 data-toc-skip class="date">2021-12-13</h4>
       
       
       <div class="hidden name"><code>using-vimpact.Rmd</code></div>
@@ -94,16 +90,16 @@
     
     
 <p>This vignette describes how to use impact calculation methods used in VIMC as an external user.</p>
-<div id="data" class="section level2">
-<h2 class="hasAnchor">
-<a href="#data" class="anchor"></a>Data</h2>
+<div class="section level2">
+<h2 id="data">Data<a class="anchor" aria-label="anchor" href="#data"></a>
+</h2>
 <p>The simplest possible example is a static model with constant routine immunisation and a one-off campaign. Burden estimates from a theoretical country are found in 3 csv titled <code>example_novax_burden.csv</code>, <code>example_routine_burden.csv</code> and <code>example_routine_campaign_burden.csv</code>. These include estimates of burden in years 1900 - 2100 and display the format used by the functions.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">example_novax</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"extdata/example_novax_burden.csv"</span>, package <span class="op">=</span> <span class="st">"vimpact"</span><span class="op">)</span><span class="op">)</span>
-<span class="va">example_routine</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"extdata/example_routine_burden.csv"</span>, package <span class="op">=</span> <span class="st">"vimpact"</span><span class="op">)</span><span class="op">)</span>
-<span class="va">example_routine_campaign</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"extdata/example_routine_campaign_burden.csv"</span>, package <span class="op">=</span> <span class="st">"vimpact"</span><span class="op">)</span><span class="op">)</span>
+<code class="sourceCode R"><span class="va">example_novax</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/example_novax_burden.csv"</span>, package <span class="op">=</span> <span class="st">"vimpact"</span><span class="op">)</span><span class="op">)</span>
+<span class="va">example_routine</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/example_routine_burden.csv"</span>, package <span class="op">=</span> <span class="st">"vimpact"</span><span class="op">)</span><span class="op">)</span>
+<span class="va">example_routine_campaign</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/example_routine_campaign_burden.csv"</span>, package <span class="op">=</span> <span class="st">"vimpact"</span><span class="op">)</span><span class="op">)</span>
 
-<span class="fu"><a href="https://rdrr.io/r/utils/str.html">str</a></span><span class="op">(</span><span class="va">example_novax</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">example_novax</span><span class="op">)</span>
 <span class="co">#&gt; 'data.frame':    10201 obs. of  6 variables:</span>
 <span class="co">#&gt;  $ country       : chr  "ABC" "ABC" "ABC" "ABC" ...</span>
 <span class="co">#&gt;  $ year          : int  2000 2000 2000 2000 2000 2000 2000 2000 2000 2000 ...</span>
@@ -111,7 +107,7 @@
 <span class="co">#&gt;  $ value         : int  16 15 14 13 13 12 12 11 11 10 ...</span>
 <span class="co">#&gt;  $ activity_type : chr  "novax" "novax" "novax" "novax" ...</span>
 <span class="co">#&gt;  $ burden_outcome: chr  "deaths" "deaths" "deaths" "deaths" ...</span>
-<span class="fu"><a href="https://rdrr.io/r/utils/str.html">str</a></span><span class="op">(</span><span class="va">example_routine</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">example_routine</span><span class="op">)</span>
 <span class="co">#&gt; 'data.frame':    10201 obs. of  6 variables:</span>
 <span class="co">#&gt;  $ country       : chr  "ABC" "ABC" "ABC" "ABC" ...</span>
 <span class="co">#&gt;  $ year          : int  2000 2000 2000 2000 2000 2000 2000 2000 2000 2000 ...</span>
@@ -119,7 +115,7 @@
 <span class="co">#&gt;  $ value         : int  16 15 14 13 13 12 12 11 11 10 ...</span>
 <span class="co">#&gt;  $ activity_type : chr  "routine" "routine" "routine" "routine" ...</span>
 <span class="co">#&gt;  $ burden_outcome: chr  "deaths" "deaths" "deaths" "deaths" ...</span>
-<span class="fu"><a href="https://rdrr.io/r/utils/str.html">str</a></span><span class="op">(</span><span class="va">example_routine_campaign</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">example_routine_campaign</span><span class="op">)</span>
 <span class="co">#&gt; 'data.frame':    10201 obs. of  6 variables:</span>
 <span class="co">#&gt;  $ country       : chr  "ABC" "ABC" "ABC" "ABC" ...</span>
 <span class="co">#&gt;  $ year          : int  2000 2000 2000 2000 2000 2000 2000 2000 2000 2000 ...</span>
@@ -128,31 +124,31 @@
 <span class="co">#&gt;  $ activity_type : chr  "campaign" "campaign" "campaign" "campaign" ...</span>
 <span class="co">#&gt;  $ burden_outcome: chr  "deaths" "deaths" "deaths" "deaths" ...</span></code></pre></div>
 </div>
-<div id="impact-by-calendar-year-cross-sectional-impact" class="section level2">
-<h2 class="hasAnchor">
-<a href="#impact-by-calendar-year-cross-sectional-impact" class="anchor"></a>Impact by calendar year (cross-sectional impact)</h2>
+<div class="section level2">
+<h2 id="impact-by-calendar-year-cross-sectional-impact">Impact by calendar year (cross-sectional impact)<a class="anchor" aria-label="anchor" href="#impact-by-calendar-year-cross-sectional-impact"></a>
+</h2>
 <p>Impact by calendar year calculates impact accrued over all ages for a specific year. This calculates the difference in disease burden between baseline and focal scenarios for a given year.</p>
 <p>To use this method you need to provide a data frame of baseline impact and a data frame of focal impact for the vaccine of interest for a given age, year and country.</p>
 <p>These data frames must contain columns for country, burden_outcome (e.g. cases, deaths, DALYs), year, age and value. It will sum the values over all ages for each year and return the impact as the difference between baseline and focal scenarios for each group.</p>
 <p>If the baseline and focal impact data contains groups which do not overlap then this will return impact only for groups contained in both datasets.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">calendar_year</span> <span class="op">&lt;-</span> <span class="fu">vimpact</span><span class="fu">::</span><span class="fu"><a href="../reference/impact_by_calendar_year.html">impact_by_calendar_year</a></span><span class="op">(</span>baseline_burden <span class="op">=</span> <span class="va">example_novax</span>, focal_burden <span class="op">=</span> <span class="va">example_routine_campaign</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/utils/str.html">str</a></span><span class="op">(</span><span class="va">calendar_year</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">calendar_year</span><span class="op">)</span>
 <span class="co">#&gt; tibble [101 × 4] (S3: tbl_df/tbl/data.frame)</span>
 <span class="co">#&gt;  $ country       : chr [1:101] "ABC" "ABC" "ABC" "ABC" ...</span>
 <span class="co">#&gt;  $ burden_outcome: chr [1:101] "deaths" "deaths" "deaths" "deaths" ...</span>
 <span class="co">#&gt;  $ year          : int [1:101] 2000 2001 2002 2003 2004 2005 2006 2007 2008 2009 ...</span>
 <span class="co">#&gt;  $ impact        : int [1:101] 0 0 0 0 0 3 11 18 27 35 ...</span></code></pre></div>
 </div>
-<div id="impact-by-birth-year-lifetime-impact" class="section level2">
-<h2 class="hasAnchor">
-<a href="#impact-by-birth-year-lifetime-impact" class="anchor"></a>Impact by birth year (lifetime impact)</h2>
+<div class="section level2">
+<h2 id="impact-by-birth-year-lifetime-impact">Impact by birth year (lifetime impact)<a class="anchor" aria-label="anchor" href="#impact-by-birth-year-lifetime-impact"></a>
+</h2>
 <p>When calculating impact by birth year we account for the long-term impact of vaccination by finding the sum of the difference in burden between focal and baseline scenarios over the lifetime of a particular cohort. This can be written as <span class="math inline">\(D(c, k) = \sum_{y-a=k}D_{b-f}(a, c, y)\)</span> where <span class="math inline">\(y \in Y_{m}\)</span> and <span class="math inline">\(a \in A_{m}\)</span> where <span class="math inline">\(D\)</span> is the difference in burden, <span class="math inline">\(b\)</span> is baseline, <span class="math inline">\(f\)</span> is focal, <span class="math inline">\(a\)</span> is age, <span class="math inline">\(c\)</span> is country, <span class="math inline">\(y\)</span> is year, <span class="math inline">\(k\)</span> is birth cohort, <span class="math inline">\(Y_{m}\)</span> are the years modelled and <span class="math inline">\(A_{m}\)</span> are the ages modelled. This requires the same data as <code>impact_by_calendar_year</code>. You need to provide data frames containing baseline and focal impact for the vaccine of interest for a given age, year and country.</p>
 <p>These data frames must contain columns for country, burden_outcome (e.g. cases, deaths, DALYs), year, age and value. It will sum the impact grouped by country, burden_outcome, and birth year. Where birth year is <code>year - age</code>. Then calculates the impact for these groups.</p>
 <p>If the baseline and focal impact data contains groups which do not overlap then this will return impact only for groups contained in both datasets.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">birth_year</span> <span class="op">&lt;-</span> <span class="fu">vimpact</span><span class="fu">::</span><span class="fu"><a href="../reference/impact_by_birth_year.html">impact_by_birth_year</a></span><span class="op">(</span>baseline_burden <span class="op">=</span> <span class="va">example_novax</span>, focal_burden <span class="op">=</span> <span class="va">example_routine_campaign</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/utils/str.html">str</a></span><span class="op">(</span><span class="va">birth_year</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">birth_year</span><span class="op">)</span>
 <span class="co">#&gt; tibble [201 × 4] (S3: tbl_df/tbl/data.frame)</span>
 <span class="co">#&gt;  $ country       : chr [1:201] "ABC" "ABC" "ABC" "ABC" ...</span>
 <span class="co">#&gt;  $ burden_outcome: chr [1:201] "deaths" "deaths" "deaths" "deaths" ...</span>
@@ -162,35 +158,35 @@
 <code class="sourceCode R"><span class="va">birth_year</span><span class="op">$</span><span class="va">year</span> <span class="op">&lt;-</span> <span class="va">birth_year</span><span class="op">$</span><span class="va">birth_cohort</span>
 <span class="va">birth_year</span><span class="op">$</span><span class="va">impact_birth_year</span> <span class="op">&lt;-</span> <span class="va">birth_year</span><span class="op">$</span><span class="va">impact</span>
 <span class="va">calendar_year</span><span class="op">$</span><span class="va">impact_calendar_year</span> <span class="op">&lt;-</span> <span class="va">calendar_year</span><span class="op">$</span><span class="va">impact</span>
-<span class="va">plot_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/merge.html">merge</a></span><span class="op">(</span><span class="va">birth_year</span>, <span class="va">calendar_year</span>, by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"country"</span>, <span class="st">"burden_outcome"</span>, <span class="st">"year"</span><span class="op">)</span><span class="op">)</span>
-<span class="va">plot_data</span><span class="op">$</span><span class="va">year</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html">as.Date</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="va">plot_data</span><span class="op">$</span><span class="va">year</span>, <span class="st">"01"</span>, <span class="st">"01"</span>, sep <span class="op">=</span> <span class="st">"-"</span><span class="op">)</span><span class="op">)</span>
-<span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">plot_data</span>, <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">year</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html">geom_line</a></span><span class="op">(</span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">impact_birth_year</span>, colour <span class="op">=</span> <span class="st">"birth year"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html">geom_line</a></span><span class="op">(</span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">impact_calendar_year</span>, colour <span class="op">=</span> <span class="st">"calendar year"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> 
-  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/expand_limits.html">expand_limits</a></span><span class="op">(</span>y <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">+</span> 
-  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ylab</a></span><span class="op">(</span><span class="st">"Impact"</span><span class="op">)</span> <span class="op">+</span> 
-  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">xlab</a></span><span class="op">(</span><span class="st">"Year"</span><span class="op">)</span></code></pre></div>
+<span class="va">plot_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/merge.html" class="external-link">merge</a></span><span class="op">(</span><span class="va">birth_year</span>, <span class="va">calendar_year</span>, by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"country"</span>, <span class="st">"burden_outcome"</span>, <span class="st">"year"</span><span class="op">)</span><span class="op">)</span>
+<span class="va">plot_data</span><span class="op">$</span><span class="va">year</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">plot_data</span><span class="op">$</span><span class="va">year</span>, <span class="st">"01"</span>, <span class="st">"01"</span>, sep <span class="op">=</span> <span class="st">"-"</span><span class="op">)</span><span class="op">)</span>
+<span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">plot_data</span>, <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">year</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">impact_birth_year</span>, colour <span class="op">=</span> <span class="st">"birth year"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">impact_calendar_year</span>, colour <span class="op">=</span> <span class="st">"calendar year"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> 
+  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/expand_limits.html" class="external-link">expand_limits</a></span><span class="op">(</span>y <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">+</span> 
+  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ylab</a></span><span class="op">(</span><span class="st">"Impact"</span><span class="op">)</span> <span class="op">+</span> 
+  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">xlab</a></span><span class="op">(</span><span class="st">"Year"</span><span class="op">)</span></code></pre></div>
 <p><img src="using-vimpact_files/figure-html/unnamed-chunk-4-1.png" width="700"></p>
 </div>
-<div id="impact-by-year-of-vaccination" class="section level2">
-<h2 class="hasAnchor">
-<a href="#impact-by-year-of-vaccination" class="anchor"></a>Impact by year of vaccination</h2>
+<div class="section level2">
+<h2 id="impact-by-year-of-vaccination">Impact by year of vaccination<a class="anchor" aria-label="anchor" href="#impact-by-year-of-vaccination"></a>
+</h2>
 <p>The final view of impact is by attributing it to the year in which vaccination took place. Impact by year of vaccination methods are vital for determining the long-term impact of of vaccination due to activities carried out in a particular year. We obtain the impact ratio as the impact attributable per fully vaccinated person (FVP) calculated as the coverage × cohort size. This ratio can be stratified by different characteristics, such as birth cohort in order to catch temporal changes in transmission or healthcare or by activity type to capture the differing effects of routine and campaign vaccination. The impact ratio allows effects due to a particular year’s worth of vaccination to be attributed to that year.</p>
-<div id="impact-by-year-of-vaccination-impact-ratio-stratified-by-activity-type" class="section level3">
-<h3 class="hasAnchor">
-<a href="#impact-by-year-of-vaccination-impact-ratio-stratified-by-activity-type" class="anchor"></a>Impact by year of vaccination: impact ratio stratified by activity type</h3>
+<div class="section level3">
+<h3 id="impact-by-year-of-vaccination-impact-ratio-stratified-by-activity-type">Impact by year of vaccination: impact ratio stratified by activity type<a class="anchor" aria-label="anchor" href="#impact-by-year-of-vaccination-impact-ratio-stratified-by-activity-type"></a>
+</h3>
 <p>To calculate impact by year of vaccination with impact ratio stratified by activity type use function <code>impact_by_year_of_vaccination_activity_type</code>. You need to provide 3 data frames. Like the previous two impact methods this needs a data frame of baseline impact and focal impact. These must contain the same columns as in the previous two methods with the addition of a column for the <code>activity_type</code> of the vaccination - either routine or campaign.</p>
 <p>You also need to provide a data frame of FVP (fully vaccinated person) data which contains country, year, activity type, age and fvp. And a set of <code>vaccination_years</code> which is a range of years for which you want calculate impact for. This will be used to filter the baseline impact, focal impact and FVPs.</p>
 <p>This method produces impact values for a particular disease stratified by country, activity type, year and burden outcome.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">example_fvps</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"extdata/example_fvps.csv"</span>, package <span class="op">=</span> <span class="st">"vimpact"</span><span class="op">)</span><span class="op">)</span>
+<code class="sourceCode R"><span class="va">example_fvps</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/example_fvps.csv"</span>, package <span class="op">=</span> <span class="st">"vimpact"</span><span class="op">)</span><span class="op">)</span>
 
 <span class="va">routine</span> <span class="op">&lt;-</span> <span class="fu">vimpact</span><span class="fu">::</span><span class="fu"><a href="../reference/impact_by_year_of_vaccination_activity_type.html">impact_by_year_of_vaccination_activity_type</a></span><span class="op">(</span>baseline_burden <span class="op">=</span> <span class="va">example_novax</span>, focal_burden <span class="op">=</span> <span class="va">example_routine</span>, fvps <span class="op">=</span> <span class="va">example_fvps</span><span class="op">[</span><span class="va">example_fvps</span><span class="op">$</span><span class="va">activity_type</span> <span class="op">==</span> <span class="st">"routine"</span>,<span class="op">]</span>, <span class="fl">2000</span><span class="op">:</span><span class="fl">2030</span><span class="op">)</span>
 
 <span class="va">campaign</span> <span class="op">&lt;-</span> <span class="fu">vimpact</span><span class="fu">::</span><span class="fu"><a href="../reference/impact_by_year_of_vaccination_activity_type.html">impact_by_year_of_vaccination_activity_type</a></span><span class="op">(</span>baseline_burden <span class="op">=</span> <span class="va">example_routine</span>, focal_burden <span class="op">=</span> <span class="va">example_routine_campaign</span>, fvps <span class="op">=</span> <span class="va">example_fvps</span><span class="op">[</span><span class="va">example_fvps</span><span class="op">$</span><span class="va">activity_type</span> <span class="op">==</span> <span class="st">"campaign"</span>,<span class="op">]</span>, <span class="fl">2000</span><span class="op">:</span><span class="fl">2030</span><span class="op">)</span>
 
-<span class="va">activity_type</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span><span class="va">routine</span>, <span class="va">campaign</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/utils/str.html">str</a></span><span class="op">(</span><span class="va">activity_type</span><span class="op">)</span>
+<span class="va">activity_type</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">routine</span>, <span class="va">campaign</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">activity_type</span><span class="op">)</span>
 <span class="co">#&gt; tibble [35 × 6] (S3: tbl_df/tbl/data.frame)</span>
 <span class="co">#&gt;  $ country       : chr [1:35] "ABC" "ABC" "ABC" "ABC" ...</span>
 <span class="co">#&gt;  $ vaccine       : chr [1:35] "YF" "YF" "YF" "YF" ...</span>
@@ -199,14 +195,14 @@
 <span class="co">#&gt;  $ burden_outcome: chr [1:35] "deaths" "deaths" "deaths" "deaths" ...</span>
 <span class="co">#&gt;  $ impact        : num [1:35] 184 323 404 478 479 ...</span></code></pre></div>
 </div>
-<div id="impact-by-year-of-vaccination-impact-ratio-stratified-by-birth-cohort" class="section level3">
-<h3 class="hasAnchor">
-<a href="#impact-by-year-of-vaccination-impact-ratio-stratified-by-birth-cohort" class="anchor"></a>Impact by year of vaccination: impact ratio stratified by birth cohort</h3>
+<div class="section level3">
+<h3 id="impact-by-year-of-vaccination-impact-ratio-stratified-by-birth-cohort">Impact by year of vaccination: impact ratio stratified by birth cohort<a class="anchor" aria-label="anchor" href="#impact-by-year-of-vaccination-impact-ratio-stratified-by-birth-cohort"></a>
+</h3>
 <p>Impact by year of vaccination can be stratified by birth cohort to catch temporal changes in transmission or healthcare. This method is invariant to vaccination activity type. However, vaccine effect is assumed to vary over time through birth cohorts.</p>
 <p>This method requires basline impact, focal impact and FVPs disaggregated by country, burden outcome, year and age. The data doesn’t have to be disaggregated by <code>activity_type</code>. This returns impact for a particular vaccine by country, year and burden outcome.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">cohort_type</span> <span class="op">&lt;-</span> <span class="fu">vimpact</span><span class="fu">::</span><span class="fu"><a href="../reference/impact_by_year_of_vaccination_birth_cohort.html">impact_by_year_of_vaccination_birth_cohort</a></span><span class="op">(</span>baseline_burden <span class="op">=</span> <span class="va">example_novax</span>, focal_burden <span class="op">=</span> <span class="va">example_routine_campaign</span>, fvps <span class="op">=</span> <span class="va">example_fvps</span>, <span class="fl">2000</span><span class="op">:</span><span class="fl">2030</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/utils/str.html">str</a></span><span class="op">(</span><span class="va">cohort_type</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">cohort_type</span><span class="op">)</span>
 <span class="co">#&gt; tibble [35 × 6] (S3: tbl_df/tbl/data.frame)</span>
 <span class="co">#&gt;  $ country       : chr [1:35] "ABC" "ABC" "ABC" "ABC" ...</span>
 <span class="co">#&gt;  $ year          : int [1:35] 2013 2018 2019 2020 2021 2022 2023 2024 2004 2005 ...</span>
@@ -215,27 +211,27 @@
 <span class="co">#&gt;  $ activity_type : chr [1:35] "campaign" "campaign" "campaign" "campaign" ...</span>
 <span class="co">#&gt;  $ impact        : num [1:35] 619 868 1314 1348 1891 ...</span></code></pre></div>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">activity_sum</span> <span class="op">&lt;-</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/aggregate.html">aggregate</a></span><span class="op">(</span><span class="va">impact</span> <span class="op">~</span> <span class="va">country</span> <span class="op">+</span> <span class="va">year</span> <span class="op">+</span> <span class="va">burden_outcome</span>,
+<code class="sourceCode R"><span class="va">activity_sum</span> <span class="op">&lt;-</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/aggregate.html" class="external-link">aggregate</a></span><span class="op">(</span><span class="va">impact</span> <span class="op">~</span> <span class="va">country</span> <span class="op">+</span> <span class="va">year</span> <span class="op">+</span> <span class="va">burden_outcome</span>,
                                  <span class="va">activity_type</span>, <span class="va">sum</span><span class="op">)</span>
-<span class="va">cohort_sum</span> <span class="op">&lt;-</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/aggregate.html">aggregate</a></span><span class="op">(</span><span class="va">impact</span> <span class="op">~</span> <span class="va">country</span> <span class="op">+</span> <span class="va">year</span> <span class="op">+</span> <span class="va">burden_outcome</span>,
+<span class="va">cohort_sum</span> <span class="op">&lt;-</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/aggregate.html" class="external-link">aggregate</a></span><span class="op">(</span><span class="va">impact</span> <span class="op">~</span> <span class="va">country</span> <span class="op">+</span> <span class="va">year</span> <span class="op">+</span> <span class="va">burden_outcome</span>,
                                  <span class="va">cohort_type</span>, <span class="va">sum</span><span class="op">)</span>
 <span class="va">activity_sum</span><span class="op">$</span><span class="va">impact_activity_strat</span> <span class="op">&lt;-</span> <span class="va">activity_sum</span><span class="op">$</span><span class="va">impact</span>
 <span class="va">cohort_sum</span><span class="op">$</span><span class="va">impact_cohort_strat</span> <span class="op">&lt;-</span> <span class="va">cohort_sum</span><span class="op">$</span><span class="va">impact</span>
-<span class="va">plot_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/merge.html">merge</a></span><span class="op">(</span><span class="va">activity_sum</span>, <span class="va">cohort_sum</span>, by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"country"</span>, <span class="st">"burden_outcome"</span>, <span class="st">"year"</span><span class="op">)</span><span class="op">)</span>
-<span class="va">plot_data</span><span class="op">$</span><span class="va">year</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html">as.Date</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="va">plot_data</span><span class="op">$</span><span class="va">year</span>, <span class="st">"01"</span>, <span class="st">"01"</span>, sep <span class="op">=</span> <span class="st">"-"</span><span class="op">)</span><span class="op">)</span>
-<span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">plot_data</span>, <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">year</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html">geom_line</a></span><span class="op">(</span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">impact_cohort_strat</span>, colour <span class="op">=</span> <span class="st">"cohort"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html">geom_line</a></span><span class="op">(</span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">impact_activity_strat</span>, colour <span class="op">=</span> <span class="st">"activity"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/expand_limits.html">expand_limits</a></span><span class="op">(</span>y <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">+</span> 
-  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ylab</a></span><span class="op">(</span><span class="st">"Impact"</span><span class="op">)</span> <span class="op">+</span> 
-  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">xlab</a></span><span class="op">(</span><span class="st">"Year"</span><span class="op">)</span></code></pre></div>
+<span class="va">plot_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/merge.html" class="external-link">merge</a></span><span class="op">(</span><span class="va">activity_sum</span>, <span class="va">cohort_sum</span>, by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"country"</span>, <span class="st">"burden_outcome"</span>, <span class="st">"year"</span><span class="op">)</span><span class="op">)</span>
+<span class="va">plot_data</span><span class="op">$</span><span class="va">year</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">plot_data</span><span class="op">$</span><span class="va">year</span>, <span class="st">"01"</span>, <span class="st">"01"</span>, sep <span class="op">=</span> <span class="st">"-"</span><span class="op">)</span><span class="op">)</span>
+<span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">plot_data</span>, <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">year</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">impact_cohort_strat</span>, colour <span class="op">=</span> <span class="st">"cohort"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">impact_activity_strat</span>, colour <span class="op">=</span> <span class="st">"activity"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/expand_limits.html" class="external-link">expand_limits</a></span><span class="op">(</span>y <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">+</span> 
+  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ylab</a></span><span class="op">(</span><span class="st">"Impact"</span><span class="op">)</span> <span class="op">+</span> 
+  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">xlab</a></span><span class="op">(</span><span class="st">"Year"</span><span class="op">)</span></code></pre></div>
 <p><img src="using-vimpact_files/figure-html/unnamed-chunk-7-1.png" width="700"></p>
 </div>
 </div>
-<div id="glossary" class="section level2">
-<h2 class="hasAnchor">
-<a href="#glossary" class="anchor"></a>Glossary</h2>
-<p>All definitions and terminology can be found in the associated manuscript available at: <a href="https://www.medrxiv.org/content/10.1101/2021.01.08.21249378v1.full-text" class="uri">https://www.medrxiv.org/content/10.1101/2021.01.08.21249378v1.full-text</a> ; we include a summary below.</p>
+<div class="section level2">
+<h2 id="glossary">Glossary<a class="anchor" aria-label="anchor" href="#glossary"></a>
+</h2>
+<p>All definitions and terminology can be found in the associated manuscript available at: <a href="https://www.medrxiv.org/content/10.1101/2021.01.08.21249378v1.full-text" class="external-link uri">https://www.medrxiv.org/content/10.1101/2021.01.08.21249378v1.full-text</a> ; we include a summary below.</p>
 <p>FVP - Fully vaccinated person</p>
 <p>Focal scenario - The vaccination scenario to be assessed in comparison to a baseline scenario</p>
 <p>Baseline scenario - The vaccination scenario to be compared against, often the situation without any vaccination (no-vac)</p>
@@ -255,11 +251,13 @@
 
 
       <footer><div class="copyright">
-  <p>Developed by Rich FitzJohn.</p>
+  <p></p>
+<p>Developed by Rich FitzJohn.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.</p>
 </div>
 
       </footer>
@@ -267,6 +265,8 @@
 
   
 
+
+  
 
   </body>
 </html>
