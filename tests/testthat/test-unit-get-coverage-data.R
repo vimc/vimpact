@@ -110,3 +110,4 @@ test_that("only gets non-zero coverage", {
   result <- do.call(get_coverage_data, test_args)
   expect_equal(nrow(result), 0)
 })
+
