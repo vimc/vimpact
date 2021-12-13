@@ -9,6 +9,7 @@ get_coverage_data(
   touchstone,
   baseline_vaccine_delivery,
   focal_vaccine_delivery,
+  focal_scenario_type,
   countries = NULL,
   vaccination_years = NULL
 )
@@ -21,6 +22,9 @@ activity_type (routine or campaign) describing delivery}
 
 \item{focal_vaccine_delivery}{A list of lists containing vaccine and
 activity_type (routine or campaign) describing delivery}
+
+\item{focal_scenario_type}{A character determining from which scenario_type
+coverage estimates shall be extracted}
 
 \item{countries}{Optional vector of countries to filter data}
 

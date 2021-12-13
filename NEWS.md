@@ -1,3 +1,7 @@
+# vimpact 0.0.6
+
+* Fix both csv and function interfaces, so that they work for 2021 runs and generate identical results.
+
 # vimpact 0.0.5
 
 * Replace impact calculation internals with dplyr

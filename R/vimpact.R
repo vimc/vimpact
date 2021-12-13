@@ -71,6 +71,7 @@ calculate_impact <- function(con, method, touchstone, modelling_group, disease,
     paste(focal_scenario_type, x$vaccine, x$activity_type, sep = "-")
   })
   focal_scenario <- paste0(focal_scenario, collapse = ";")
+
   baseline_scenario <- vcapply(baseline_vaccine_delivery, function(x) {
     paste(baseline_scenario_type, x$vaccine, x$activity_type, sep = "-")
   })
@@ -95,7 +96,8 @@ calculate_impact <- function(con, method, touchstone, modelling_group, disease,
     impact_by_birth_year(baseline, focal)
   } else {
     fvps <- get_fvps(con, touchstone, baseline_vaccine_delivery,
-                     focal_vaccine_delivery, countries, vaccination_years)
+                     focal_vaccine_delivery, focal_scenario_type, countries, vaccination_years)
+
     if (method == "yov_activity_type") {
       impact_by_year_of_vaccination_activity_type(baseline, focal,
                                                   fvps, vaccination_years)
@@ -165,13 +167,15 @@ filter_year <- function(df, vaccination_years) {
 #'   activity_type (routine or campaign) describing delivery
 #' @param focal_vaccine_delivery A list of lists containing vaccine and
 #'   activity_type (routine or campaign) describing delivery
+#' @param focal_scenario_type A character determining from which scenario_type
+#'   coverage estimates shall be extracted
 #' @param countries Optional vector of countries to filter data
 #' @param vaccination_years Option vector of years to filter data
 #'
 #' @return Tibble containing fvp data
 #' @keywords internal
 get_fvps <- function(con, touchstone, baseline_vaccine_delivery,
-                     focal_vaccine_delivery, countries = NULL,
+                     focal_vaccine_delivery, focal_scenario_type, countries = NULL,
                      vaccination_years = NULL) {
   age_from <- age <- age_to <- coverage_set <- country <- year <- NULL
   gender <- activity_type <- value <- target <- fvps_source <- NULL
@@ -179,7 +183,7 @@ get_fvps <- function(con, touchstone, baseline_vaccine_delivery,
   population <- get_population_dplyr(con, touchstone, countries,
                                      vaccination_years)
   coverage <- get_coverage_data(con, touchstone, baseline_vaccine_delivery,
-                                focal_vaccine_delivery, countries,
+                                focal_vaccine_delivery, focal_scenario_type, countries,
                                 vaccination_years)
 
   ## We have pop data for each age group
@@ -187,9 +191,12 @@ get_fvps <- function(con, touchstone, baseline_vaccine_delivery,
   ## We need total pop over this range of years
   aggregate_pop <- coverage %>%
     dplyr::left_join(population, by = c("country" = "country",
-                                     "year" = "year",
-                                     "gender" = "gender")) %>%
+                                        "year" = "year",
+                                        "gender" = "gender")) %>%
     dplyr::filter(age_from <= age & age <= age_to) %>%
+    dplyr::select(coverage_set, country, year, gender, activity_type,
+                  age_from, age_to, age, value) %>%
+    dplyr::distinct() %>% ## there could be multiple-sias in the same year, which causes duplications
     dplyr::group_by(coverage_set, country, year, gender, activity_type,
                     age_from, age_to) %>%
     dplyr::summarise(population = sum(value, na.rm = TRUE))
@@ -197,8 +204,8 @@ get_fvps <- function(con, touchstone, baseline_vaccine_delivery,
 
   coverage %>%
     dplyr::left_join(population, by = c("country" = "country",
-                                      "year" = "year",
-                                      "gender" = "gender")) %>%
+                                        "year" = "year",
+                                        "gender" = "gender")) %>%
     dplyr::filter(age_from <= age & age <= age_to) %>%
     dplyr::left_join(aggregate_pop, by = c("country" = "country",
                                            "coverage_set" = "coverage_set",
@@ -224,27 +231,47 @@ get_fvps <- function(con, touchstone, baseline_vaccine_delivery,
 #'   activity_type (routine or campaign) describing delivery
 #' @param focal_vaccine_delivery A list of lists containing vaccine and
 #'   activity_type (routine or campaign) describing delivery
+#' @param focal_scenario_type A character determining from which scenario_type
+#'   coverage estimates shall be extracted
 #' @param countries Optional vector of countries to filter data
 #' @param vaccination_years Option vector of years to filter data
 #'
 #' @return Tibble of coverage data
 #' @keywords internal
 get_coverage_data <- function(con, touchstone, baseline_vaccine_delivery,
-                              focal_vaccine_delivery, countries = NULL,
+                              focal_vaccine_delivery, focal_scenario_type, countries = NULL,
                               vaccination_years = NULL) {
   gavi_support_level <- CONCAT <- vaccine <- activity_type <- id <- year <- NULL
   age_from <- age_to <- name <- target <- NULL
-  delivery <-  vcapply(c(focal_vaccine_delivery, baseline_vaccine_delivery),
+  ## this should be the difference between focal and baseline vaccine deliveries
+  # old approach
+  # delivery <-  vcapply(c(focal_vaccine_delivery, baseline_vaccine_delivery),
+  #                      function(x) {
+  #                        paste(x$vaccine, x$activity_type, sep = "-")
+  #                      })
+  ## new approach
+  delivery <- setdiff(focal_vaccine_delivery, baseline_vaccine_delivery)
+  delivery <-  vcapply(delivery,
                        function(x) {
                          paste(x$vaccine, x$activity_type, sep = "-")
                        })
+  scenario <- dplyr::tbl(con, "scenario")
+  scenario_description <- dplyr::tbl(con, "scenario_description")
+  cov_sets_by_scenario_type <- scenario %>%
+    dplyr::left_join(scenario_description, by = c("scenario_description" = "id")) %>%
+    dplyr::filter(touchstone %in% !!touchstone & scenario_type == focal_scenario_type) %>%
+    dplyr::select(focal_sets = focal_coverage_set) %>%
+    dplyr::distinct()
+  cov_sets_by_scenario_type <- as.data.frame(cov_sets_by_scenario_type)
+
   coverage_set <- dplyr::tbl(con, "coverage_set")
   coverage <- dplyr::tbl(con, "coverage")
   gender <- dplyr::tbl(con, "gender")
   country <- dplyr::tbl(con, "country")
   cov_set <- coverage_set %>%
     dplyr::filter(touchstone == !!touchstone &
-                    gavi_support_level != "none") %>%
+                    gavi_support_level != "none" &
+                    id %in% !!cov_sets_by_scenario_type$focal_sets) %>%
     dplyr::mutate("delivery" = CONCAT(vaccine, "-", activity_type)) %>%
     dplyr::filter(delivery %in% !!delivery) %>%
     dplyr::select(coverage_set = id, vaccine, activity_type)
@@ -348,6 +375,14 @@ get_burden_estimate_set_ids <- function(
   con, baseline_scenario_type, baseline_scenario, focal_scenario_type,
   focal_scenario, touchstone, modelling_group, disease) {
 
+  zz <- function(x){
+    y <- unlist(strsplit(x, ";"))
+    y <- y[order(y)]
+    paste(y, collapse = ";")
+  }
+  focal_scenario <- zz(focal_scenario)
+  baseline_scenario <- zz(baseline_scenario)
+
   scenario_type <- id <- scenario_id <- vaccine <- activity_type <- NULL
   CONCAT <- current_burden_estimate_set <- str_flatten <- delivery <- NULL
 
@@ -368,16 +403,25 @@ get_burden_estimate_set_ids <- function(
                       by = c("scenario_id" = "scenario")) %>%
     dplyr::inner_join(coverage_set,
                       by = c("coverage_set" = "id")) %>%
-    dplyr::select(scenario_id, scenario_type, disease, vaccine, activity_type) %>%
+    dplyr::select(scenario_id, scenario_type, disease, vaccine, activity_type, gavi_support_level) %>%
     dplyr::inner_join(responsibility, by = c("scenario_id" = "scenario")) %>%
     dplyr::inner_join(responsibility_set,
                       by = c("responsibility_set" = "id")) %>%
     dplyr::filter(touchstone == !!touchstone &
                     modelling_group == !!modelling_group &
                     disease == !!disease) %>%
-    dplyr::mutate("delivery" = CONCAT(scenario_type, "-",
+    dplyr::mutate("vaccine" = ifelse(gavi_support_level == "none", "none", vaccine),
+                  "activity_type" = ifelse(gavi_support_level == "none", "none", activity_type),
+                  "delivery" = CONCAT(scenario_type, "-",
                                       vaccine, "-", activity_type)) %>%
-    dplyr::group_by(current_burden_estimate_set, activity_type) %>%
+    dplyr::filter(!(scenario_type != "novac" & vaccine == "none")) %>%
+    # the problem was that str_flatten glues deliveries in an order different from our recipe
+    ## I spent a few hours trying to resolve this ordering issue, but failed again and again
+    ## In the end, this select() + distinct() combination gives the increasing order
+    ## I don't know why it works, but it works
+    dplyr::select(current_burden_estimate_set, delivery) %>%
+    dplyr::distinct() %>%
+    dplyr::group_by(current_burden_estimate_set) %>%
     dplyr::summarise(delivery = str_flatten(delivery, collapse = ";"),
                      .groups = "keep") %>%
     dplyr::mutate(scenario = dplyr::case_when(
@@ -385,7 +429,7 @@ get_burden_estimate_set_ids <- function(
       delivery == baseline_scenario ~ "baseline"
     )) %>%
     dplyr::filter(!is.na(scenario)) %>%
-    dplyr::select(scenario, activity_type,
+    dplyr::select(scenario, delivery,
                   burden_estimate_set = current_burden_estimate_set)
 }
 
@@ -428,8 +472,8 @@ get_impact_for_burden_estimate_set <- function(
         grepl("dalys", burden_outcome) ~ "dalys"
       )
     ) %>%
-    dplyr::group_by(country, activity_type, burden_outcome, year, age, scenario) %>%
+    dplyr::group_by(country, burden_outcome, year, age, scenario) %>%
     dplyr::summarise(value = sum(value, na.rm = TRUE), .groups = "keep") %>%
-    dplyr::select(country, year, age, burden_outcome, scenario, activity_type,
-                  value)
+    dplyr::select(country, year, age, burden_outcome, scenario, value)
+
 }
