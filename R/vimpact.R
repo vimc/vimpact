@@ -50,13 +50,7 @@ calculate_impact <- function(con, method, touchstone, modelling_group, disease,
                           "yov_birth_cohort"))
   scenario <- NULL
 
-  ## Map touchstone name to ID if touchstone name given
-  touchstones <- DBI::dbGetQuery(con,
-                                 "SELECT id, touchstone_name FROM touchstone")
-  if (!touchstone %in% touchstones[["id"]]) {
-    touchstone <- get_touchstone(con, touchstone)
-  }
-
+  touchstone <- get_touchstone_id(con, touchstone)
   outcomes <- get_burden_outcome_ids(con, burden_outcomes)
 
   none_vaccine_delivery <- list(list(activity_type = "none",
@@ -318,7 +312,6 @@ get_burden_outcome_ids <- function(con, burden_outcomes) {
     dplyr::filter(code %in% burden_outcomes) %>%
     dplyr::select(id, code)
 }
-
 
 #' Get burden estimate set ids
 #'

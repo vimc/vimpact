@@ -3,5 +3,6 @@ docs
 .Renviron
 .Rhistory
 .DS_Store
+.idea
 vignettes_src/*.md
 vignettes_src/*.html
