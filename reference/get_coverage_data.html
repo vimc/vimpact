@@ -66,8 +66,7 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">get_coverage_data</span><span class="op">(</span>
   <span class="va">con</span>,
   <span class="va">touchstone</span>,
-  <span class="va">baseline_vaccine_delivery</span>,
-  <span class="va">focal_vaccine_delivery</span>,
+  <span class="va">delivery_methods</span>,
   countries <span class="op">=</span> <span class="cn">NULL</span>,
   vaccination_years <span class="op">=</span> <span class="cn">NULL</span>
 <span class="op">)</span></code></pre></div>
@@ -77,18 +76,14 @@
     <h2>Arguments</h2>
     <dl><dt>con</dt>
 <dd><p>DB connection</p></dd>
-<dt>baseline_vaccine_delivery</dt>
-<dd><p>A list of lists containing vaccine and
-activity_type (routine or campaign) describing delivery</p></dd>
-<dt>focal_vaccine_delivery</dt>
-<dd><p>A list of lists containing vaccine and
-activity_type (routine or campaign) describing delivery</p></dd>
+<dt>touchstone</dt>
+<dd><p>Touchstone to get data for</p></dd>
 <dt>countries</dt>
 <dd><p>Optional vector of countries to filter data</p></dd>
 <dt>vaccination_years</dt>
 <dd><p>Option vector of years to filter data</p></dd>
-<dt>touchtonse</dt>
-<dd><p>Touchstone to get data for</p></dd>
+<dt>delivery</dt>
+<dd><p>List of delivery methods to get data for</p></dd>
 </dl></div>
     <div id="value">
     <h2>Value</h2>

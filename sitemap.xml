@@ -55,10 +55,22 @@
     <loc>/reference/get_burden_outcome_ids.html</loc>
   </url>
   <url>
+    <loc>/reference/get_country.html</loc>
+  </url>
+  <url>
+    <loc>/reference/get_coverage.html</loc>
+  </url>
+  <url>
     <loc>/reference/get_coverage_data.html</loc>
   </url>
   <url>
+    <loc>/reference/get_coverage_set_by_touchstone.html</loc>
+  </url>
+  <url>
     <loc>/reference/get_fvps.html</loc>
+  </url>
+  <url>
+    <loc>/reference/get_gender.html</loc>
   </url>
   <url>
     <loc>/reference/get_impact_for_burden_estimate_set.html</loc>
@@ -71,6 +83,9 @@
   </url>
   <url>
     <loc>/reference/get_touchstone.html</loc>
+  </url>
+  <url>
+    <loc>/reference/get_touchstone_id.html</loc>
   </url>
   <url>
     <loc>/reference/impact_by_birth_year.html</loc>
