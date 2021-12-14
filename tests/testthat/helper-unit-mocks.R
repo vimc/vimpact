@@ -14,7 +14,7 @@ mock_coverage_set <- function(id = 1:4,
 
 mock_coverage <- function(id = 1:5,
                           coverage_set = rep(1, 5),
-                          year = as.character(2020:2024),
+                          year = 2020:2024,
                           country = rep("AFG", 5),
                           age_from = rep(1, 5),
                           age_to = rep(5, 5),

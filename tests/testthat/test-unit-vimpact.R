@@ -29,7 +29,7 @@ test_that("can filter burden estimates by countries and map numeric to character
   df <- data.frame(
     country = c(1, 2, 3), # note numeric ids
     burden_estimate_set = c(11, 12, 13),
-    year = "2020",
+    year = 2020,
     burden_outcome = "dalys",
     activity_type = "routine",
     value = 1000,
@@ -46,7 +46,7 @@ test_that("can filter burden estimates by countries and map numeric to character
   expected <- data.frame(
     burden_estimate_set = c(11, 13),
     country = c("AFG", "UGA"), # note human readable ids
-    year = "2020",
+    year = 2020,
     burden_outcome = "dalys",
     activity_type = "routine",
     value = 1000,
@@ -61,7 +61,7 @@ test_that("filter_country_impact can handle nulls", {
   df <- data.frame(
     country = c(1, 2, 3), # note numeric ids
     burden_estimate_set = c(11, 12, 13),
-    year = "2020",
+    year = 2020,
     burden_outcome = "dalys",
     activity_type = "routine",
     value = 1000,
@@ -78,7 +78,7 @@ test_that("filter_country_impact can handle nulls", {
   expected <- data.frame(
     burden_estimate_set = c(11, 12, 13),
     country = c("AFG", "PAK", "UGA"), # note human readable ids
-    year = "2020",
+    year = 2020,
     burden_outcome = "dalys",
     activity_type = "routine",
     value = 1000,
@@ -113,13 +113,13 @@ test_that("can not filter by age", {
 
 test_that("can filter by year", {
   df <- data.frame(
-    year = c("2020", "2020", "2021"),
+    year = c(2020, 2020, 2021),
     other_val = c(1, 2, 3),
     stringsAsFactors = FALSE
   )
-  result <- filter_year(df, "2021")
+  result <- filter_year(df, 2021)
   expected <- data.frame(
-    year = "2021",
+    year = 2021,
     other_val = 3,
     stringsAsFactors = FALSE
   )
@@ -128,7 +128,7 @@ test_that("can filter by year", {
 
 test_that("filter_year can handle nulls", {
   df <- data.frame(
-    year = c("2020", "2020", "2021"),
+    year = c(2020, 2020, 2021),
     other_val = c(1, 2, 3)
   )
   result <- filter_year(df, NULL)
@@ -136,12 +136,12 @@ test_that("filter_year can handle nulls", {
 })
 
 test_that("can aggregate population", {
-  coverage <- data.frame(coverage_set = 1, vaccine = "HepB", country = "AFG", year = "2020", activity_type = "routine",
+  coverage <- data.frame(coverage_set = 1, vaccine = "HepB", country = "AFG", year = 2020, activity_type = "routine",
                          age_from = 1, age_to = 3, gender = "male", target = 1000, coverage = 1000)
 
   # test only correct ages included
   population <- data.frame(country = "AFG",
-                           year = "2020",
+                           year = 2020,
                            age = c(1, 2, 3, 4),
                            gender = "male",
                            value = 10000)
@@ -151,7 +151,7 @@ test_that("can aggregate population", {
 
   # test only correct years included
   population <- data.frame(country = "AFG",
-                           year = c("2020", "2020", "2021"),
+                           year = c(2020, 2020, 2021),
                            age = 1,
                            gender = "male",
                            value = 10000)
@@ -161,7 +161,7 @@ test_that("can aggregate population", {
 
   # test only correct gender included
   population <- data.frame(country = "AFG",
-                           year = "2020",
+                           year = 2020,
                            age = c(1, 2, 1),
                            gender = c("female", "male", "male"),
                            value = 10000)
@@ -171,12 +171,11 @@ test_that("can aggregate population", {
 
   # test only correct country included
   population <- data.frame(country = c("AFG", "AFG", "UGA"),
-                           year = "2020",
+                           year = 2020,
                            age = 1,
                            gender = "male",
                            value = 10000)
 
   result <- aggregate_pop(coverage, population)
   expect_equal(result$population, 20000)
-
 })
