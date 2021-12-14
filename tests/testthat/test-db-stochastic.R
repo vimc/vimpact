@@ -348,7 +348,7 @@ test_that("fetch_stochastic_data_year_groups errors if invalid table", {
 test_that("fetch_stochastic_data_year_groups filtering on year doesn't work", {
   expect_error(
     fetch_stochastic_data_year_groups(NULL, "cross_all_2019",
-                                      filters = list(year = "2015")),
+                                      filters = list(year = 2015)),
     "Can't filter year as year used in grouping")
 })
 

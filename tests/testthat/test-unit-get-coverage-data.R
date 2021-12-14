@@ -13,7 +13,7 @@ test_that("returns coverage data tibble", {
                                                             vaccine = "HepB"))
   mockery::stub(get_coverage_data, "get_coverage", function(con) mock_coverage(id = c(1, 2, 3, 4),
                                                                                coverage_set = 11:14,
-                                                                               year = "2020",
+                                                                               year = 2020,
                                                                                country = "AFG",
                                                                                gavi_support = c("with", "without"),
                                                                                age_from = 1,
