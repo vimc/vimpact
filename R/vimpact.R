@@ -211,7 +211,8 @@ get_fvps <- function(con, touchstone, baseline_vaccine_delivery,
 #' @return Tibble of coverage data with aggregated population
 #' @keywords internal
 aggregate_pop <- function(coverage, population) {
-  age_from <- age <- age_to <- coverage_set <- country <- year <- gender <- activity_type <- NULL
+  age_from <- age <- age_to <- coverage_set <- country <- year <- NULL
+  gender <- activity_type <- NULL
   coverage %>%
     dplyr::left_join(population, by = c("country" = "country",
                                         "year" = "year",
