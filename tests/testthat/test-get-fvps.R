@@ -1,8 +1,10 @@
 test_args <- list(
   con = NULL,
   touchstone = "t1",
-  baseline_vaccine_delivery = "",
-  focal_vaccine_delivery = "",
+  baseline_vaccine_delivery = list(list(activity_type = "none",
+                                        vaccine = "none")),
+  focal_vaccine_delivery = list(list(vaccine = "HepB",
+                                     activity_type = "routine")),
   countries = "AFG",
   vaccination_years = 2000:2010
 )
@@ -18,7 +20,7 @@ mock_get_population_dplyr <- function(con, touchstone, countries, years) {
 mock_get_coverage_data <- function(con, touchstone, baseline_vaccine_delivery,
                                    focal_vaccine_delivery, countries,
                                    vaccination_years) {
-  data.frame(coverage_set = 1, vaccine = "HepB", country = "AFG", year = "2020",
+  data.frame(coverage_set = 1, vaccine = "HepB", country = "AFG", year = "2000",
              activity_type = "routine", age_from = 1, age_to = 3,
              gender = "male", target = 1000, coverage = 1000)
 }
