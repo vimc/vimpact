@@ -33,7 +33,7 @@ recipe_template <- function(template_version = "201710", method){
                     "burden outcomes. \n",
                     "Use '*' when the model is using simplified deaths and cases definitions. Otherwise, list burden outcomes in the form of\n",
                     "<deaths_outcome1>,<deaths_outcome2>,<deaths_outcome3>;<cases_outcome1>,<cases_outcome2>,<cases_outcome3> \n",
-                    "NO spacing is allowed."), man)
+                    "NO spacing is allowed. DO NOT provide dalys, as dalys will be added in automatically."), man)
   close(man)
   message("Generated impact recipe template in directory recipe.")
 }
@@ -63,7 +63,7 @@ get_meta_from_recipe <- function(default_recipe = TRUE, method = "method0", reci
     if (recipe$burden_outcome[i] == "*"){
       recipe$burden_outcome[i] <- "deaths;cases;dalys"
     } else {
-      recipe$burden_outcome[i] <- paste(recipe$burden_outcome[i], sep = ";")
+      recipe$burden_outcome[i] <- paste(recipe$burden_outcome[i], "dalys", sep = ";")
     }
   }
 
