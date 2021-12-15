@@ -429,26 +429,6 @@ impact_by_birth_year <- function(baseline_burden, focal_burden) {
 #' @export
 impact_by_year_of_vaccination_activity_type <- function(
   baseline_burden, focal_burden, fvps, vaccination_years) {
-  ## this was determining activity_type from focal_burden
-  ## making more sense and easier coding, determine activity_type from fvps
-  # assert_has_columns(
-  #   baseline_burden,
-  #   c("country", "burden_outcome", "activity_type", "year", "age", "value"))
-  # assert_has_columns(
-  #   focal_burden,
-  #   c("country", "burden_outcome", "activity_type", "year", "age", "value"))
-  # assert_has_columns(
-  #   fvps,
-  #   c("country", "year", "vaccine", "activity_type", "age", "fvps"))
-  # activity_types <- c("novax", "routine", "campaign")
-  # assert_allowed_values(baseline_burden, "activity_type", activity_types)
-  # assert_allowed_values(focal_burden, "activity_type", c("routine", "campaign"))
-  # assert_allowed_values(fvps, "activity_type", activity_types)
-  # activity <- focal_burden %>%
-  #   dplyr::ungroup() %>%
-  #   dplyr::select(activity_type) %>%
-  #   dplyr::distinct() %>%
-  #   dplyr::collect()
   assert_has_columns(
     baseline_burden,
     c("country", "burden_outcome", "year", "age", "value"))
@@ -487,13 +467,6 @@ impact_by_year_of_vaccination_activity_type <- function(
       impact_by_birth_year(focal_burden) %>%
       dplyr::rename(time = birth_cohort) %>%
       dplyr::mutate(activity_type = activity) %>%
-      # this is right for static models, but can be problematic for dynamic models
-      # e.g. NGA has only introduced MCV2 since 2019
-      # the following filter is only summing up impact for cohorts 2017:2028
-      # conventionally we sum up impact for cohorts 1998:2028
-      # dynamic models can have some indirect benefit for cohorts not vaccinated, i.e. 1998:2016 cohorts here
-      # dplyr::filter(time >= min(fvps$year - fvps$age) &
-      #                 time <= max(fvps$year - fvps$age))
       dplyr::filter(time %in% (vaccination_years - min(fvps$age)))
   }
 
