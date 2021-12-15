@@ -250,8 +250,13 @@ get_coverage_data <- function(con, touchstone, delivery_methods, focal_scenario_
                               vaccination_years = NULL) {
   gavi_support_level <- CONCAT <- vaccine <- activity_type <- id <- year <- NULL
   age_from <- age_to <- name <- target <- NULL
-  scenario <- dplyr::tbl(con, "scenario")
-  scenario_description <- dplyr::tbl(con, "scenario_description")
+  scenario <- get_scenario(con)
+  scenario_description <- get_scenario_description(con)
+  coverage_set <- get_coverage_set_by_touchstone(con, touchstone)
+  coverage <- get_coverage(con)
+  gender <- get_gender(con)
+  country <-  get_country(con)
+
   cov_sets_by_scenario_type <- scenario %>%
     dplyr::left_join(scenario_description,
                      by = c("scenario_description" = "id")) %>%
@@ -261,10 +266,6 @@ get_coverage_data <- function(con, touchstone, delivery_methods, focal_scenario_
     dplyr::distinct()
   cov_sets_by_scenario_type <- as.data.frame(cov_sets_by_scenario_type)
 
-  coverage_set <- dplyr::tbl(con, "coverage_set")
-  coverage <- dplyr::tbl(con, "coverage")
-  gender <- dplyr::tbl(con, "gender")
-  country <- dplyr::tbl(con, "country")
   cov_set <- coverage_set %>%
     dplyr::filter(touchstone == !!touchstone &
                     gavi_support_level != "none" &

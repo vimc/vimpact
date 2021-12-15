@@ -43,3 +43,25 @@ mock_gender <- function() {
 mock_country <- function(id = "AFG", nid = 1, name = "Afghanistan") {
   data.frame(id = id, nid = nid, name = name, stringsAsFactors = FALSE)
 }
+
+mock_scenario <- function(id = "1",
+                          touchstone = "t1",
+                          scenario_description = "desc1",
+                          focal_coverage_set = "1") {
+  data.frame(id = id,
+             touchstone = touchstone,
+             scenario_description = scenario_description,
+             focal_coverage_set = focal_coverage_set,
+             stringsAsFactors = FALSE)
+}
+
+mock_scenario_description <- function(id = "desc1",
+                                      description = "description",
+                                      disease = "HepB",
+                                      scenario_type = "bestcase") {
+  data.frame(id = id,
+             description = description,
+             disease = disease,
+             scenario_type = scenario_type,
+             stringsAsFactors = FALSE)
+}
