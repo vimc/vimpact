@@ -37,6 +37,9 @@
     <loc>/reference/calculate_impact.html</loc>
   </url>
   <url>
+    <loc>/reference/calculate_impact_from_recipe.html</loc>
+  </url>
+  <url>
     <loc>/reference/cohort_deaths_all_cause.html</loc>
   </url>
   <url>
@@ -110,5 +113,8 @@
   </url>
   <url>
     <loc>/reference/recipe_template.html</loc>
+  </url>
+  <url>
+    <loc>/reference/split_scenario_vaccine_delivery.html</loc>
   </url>
 </urlset>
