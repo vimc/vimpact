@@ -1,3 +1,7 @@
+# vimpact 0.0.6
+
+* Add wrapper function for running impact calculations for many scenarios
+
 # vimpact 0.0.5
 
 * Replace impact calculation internals with dplyr
