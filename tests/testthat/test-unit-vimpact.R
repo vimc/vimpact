@@ -177,5 +177,5 @@ test_that("can aggregate population", {
                            value = 10000)
 
   result <- aggregate_pop(coverage, population)
-  expect_equal(result$population, 20000)
+  expect_equal(result$population, 1000)
 })
