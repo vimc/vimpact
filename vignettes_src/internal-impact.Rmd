@@ -149,56 +149,161 @@ str(old_impact)
 
 and we can see from a plot that the output is very similar
 
-```{r}
-impact_plot <- merge(old_impact, impact, all.x = TRUE, all.y = TRUE,
-                     by = c("country", "vaccine", "activity_type", "year",
-                            "burden_outcome"))
-countries <- unique(impact_plot$country)
-impact_plot <- impact_plot %>%
-  dplyr::rename(recipe_impact = impact.x, function_impact = impact.y) %>%
-  tidyr::pivot_wider(names_from = country, 
-                     values_from = c(recipe_impact, function_impact))
-impact_plot <- as.data.frame(impact_plot)
-countries_filter <- lapply(unique(countries), function(country) {
-  button <- list(
-    method = "restyle",
-    args = list("y", c(
-      list(impact_plot[, paste0("recipe_impact_", country)]),
-      list(impact_plot[, paste0("function_impact_", country)]))),
-    label = country
-  )
-})
-plot <- plotly::plot_ly(data = impact_plot) %>%
-  plotly::add_trace(x = ~year, y = ~recipe_impact_AFG, name = "recipe", 
-                    type = "scatter", mode = "markers", text = ~vaccine,
-                    marker = list(
-                      color = "rgb(235, 204, 42)",
-                      size = 10
-                    )) %>%
-  plotly::add_trace(x = ~year, y = ~function_impact_AFG, name = "function",
-                    type = "scatter", mode = "markers", text = ~vaccine,
-                    marker = list(
-                      color = "rgb(60, 154, 178)",
-                      symbol = "circle-open",
-                      size = 10,
-                      line = list(
+```{r include = FALSE}
+get_comparison_table <- function(touchstone, modelling_group, disease, focal_scenario_type,
+                                 focal_vaccine_delivery, baseline_scenario_type, baseline_vaccine_delivery,
+                                 burden_outcome_extract, burden_outcome_plot) {
+  focal <- vcapply(focal_vaccine_delivery, function(delivery) {
+    paste0(delivery$vaccine, "-", delivery$activity_type)
+  })
+  focal <- paste0(focal_scenario_type, ":", focal)
+  if (baseline_scenario_type = "novac") {
+    baseline <- "novac"
+  } else {
+    baseline <- vcapply(baseline_vaccine_delivery, function(delivery) {
+      paste0(delivery$vaccine, "-", delivery$activity_type)
+    })
+    baseline <- paste0(baseline_scenario_type, ":", baseline)
+  }
+  recipe <- data.frame(
+    touchstone = touchstone,
+    modelling_group = modelling_group, 
+    disease = disease,
+    focal = focal,
+    baseline = baseline,
+    burden_outcome = burden_outcome_extract)
+  t <- tempfile(fileext = ".csv")
+  write.csv(recipe, t, row.names = FALSE)
+  meta <- vimpact:::get_meta_from_recipe(default_recipe = FALSE, recipe = t,
+                                         method = "method2a", con = con)
+  old_raw_impact <- vimpact:::get_raw_impact_details(con, meta, burden_outcome_plot)
+  country <- dplyr::tbl(con, "country")
+  old_impact <- old_impact %>%
+    dplyr::left_join(country, by = c("country" = "nid"), copy = TRUE) %>%
+    dplyr::select(country = id, vaccine, activity_type, year = time,
+                  burden_outcome, impact) %>%
+    dplyr::filter(!is.na(impact)) %>%
+    dplyr::arrange(activity_type, country, year, vaccine)
+  
+  fvps <- vimpact::extract_vaccination_history(con, touchstone, year_min = 2000,
+                                               year_max = 2030,
+                                               disease_to_extract = disease)
+  fvps$fvps <- fvps$fvps_adjusted
+  fvps$country <- fvps$country_nid
+  
+  old_impact <- vimpact:::impact_by_year_of_vaccination(
+    meta, old_raw_impact, fvps, vaccination_years = 2000:2030)
+  
+  impact <- vimpact::calculate_impact(
+    con, method = "yov_activity_type", 
+    touchstone = touchstone,
+    modelling_group = modelling_group,  
+    disease = disease,
+    focal_scenario_type = focal_scenario_type, 
+    focal_vaccine_delivery = focal_vaccine_delivery,
+    baseline_scenario_type = baseline_scenario_type,
+    burden_outcomes = burden_outcome_plot)
+  out <- merge(old_impact, impact, all.x = TRUE, all.y = TRUE,
+               by = c("country", "vaccine", "activity_type", "year",
+                      "burden_outcome"))
+  out$disease <- disease
+  out
+}
+
+## YF
+yf_table <- get_comparison_table(
+  touchstone = "201910gavi-5",
+  modelling_group = "IC-Garske",  
+  disease = "YF",
+  focal_scenario_type = "default", 
+  focal_vaccine_delivery = list(
+    list(vaccine = "YF", activity_type = "routine"),
+    list(vaccine = "YF", activity_type = "campaign")
+  ),
+  baseline_scenario_type = "default",
+  baseline_vaccine_delivery = list(
+    list(vaccine = "YF", activity_type = "routine")
+  ),
+  burden_outcomes_extract = "dalys",
+  burden_outcome_plot = "dalys")
+
+measles_table <- get_comparison_table(
+  touchstone = "201910gavi-5",
+  modelling_group = "LSHTM-Jit",  
+  disease = "Measles",
+  focal_scenario_type = "default", 
+  focal_vaccine_delivery = list(
+    list(vaccine = "MCV1", activity_type = "routine")
+  ),
+  baseline_scenario_type = "novac",
+  baseline_vaccine_delivery = NULL,
+  burden_outcomes_extract = "dalys",
+  burden_outcome_plot = "dalys")
+
+make_plot <- function(data) {
+  countries <- unique(data$country)
+  impact_plot <- data %>%
+    dplyr::rename(recipe_impact = impact.x, function_impact = impact.y) %>%
+    tidyr::pivot_wider(names_from = country, 
+                       values_from = c(recipe_impact, function_impact))
+  
+  impact_plot <- as.data.frame(impact_plot)
+  countries_filter <- lapply(unique(countries), function(country) {
+    button <- list(
+      method = "restyle",
+      args = list("y", c(
+        list(impact_plot[, paste0("recipe_impact_", country)]),
+        list(impact_plot[, paste0("function_impact_", country)]))),
+      label = country
+    )
+  })
+  plot <- plotly::plot_ly(data = impact_plot) %>%
+    plotly::add_trace(x = ~year, y = ~recipe_impact_AFG, name = "recipe", 
+                      type = "scatter", mode = "markers", text = ~vaccine,
+                      marker = list(
+                        color = "rgb(235, 204, 42)",
+                        size = 10
+                      )) %>%
+    plotly::add_trace(x = ~year, y = ~function_impact_AFG, name = "function",
+                      type = "scatter", mode = "markers", text = ~vaccine,
+                      marker = list(
                         color = "rgb(60, 154, 178)",
-                        width = 2
-                      )
-                    )) %>%
-  plotly::layout(
-    yaxis = list(title = "impact"),
-    updatemenus = list(
-      list(
-        y = 0.7,
-        buttons = countries_filter
-      )
-    ))
+                        symbol = "circle-open",
+                        size = 10,
+                        line = list(
+                          color = "rgb(60, 154, 178)",
+                          width = 2
+                        )
+                      )) %>%
+    plotly::layout(
+      yaxis = list(title = "impact"),
+      updatemenus = list(
+        list(
+          y = 0.7,
+          buttons = countries_filter
+        )
+      ))
+  plot
+}
 ```
 
 ```{r include = FALSE}
-htmlwidgets::saveWidget(plotly::partial_bundle(plot), 
-                        "impact_comparisons.html")
+hepb_data <- merge(old_impact, impact, all.x = TRUE, all.y = TRUE,
+                    by = c("country", "vaccine", "activity_type", "year",
+                           "burden_outcome"))
+hepb_plot <- make_plot(hepb_data)
+yf_plot <- make_plot(yf_data)
+measles_plot <- make_plot(measles_data)
+```
+
+
+```{r include = FALSE}
+htmlwidgets::saveWidget(plotly::partial_bundle(hepb_plot), 
+                        "impact_comparisons_hepb.html")
+htmlwidgets::saveWidget(plotly::partial_bundle(yf_plot), 
+                        "impact_comparisons_yf.html")
+htmlwidgets::saveWidget(plotly::partial_bundle(measles_plot), 
+                        "impact_comparisons_measles.html")
 ```
 
 <!-- WIDGET -->
