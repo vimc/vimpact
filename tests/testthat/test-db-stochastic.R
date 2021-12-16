@@ -318,7 +318,7 @@ test_that("using a single year group returns same as fetch_stochastic_data", {
   names(data_grouped) <- nms
   data_grouped <- data_grouped[ , colnames(data_grouped) != "end_time"]
 
-  expect_equivalent(data_grouped, data)
+  expect_equal(data_grouped, data, ignore_attr = TRUE)
 
   ## and filters work
   filters <- list(
@@ -335,7 +335,7 @@ test_that("using a single year group returns same as fetch_stochastic_data", {
   names(data_grouped) <- nms
   data_grouped <- data_grouped[ , colnames(data_grouped) != "end_time"]
 
-  expect_equivalent(data_grouped, data)
+  expect_equal(data_grouped, data, ignore_attr = TRUE)
 })
 
 test_that("fetch_stochastic_data_year_groups errors if invalid table", {

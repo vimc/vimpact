@@ -33,7 +33,7 @@ recipe_template <- function(template_version = "201710", method){
                     "burden outcomes. \n",
                     "Use '*' when the model is using simplified deaths and cases definitions. Otherwise, list burden outcomes in the form of\n",
                     "<deaths_outcome1>,<deaths_outcome2>,<deaths_outcome3>;<cases_outcome1>,<cases_outcome2>,<cases_outcome3> \n",
-                    "NO spacing is allowed. DO NOT provide dalys, as dalys will be added in automatically."), man)
+                    "NO spacing is allowed."), man)
   close(man)
   message("Generated impact recipe template in directory recipe.")
 }
@@ -63,7 +63,7 @@ get_meta_from_recipe <- function(default_recipe = TRUE, method = "method0", reci
     if (recipe$burden_outcome[i] == "*"){
       recipe$burden_outcome[i] <- "deaths;cases;dalys"
     } else {
-      recipe$burden_outcome[i] <- paste(recipe$burden_outcome[i], "dalys", sep = ";")
+      recipe$burden_outcome[i] <- paste(recipe$burden_outcome[i], sep = ";")
     }
   }
 
@@ -121,8 +121,11 @@ get_meta_from_recipe <- function(default_recipe = TRUE, method = "method0", reci
 
     meta_all <- DBI::dbGetQuery(con, sql)
     ## remove yf reactive sias - otherwise cannot match with recipe
-    j <- meta_all$vaccine == "YF" & meta_all$gavi_support_level == "none"
-    meta_all <- meta_all[!j, ]
+    i <- meta_all$scenario_type == "novac"
+    j <- meta_all$gavi_support_level == "none"
+    meta_all$vaccine[i] <- "none"
+    meta_all$activity_type[i] <- "none"
+    meta_all <- meta_all[!(!i & j), ]
     meta_all$gavi_support_level <- NULL
     meta_all$vaccine_delivery <- paste(meta_all$vaccine, meta_all$activity_type, sep = "-")
     meta_all$vaccine_delivery[meta_all$vaccine_delivery == "none-none"] <- ""
@@ -209,12 +212,22 @@ replace_burden_outcome <- function(burden_outcomes, a){
       m[j] <- paste(v1, collapse = ",")
     }
     m2 <- m
+    ii <- 1
     k <- grepl("deaths", v)
-    m2[1] <- m[k]
+    if(any(k)){
+      m2[ii] <- m[k]
+      ii <- ii+1
+    }
     k <- grepl("cases", v)
-    m2[2] <- m[k]
+    if(any(k)){
+      m2[ii] <- m[k]
+      ii <- ii+1
+    }
     k <- grepl("dalys", v)
-    m2[3] <- m[k]
+    if(any(k)){
+      m2[ii] <- m[k]
+      ii <- ii+1
+    }
 
     t[i] <- paste(m2, collapse = ";")
   }

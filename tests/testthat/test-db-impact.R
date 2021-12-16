@@ -361,7 +361,7 @@ test_that("impact by year of vaccination activity type: only campaign", {
   expect_equal(
     colnames(impact),
     c("country", "vaccine", "activity_type", "year", "burden_outcome",
-      "impact"))
+      "impact", "fvps"))
 })
 
 test_that("impact by year of vaccination activity type: only routine", {
@@ -376,10 +376,11 @@ test_that("impact by year of vaccination activity type: only routine", {
   expect_equal(
     colnames(impact),
     c("country", "vaccine", "activity_type", "year", "burden_outcome",
-      "impact"))
+      "impact", "fvps"))
 })
 
 test_that("impact by YOV activity type: different impact & fvp", {
+  ## Xiang review
   baseline <- impact_test_data_baseline[
     impact_test_data_baseline$activity_type == "routine", ]
   focal <- impact_test_data_focal[
@@ -395,7 +396,7 @@ test_that("impact by YOV activity type: only works with single activity type", {
   expect_error(impact_by_year_of_vaccination_activity_type(
     impact_test_data_baseline, impact_test_data_focal, fvp_test_data_15,
     2000:2010),
-    "Focal burden must have only one activity_type.")
+    "FVPs must have only one activity_type.")
 })
 
 test_that("impact by YOV activity type: no fvps in vaccination years", {
@@ -403,8 +404,9 @@ test_that("impact by YOV activity type: no fvps in vaccination years", {
     impact_test_data_baseline$activity_type == "routine", ]
   focal <- impact_test_data_focal[
     impact_test_data_focal$activity_type == "routine", ]
+  fvps <- fvp_test_data_15[fvp_test_data_15$activity_type == "routine", ]
   expect_error(impact_by_year_of_vaccination_activity_type(
-    baseline, focal, fvp_test_data_15,
+    baseline, focal, fvps,
     2050:2060),
     "No FVP data for this range of vaccination years")
 })
@@ -441,7 +443,7 @@ test_that("impact activity type: functions agree - routine", {
 
   routine_raw_impact <- get_raw_impact_details(con = con, meta,
                                                burden_outcome = "deaths")
-  fvp <- fvp_test_data_15
+  fvp <- fvp_test_data_15[fvp_test_data_15$activity_type == "routine", ]
   fvp$vaccine <- "YF"
   fvp$disease <- "YF"
   vimc_impact <- impact_by_year_of_vaccination(
@@ -490,7 +492,7 @@ test_that("impact activity type: functions agree - campaign", {
 
   campaign_raw_impact <- get_raw_impact_details(con = con, meta,
                                                 burden_outcome = "deaths")
-  fvp <- fvp_test_data_15
+  fvp <- fvp_test_data_15[fvp_test_data_15$activity_type == "campaign", ]
   fvp$vaccine <- "YF"
   fvp$disease <- "YF"
   vimc_impact <- impact_by_year_of_vaccination(
@@ -517,7 +519,7 @@ test_that("impact by year of vaccination birth cohort", {
   expect_equal(
     colnames(impact),
     c("country", "year", "burden_outcome", "vaccine", "activity_type",
-      "impact"))
+      "impact", "fvps"))
 })
 
 test_that("impact by YOV birth cohort: no fvps in vaccination years", {
@@ -572,5 +574,8 @@ test_that("impact birth cohort: internal and external functions agree", {
     vimc_impact, sum, na.rm = TRUE)
   vimc_impact <- vimc_impact[
     order(vimc_impact$country, vimc_impact$activity_type, vimc_impact$year), ]
+  public_impact <- public_impact %>%
+    dplyr::select("country", "year", "burden_outcome", "vaccine",
+                  "activity_type", "impact")
   expect_equal(public_impact, vimc_impact, ignore_attr = TRUE)
 })

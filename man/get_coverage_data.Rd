@@ -8,6 +8,7 @@ get_coverage_data(
   con,
   touchstone,
   delivery_methods,
+  focal_scenario_type,
   countries = NULL,
   vaccination_years = NULL
 )
@@ -17,11 +18,20 @@ get_coverage_data(
 
 \item{touchstone}{Touchstone to get data for}
 
+\item{delivery_methods}{List of delivery methods to get data for}
+
+\item{focal_scenario_type}{A character determining from which scenario_type
+coverage estimates shall be extracted}
+
 \item{countries}{Optional vector of countries to filter data}
 
 \item{vaccination_years}{Option vector of years to filter data}
 
-\item{delivery}{List of delivery methods to get data for}
+\item{baseline_vaccine_delivery}{A list of lists containing vaccine and
+activity_type (routine or campaign) describing delivery}
+
+\item{focal_vaccine_delivery}{A list of lists containing vaccine and
+activity_type (routine or campaign) describing delivery}
 }
 \value{
 Tibble of coverage data
