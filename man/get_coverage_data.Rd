@@ -7,8 +7,7 @@
 get_coverage_data(
   con,
   touchstone,
-  baseline_vaccine_delivery,
-  focal_vaccine_delivery,
+  delivery_methods,
   countries = NULL,
   vaccination_years = NULL
 )
@@ -16,17 +15,13 @@ get_coverage_data(
 \arguments{
 \item{con}{DB connection}
 
-\item{baseline_vaccine_delivery}{A list of lists containing vaccine and
-activity_type (routine or campaign) describing delivery}
-
-\item{focal_vaccine_delivery}{A list of lists containing vaccine and
-activity_type (routine or campaign) describing delivery}
+\item{touchstone}{Touchstone to get data for}
 
 \item{countries}{Optional vector of countries to filter data}
 
 \item{vaccination_years}{Option vector of years to filter data}
 
-\item{touchtonse}{Touchstone to get data for}
+\item{delivery}{List of delivery methods to get data for}
 }
 \value{
 Tibble of coverage data

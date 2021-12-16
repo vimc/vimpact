@@ -50,13 +50,7 @@ calculate_impact <- function(con, method, touchstone, modelling_group, disease,
                           "yov_birth_cohort"))
   scenario <- NULL
 
-  ## Map touchstone name to ID if touchstone name given
-  touchstones <- DBI::dbGetQuery(con,
-                                 "SELECT id, touchstone_name FROM touchstone")
-  if (!touchstone %in% touchstones[["id"]]) {
-    touchstone <- get_touchstone(con, touchstone)
-  }
-
+  touchstone <- get_touchstone_id(con, touchstone)
   outcomes <- get_burden_outcome_ids(con, burden_outcomes)
 
   none_vaccine_delivery <- list(list(activity_type = "none",
@@ -173,34 +167,26 @@ filter_year <- function(df, vaccination_years) {
 get_fvps <- function(con, touchstone, baseline_vaccine_delivery,
                      focal_vaccine_delivery, countries = NULL,
                      vaccination_years = NULL) {
-  age_from <- age <- age_to <- coverage_set <- country <- year <- NULL
-  gender <- activity_type <- value <- target <- fvps_source <- NULL
+  age_from <- age <- age_to <- country <- year <- NULL
+  activity_type <- value <- target <- fvps_source <- NULL
   vaccine <- fvps <- NULL
   population <- get_population_dplyr(con, touchstone, countries,
                                      vaccination_years)
-  coverage <- get_coverage_data(con, touchstone, baseline_vaccine_delivery,
-                                focal_vaccine_delivery, countries,
+  delivery <- vcapply(c(focal_vaccine_delivery, baseline_vaccine_delivery),
+                      function(x) {
+                        paste(x$vaccine, x$activity_type, sep = "-")
+                      })
+  coverage <- get_coverage_data(con, touchstone, delivery, countries,
                                 vaccination_years)
 
-  ## We have pop data for each age group
-  ## But coverage might be for a range of ages e.g. 1 to 100
-  ## We need total pop over this range of years
-  aggregate_pop <- coverage %>%
-    dplyr::left_join(population, by = c("country" = "country",
-                                     "year" = "year",
-                                     "gender" = "gender")) %>%
-    dplyr::filter(age_from <= age & age <= age_to) %>%
-    dplyr::group_by(coverage_set, country, year, gender, activity_type,
-                    age_from, age_to) %>%
-    dplyr::summarise(population = sum(value, na.rm = TRUE))
-
+  aggregated_pop <- aggregate_pop(coverage, population)
 
   coverage %>%
     dplyr::left_join(population, by = c("country" = "country",
-                                      "year" = "year",
-                                      "gender" = "gender")) %>%
+                                        "year" = "year",
+                                        "gender" = "gender")) %>%
     dplyr::filter(age_from <= age & age <= age_to) %>%
-    dplyr::left_join(aggregate_pop, by = c("country" = "country",
+    dplyr::left_join(aggregated_pop, by = c("country" = "country",
                                            "coverage_set" = "coverage_set",
                                            "year" = "year",
                                            "gender" = "gender",
@@ -216,38 +202,50 @@ get_fvps <- function(con, touchstone, baseline_vaccine_delivery,
     dplyr::collect()
 }
 
+#' Given population data for each age group and coverage for a range of ages e.g. 1 to 100
+#' return coverage data with total population over this range
+#'
+#' @param coverage Tibble of coverage data
+#' @param population Tibble of population data
+#'
+#' @return Tibble of coverage data with aggregated population
+#' @keywords internal
+aggregate_pop <- function(coverage, population) {
+  age_from <- age <- age_to <- coverage_set <- country <- year <- NULL
+  gender <- activity_type <- NULL
+  coverage %>%
+    dplyr::left_join(population, by = c("country" = "country",
+                                        "year" = "year",
+                                        "gender" = "gender")) %>%
+    dplyr::filter(age_from <= age & age <= age_to) %>%
+    dplyr::group_by(coverage_set, country, year, gender, activity_type,
+                    age_from, age_to) %>%
+    dplyr::summarise(population = sum(value, na.rm = TRUE))
+}
+
 #' Get coverage data for a particular touchstone and vaccine delivery method
 #'
 #' @param con DB connection
-#' @param touchtonse Touchstone to get data for
-#' @param baseline_vaccine_delivery A list of lists containing vaccine and
-#'   activity_type (routine or campaign) describing delivery
-#' @param focal_vaccine_delivery A list of lists containing vaccine and
-#'   activity_type (routine or campaign) describing delivery
+#' @param touchstone Touchstone to get data for
+#' @param delivery List of delivery methods to get data for
 #' @param countries Optional vector of countries to filter data
 #' @param vaccination_years Option vector of years to filter data
 #'
 #' @return Tibble of coverage data
 #' @keywords internal
-get_coverage_data <- function(con, touchstone, baseline_vaccine_delivery,
-                              focal_vaccine_delivery, countries = NULL,
-                              vaccination_years = NULL) {
-  gavi_support_level <- CONCAT <- vaccine <- activity_type <- id <- year <- NULL
-  age_from <- age_to <- name <- target <- NULL
-  delivery <-  vcapply(c(focal_vaccine_delivery, baseline_vaccine_delivery),
-                       function(x) {
-                         paste(x$vaccine, x$activity_type, sep = "-")
-                       })
-  coverage_set <- dplyr::tbl(con, "coverage_set")
-  coverage <- dplyr::tbl(con, "coverage")
-  gender <- dplyr::tbl(con, "gender")
-  country <- dplyr::tbl(con, "country")
+get_coverage_data <- function(con, touchstone, delivery_methods,
+                              countries = NULL, vaccination_years = NULL) {
+  CONCAT <- vaccine <- activity_type <- id <- year <- NULL
+  age_from <- age_to <- name <- target <- delivery <- NULL
+  coverage_set <- get_coverage_set_by_touchstone(con, touchstone)
+  coverage <- get_coverage(con)
+  gender <- get_gender(con)
+  country <- get_country(con)
+
   cov_set <- coverage_set %>%
-    dplyr::filter(touchstone == !!touchstone &
-                    gavi_support_level != "none") %>%
     dplyr::mutate("delivery" = CONCAT(vaccine, "-", activity_type)) %>%
-    dplyr::filter(delivery %in% !!delivery) %>%
-    dplyr::select(coverage_set = id, vaccine, activity_type)
+    dplyr::filter(delivery %in% !!delivery_methods) %>%
+    dplyr::select(coverage_set = id, vaccine, activity_type, delivery)
 
   cov <- cov_set %>%
     dplyr::left_join(coverage, by = c("coverage_set" = "coverage_set")) %>%
@@ -279,8 +277,8 @@ get_population_dplyr <- function(con, touchstone, countries = NULL,
   touchstone_demographic_dataset <- dplyr::tbl(con,
                                                "touchstone_demographic_dataset")
   demographic_statistic_type <- dplyr::tbl(con, "demographic_statistic_type")
-  gender <- dplyr::tbl(con, "gender")
-  country <- dplyr::tbl(con, "country")
+  gender <- get_gender(con)
+  country <- get_country(con)
 
   demographic_statistic %>%
     dplyr::left_join(touchstone_demographic_dataset,
@@ -318,7 +316,6 @@ get_burden_outcome_ids <- function(con, burden_outcomes) {
     dplyr::filter(code %in% burden_outcomes) %>%
     dplyr::select(id, code)
 }
-
 
 #' Get burden estimate set ids
 #'
