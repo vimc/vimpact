@@ -60,7 +60,7 @@ recipe <- data.frame(
   modelling_group = "CDA-Razavi", disease = "HepB",
   focal = "default:HepB_BD-routine;HepB-routine",
   baseline = "novac",
-  burden_outcome = "hepb_deaths_acute,hepb_deaths_dec_cirrh,hepb_deaths_hcc;hepb_cases_acute_severe,hepb_cases_dec_cirrh,hepb_cases_hcc")
+  burden_outcome = "hepb_deaths_acute,hepb_deaths_dec_cirrh,hepb_deaths_hcc;hepb_cases_acute_severe,hepb_cases_dec_cirrh,hepb_cases_hcc;dalys")
 t <- tempfile(fileext = ".csv")
 write.csv(recipe, t, row.names = FALSE)
 ```
@@ -150,20 +150,23 @@ str(old_impact)
 and we can see from a plot that the output is very similar
 
 ```{r include = FALSE}
-get_comparison_table <- function(touchstone, modelling_group, disease, focal_scenario_type,
-                                 focal_vaccine_delivery, baseline_scenario_type, baseline_vaccine_delivery,
+get_comparison_table <- function(touchstone, modelling_group, disease, 
+                                 focal_scenario_type,
+                                 focal_vaccine_delivery, baseline_scenario_type,
+                                 baseline_vaccine_delivery,
                                  burden_outcome_extract, burden_outcome_plot) {
-  focal <- vcapply(focal_vaccine_delivery, function(delivery) {
+  focal <- vapply(focal_vaccine_delivery, function(delivery) {
     paste0(delivery$vaccine, "-", delivery$activity_type)
-  })
-  focal <- paste0(focal_scenario_type, ":", focal)
-  if (baseline_scenario_type = "novac") {
+  }, character(1))
+  focal <- paste0(focal_scenario_type, ":", paste0(focal, collapse = ";"))
+  if (baseline_scenario_type == "novac") {
     baseline <- "novac"
   } else {
-    baseline <- vcapply(baseline_vaccine_delivery, function(delivery) {
+    baseline <- vapply(baseline_vaccine_delivery, function(delivery) {
       paste0(delivery$vaccine, "-", delivery$activity_type)
-    })
-    baseline <- paste0(baseline_scenario_type, ":", baseline)
+    }, character(1))
+    baseline <- paste0(baseline_scenario_type, ":", 
+                       paste0(baseline, collapse = ";"))
   }
   recipe <- data.frame(
     touchstone = touchstone,
@@ -176,7 +179,10 @@ get_comparison_table <- function(touchstone, modelling_group, disease, focal_sce
   write.csv(recipe, t, row.names = FALSE)
   meta <- vimpact:::get_meta_from_recipe(default_recipe = FALSE, recipe = t,
                                          method = "method2a", con = con)
-  old_raw_impact <- vimpact:::get_raw_impact_details(con, meta, burden_outcome_plot)
+  old_raw_impact <- vimpact:::get_raw_impact_details(con, meta, 
+                                                     burden_outcome_plot)
+  old_impact <- vimpact:::impact_by_year_of_vaccination(
+    meta, old_raw_impact, fvps, vaccination_years = 2000:2030)
   country <- dplyr::tbl(con, "country")
   old_impact <- old_impact %>%
     dplyr::left_join(country, by = c("country" = "nid"), copy = TRUE) %>%
@@ -190,9 +196,6 @@ get_comparison_table <- function(touchstone, modelling_group, disease, focal_sce
                                                disease_to_extract = disease)
   fvps$fvps <- fvps$fvps_adjusted
   fvps$country <- fvps$country_nid
-  
-  old_impact <- vimpact:::impact_by_year_of_vaccination(
-    meta, old_raw_impact, fvps, vaccination_years = 2000:2030)
   
   impact <- vimpact::calculate_impact(
     con, method = "yov_activity_type", 
@@ -213,9 +216,9 @@ get_comparison_table <- function(touchstone, modelling_group, disease, focal_sce
 ## YF
 yf_table <- get_comparison_table(
   touchstone = "201910gavi-5",
-  modelling_group = "IC-Garske",  
+  modelling_group = "IC-Garske",
   disease = "YF",
-  focal_scenario_type = "default", 
+  focal_scenario_type = "default",
   focal_vaccine_delivery = list(
     list(vaccine = "YF", activity_type = "routine"),
     list(vaccine = "YF", activity_type = "campaign")
@@ -224,7 +227,7 @@ yf_table <- get_comparison_table(
   baseline_vaccine_delivery = list(
     list(vaccine = "YF", activity_type = "routine")
   ),
-  burden_outcomes_extract = "dalys",
+  burden_outcome_extract = "deaths;cases;dalys",
   burden_outcome_plot = "dalys")
 
 measles_table <- get_comparison_table(
@@ -237,7 +240,7 @@ measles_table <- get_comparison_table(
   ),
   baseline_scenario_type = "novac",
   baseline_vaccine_delivery = NULL,
-  burden_outcomes_extract = "dalys",
+  burden_outcome_extract = "deaths;cases;dalys",
   burden_outcome_plot = "dalys")
 
 make_plot <- function(data) {
