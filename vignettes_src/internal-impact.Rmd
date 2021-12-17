@@ -233,18 +233,18 @@ get_comparison_table <- function(touchstone, modelling_group, disease,
 #   burden_outcome_extract = "deaths;cases;dalys",
 #   burden_outcome_plot = "dalys")
 
-yf_table <- get_comparison_table(
-  touchstone = "201910gavi-5",
-  modelling_group = "IC-Garske",
-  disease = "YF",
-  focal_scenario_type = "default",
-  focal_vaccine_delivery = list(
-    list(vaccine = "YF", activity_type = "routine")
-  ),
-  baseline_scenario_type = "novac",
-  baseline_vaccine_delivery = NULL,
-  burden_outcome_extract = "deaths;cases;dalys",
-  burden_outcome_plot = "dalys")
+# yf_table <- get_comparison_table(
+#   touchstone = "201910gavi-5",
+#   modelling_group = "IC-Garske",
+#   disease = "YF",
+#   focal_scenario_type = "default",
+#   focal_vaccine_delivery = list(
+#     list(vaccine = "YF", activity_type = "routine")
+#   ),
+#   baseline_scenario_type = "novac",
+#   baseline_vaccine_delivery = NULL,
+#   burden_outcome_extract = "deaths;cases;dalys",
+#   burden_outcome_plot = "dalys")
 ```
 
 ```{r include = FALSE}
@@ -316,7 +316,7 @@ hepb_data <- merge(old_impact, impact, all.x = TRUE, all.y = TRUE,
                     by = c("country", "vaccine", "activity_type", "year",
                            "burden_outcome"))
 hepb_plot <- make_plot(hepb_data)
-yf_plot <- make_plot(yf_data)
+# yf_plot <- make_plot(yf_data)
 measles_plot <- make_plot(measles_data)
 ```
 
@@ -324,7 +324,7 @@ measles_plot <- make_plot(measles_data)
 ```{r include = FALSE}
 htmlwidgets::saveWidget(plotly::partial_bundle(hepb_plot), 
                         "impact_comparisons_hepb.html")
-htmlwidgets::saveWidget(plotly::partial_bundle(yf_plot), 
+htmlwidgets::saveWidget(plotly::partial_bundle(hepb_plot), 
                         "impact_comparisons_yf.html")
 htmlwidgets::saveWidget(plotly::partial_bundle(measles_plot), 
                         "impact_comparisons_measles.html")
