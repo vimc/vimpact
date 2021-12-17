@@ -90,3 +90,9 @@ fvp_test_data_15 <- data_frame(
   fvps = c(34, 54, 34, 54, 23, 65, 78, 98, 78, 98, 43, 45, 65, 45, 65),
   disease = rep("HepB", 15)
 )
+
+## This helper lets us use with_mock interactively see
+## https://github.com/krlmlr/mockr/pull/29
+with_mock <- function(..., .parent = parent.frame()) {
+  mockr::with_mock(..., .parent = .parent, .env = "vimpact")
+}
