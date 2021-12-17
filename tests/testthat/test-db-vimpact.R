@@ -301,3 +301,24 @@ test_that("can use wrapper function to run impact for a recipe", {
   expect_true(args[[2]]$is_under5)
   expect_equal(args[[2]]$vaccination_years, 2000:2005)
 })
+
+test_that("get_burden_estimate_set_ids can get ids from scenario specification with any order", {
+  con <- test_montagu_readonly_connection()
+  ids <- get_burden_estimate_set_ids(
+    con,
+    baseline_scenario_type = "novac",
+    baseline_scenario = "novac-none-none",
+    focal_scenario_type = "default",
+    focal_scenario = "default-HepB-routine;default-HepB_BD-routine",
+    touchstone = "201710gavi-5",
+    modelling_group = "CDA-Razavi",
+    disease = "HepB") %>%
+    dplyr::collect()
+  expect_equal(ids, data.frame(
+    scenario = c("baseline", "focal"),
+    delivery = c("novac-none-none",
+                 "default-HepB_BD-routine;default-HepB-routine"),
+    burden_estimate_set = c(579, 581),
+    stringsAsFactors = FALSE
+  ), ignore_attr = TRUE)
+})
