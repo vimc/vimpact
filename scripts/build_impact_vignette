@@ -9,7 +9,7 @@ widget=' \
 ### HepB \
 ```{r} \
 htmltools::tags$iframe( \
-  src = "impact_comparisons_hepB.html", \
+  src = "impact_comparisons_hepb.html", \
   width = "100%", \
   height = "400", \
   scrolling = "no", \
@@ -48,4 +48,6 @@ sed -s 's/[[:space:]]*$//' vignettes_src/internal-impact.md |
     sed 's/\r//g' |
     sed "s/HEADER/$header/" |
     sed "s/<!-- WIDGET -->/$widget/" > vignettes/internal-impact.Rmd
-cp vignettes_src/impact_comparisons.html vignettes/impact_comparisons.html
+cp vignettes_src/impact_comparisons_hepb.html vignettes/impact_comparisons_hepb.html
+cp vignettes_src/impact_comparisons_yf.html vignettes/impact_comparisons_yf.html
+cp vignettes_src/impact_comparisons_measles.html vignettes/impact_comparisons_measles.html
