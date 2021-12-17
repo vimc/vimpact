@@ -217,7 +217,7 @@ get_comparison_table <- function(touchstone, modelling_group, disease,
 
 ```{r include = FALSE}
 ## YF
-# yf_table <- get_comparison_table(
+# yf_data <- get_comparison_table(
 #   touchstone = "201910gavi-5",
 #   modelling_group = "IC-Garske",
 #   disease = "YF",
@@ -233,7 +233,7 @@ get_comparison_table <- function(touchstone, modelling_group, disease,
 #   burden_outcome_extract = "deaths;cases;dalys",
 #   burden_outcome_plot = "dalys")
 
-# yf_table <- get_comparison_table(
+# yf_data <- get_comparison_table(
 #   touchstone = "201910gavi-5",
 #   modelling_group = "IC-Garske",
 #   disease = "YF",
@@ -248,7 +248,7 @@ get_comparison_table <- function(touchstone, modelling_group, disease,
 ```
 
 ```{r include = FALSE}
-measles_table <- get_comparison_table(
+measles_data <- get_comparison_table(
   touchstone = "201910gavi-5",
   modelling_group = "LSHTM-Jit",  
   disease = "Measles",
