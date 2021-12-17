@@ -71,7 +71,6 @@ calculate_impact <- function(con, method, touchstone, modelling_group, disease,
   })
   baseline_scenario <- paste0(baseline_scenario, collapse = ";")
 
-  browser()
   burden_estimate_sets <- get_burden_estimate_set_ids(
     con, baseline_scenario_type, baseline_scenario,
     focal_scenario_type, focal_scenario,
