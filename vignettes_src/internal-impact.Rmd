@@ -213,23 +213,41 @@ get_comparison_table <- function(touchstone, modelling_group, disease,
   out
 }
 
+```
+
+```{r include = FALSE}
 ## YF
+# yf_table <- get_comparison_table(
+#   touchstone = "201910gavi-5",
+#   modelling_group = "IC-Garske",
+#   disease = "YF",
+#   focal_scenario_type = "default",
+#   focal_vaccine_delivery = list(
+#     list(vaccine = "YF", activity_type = "routine"),
+#     list(vaccine = "YF", activity_type = "campaign")
+#   ),
+#   baseline_scenario_type = "default",
+#   baseline_vaccine_delivery = list(
+#     list(vaccine = "YF", activity_type = "routine")
+#   ),
+#   burden_outcome_extract = "deaths;cases;dalys",
+#   burden_outcome_plot = "dalys")
+
 yf_table <- get_comparison_table(
   touchstone = "201910gavi-5",
   modelling_group = "IC-Garske",
   disease = "YF",
   focal_scenario_type = "default",
   focal_vaccine_delivery = list(
-    list(vaccine = "YF", activity_type = "routine"),
-    list(vaccine = "YF", activity_type = "campaign")
-  ),
-  baseline_scenario_type = "default",
-  baseline_vaccine_delivery = list(
     list(vaccine = "YF", activity_type = "routine")
   ),
+  baseline_scenario_type = "novac",
+  baseline_vaccine_delivery = NULL,
   burden_outcome_extract = "deaths;cases;dalys",
   burden_outcome_plot = "dalys")
+```
 
+```{r include = FALSE}
 measles_table <- get_comparison_table(
   touchstone = "201910gavi-5",
   modelling_group = "LSHTM-Jit",  
@@ -243,6 +261,9 @@ measles_table <- get_comparison_table(
   burden_outcome_extract = "deaths;cases;dalys",
   burden_outcome_plot = "dalys")
 
+```
+
+```{r include = FALSE}
 make_plot <- function(data) {
   countries <- unique(data$country)
   impact_plot <- data %>%
