@@ -179,6 +179,12 @@ get_comparison_table <- function(touchstone, modelling_group, disease,
   write.csv(recipe, t, row.names = FALSE)
   meta <- vimpact:::get_meta_from_recipe(default_recipe = FALSE, recipe = t,
                                          method = "method2a", con = con)
+  fvps <- vimpact::extract_vaccination_history(con, touchstone, year_min = 2000,
+                                               year_max = 2030,
+                                               disease_to_extract = disease)
+  fvps$fvps <- fvps$fvps_adjusted
+  fvps$country <- fvps$country_nid
+  
   old_raw_impact <- vimpact:::get_raw_impact_details(con, meta, 
                                                      burden_outcome_plot)
   old_impact <- vimpact:::impact_by_year_of_vaccination(
@@ -190,12 +196,6 @@ get_comparison_table <- function(touchstone, modelling_group, disease,
                   burden_outcome, impact) %>%
     dplyr::filter(!is.na(impact)) %>%
     dplyr::arrange(activity_type, country, year, vaccine)
-  
-  fvps <- vimpact::extract_vaccination_history(con, touchstone, year_min = 2000,
-                                               year_max = 2030,
-                                               disease_to_extract = disease)
-  fvps$fvps <- fvps$fvps_adjusted
-  fvps$country <- fvps$country_nid
   
   impact <- vimpact::calculate_impact(
     con, method = "yov_activity_type", 
@@ -216,35 +216,18 @@ get_comparison_table <- function(touchstone, modelling_group, disease,
 ```
 
 ```{r include = FALSE}
-## YF
-# yf_data <- get_comparison_table(
-#   touchstone = "201910gavi-5",
-#   modelling_group = "IC-Garske",
-#   disease = "YF",
-#   focal_scenario_type = "default",
-#   focal_vaccine_delivery = list(
-#     list(vaccine = "YF", activity_type = "routine"),
-#     list(vaccine = "YF", activity_type = "campaign")
-#   ),
-#   baseline_scenario_type = "default",
-#   baseline_vaccine_delivery = list(
-#     list(vaccine = "YF", activity_type = "routine")
-#   ),
-#   burden_outcome_extract = "deaths;cases;dalys",
-#   burden_outcome_plot = "dalys")
-
-# yf_data <- get_comparison_table(
-#   touchstone = "201910gavi-5",
-#   modelling_group = "IC-Garske",
-#   disease = "YF",
-#   focal_scenario_type = "default",
-#   focal_vaccine_delivery = list(
-#     list(vaccine = "YF", activity_type = "routine")
-#   ),
-#   baseline_scenario_type = "novac",
-#   baseline_vaccine_delivery = NULL,
-#   burden_outcome_extract = "deaths;cases;dalys",
-#   burden_outcome_plot = "dalys")
+yf_data <- get_comparison_table(
+  touchstone = "201910gavi-5",
+  modelling_group = "IC-Garske",
+  disease = "YF",
+  focal_scenario_type = "default",
+  focal_vaccine_delivery = list(
+    list(vaccine = "YF", activity_type = "routine")
+  ),
+  baseline_scenario_type = "novac",
+  baseline_vaccine_delivery = NULL,
+  burden_outcome_extract = "deaths;cases;dalys",
+  burden_outcome_plot = "dalys")
 ```
 
 ```{r include = FALSE}
@@ -267,6 +250,7 @@ measles_data <- get_comparison_table(
 make_plot <- function(data) {
   countries <- unique(data$country)
   impact_plot <- data %>%
+    dplyr::select(-impact_ratio, -fvps) %>%
     dplyr::rename(recipe_impact = impact.x, function_impact = impact.y) %>%
     tidyr::pivot_wider(names_from = country, 
                        values_from = c(recipe_impact, function_impact))
@@ -282,13 +266,13 @@ make_plot <- function(data) {
     )
   })
   plot <- plotly::plot_ly(data = impact_plot) %>%
-    plotly::add_trace(x = ~year, y = ~recipe_impact_AFG, name = "recipe", 
+    plotly::add_trace(x = ~year, y = ~recipe_impact_AGO, name = "recipe", 
                       type = "scatter", mode = "markers", text = ~vaccine,
                       marker = list(
                         color = "rgb(235, 204, 42)",
                         size = 10
                       )) %>%
-    plotly::add_trace(x = ~year, y = ~function_impact_AFG, name = "function",
+    plotly::add_trace(x = ~year, y = ~function_impact_AGO, name = "function",
                       type = "scatter", mode = "markers", text = ~vaccine,
                       marker = list(
                         color = "rgb(60, 154, 178)",
@@ -316,7 +300,7 @@ hepb_data <- merge(old_impact, impact, all.x = TRUE, all.y = TRUE,
                     by = c("country", "vaccine", "activity_type", "year",
                            "burden_outcome"))
 hepb_plot <- make_plot(hepb_data)
-# yf_plot <- make_plot(yf_data)
+yf_plot <- make_plot(yf_data)
 measles_plot <- make_plot(measles_data)
 ```
 
@@ -324,7 +308,7 @@ measles_plot <- make_plot(measles_data)
 ```{r include = FALSE}
 htmlwidgets::saveWidget(plotly::partial_bundle(hepb_plot), 
                         "impact_comparisons_hepb.html")
-htmlwidgets::saveWidget(plotly::partial_bundle(hepb_plot), 
+htmlwidgets::saveWidget(plotly::partial_bundle(yf_plot), 
                         "impact_comparisons_yf.html")
 htmlwidgets::saveWidget(plotly::partial_bundle(measles_plot), 
                         "impact_comparisons_measles.html")
