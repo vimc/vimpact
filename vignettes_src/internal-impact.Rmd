@@ -192,7 +192,7 @@ get_comparison_table <- function(touchstone, modelling_group, disease,
   country <- dplyr::tbl(con, "country")
   old_impact <- old_impact %>%
     dplyr::left_join(country, by = c("country" = "nid"), copy = TRUE) %>%
-    dplyr::select(country = id, vaccine, activity_type, year = time,
+    dplyr::select(country = id, vaccine, activity_type, year,
                   burden_outcome, impact) %>%
     dplyr::filter(!is.na(impact)) %>%
     dplyr::arrange(activity_type, country, year, vaccine)
