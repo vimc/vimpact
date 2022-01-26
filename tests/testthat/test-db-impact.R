@@ -361,7 +361,7 @@ test_that("impact by year of vaccination activity type: only campaign", {
   expect_equal(
     colnames(impact),
     c("country", "vaccine", "activity_type", "year", "burden_outcome",
-      "impact", "fvps"))
+      "impact", "impact_ratio", "fvps"))
 })
 
 test_that("impact by year of vaccination activity type: only routine", {
@@ -376,7 +376,7 @@ test_that("impact by year of vaccination activity type: only routine", {
   expect_equal(
     colnames(impact),
     c("country", "vaccine", "activity_type", "year", "burden_outcome",
-      "impact", "fvps"))
+      "impact", "impact_ratio", "fvps"))
 })
 
 # test_that("impact by YOV activity type: different impact & fvp", {

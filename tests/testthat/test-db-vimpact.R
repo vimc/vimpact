@@ -48,7 +48,7 @@ test_that("can calculate impact by calendar year from db: dalys", {
     modelling_group = "CDA-Razavi", disease = "HepB",
     focal = "default:HepB_BD-routine;HepB-routine",
     baseline = "novac",
-    burden_outcome = "hepb_deaths_acute;hepb_cases_acute_severe")
+    burden_outcome = "hepb_deaths_acute;hepb_cases_acute_severe;dalys")
   t <- tempfile(fileext = ".csv")
   write.csv(recipe, t, row.names = FALSE)
   meta <- get_meta_from_recipe(default_recipe = FALSE, recipe = t,
@@ -81,7 +81,7 @@ test_that("can calculate impact by birth year from db", {
     modelling_group = "CDA-Razavi", disease = "HepB",
     focal = "default:HepB_BD-routine;HepB-routine",
     baseline = "novac",
-    burden_outcome = "hepb_deaths_acute;hepb_cases_acute_severe")
+    burden_outcome = "hepb_deaths_acute;hepb_cases_acute_severe;dalys")
   t <- tempfile(fileext = ".csv")
   write.csv(recipe, t, row.names = FALSE)
   meta <- get_meta_from_recipe(default_recipe = FALSE, recipe = t,
@@ -114,7 +114,7 @@ test_that("can calculate impact by yov: birth cohort", {
     modelling_group = "CDA-Razavi", disease = "HepB",
     focal = "default:HepB_BD-routine;HepB-routine",
     baseline = "novac",
-    burden_outcome = "hepb_deaths_acute;hepb_cases_acute_severe")
+    burden_outcome = "hepb_deaths_acute;hepb_cases_acute_severe;dalys")
   t <- tempfile(fileext = ".csv")
   write.csv(recipe, t, row.names = FALSE)
   meta <- get_meta_from_recipe(default_recipe = FALSE, recipe = t,
@@ -159,7 +159,7 @@ test_that("can calculate impact by yov: activity type", {
     modelling_group = "CDA-Razavi", disease = "HepB",
     focal = "default:HepB_BD-routine;HepB-routine",
     baseline = "novac",
-    burden_outcome = "hepb_deaths_acute;hepb_cases_acute_severe")
+    burden_outcome = "hepb_deaths_acute;hepb_cases_acute_severe;dalys")
   t <- tempfile(fileext = ".csv")
   write.csv(recipe, t, row.names = FALSE)
   meta <- get_meta_from_recipe(default_recipe = FALSE, recipe = t,
@@ -195,13 +195,15 @@ test_that("can get FVPS", {
     list(vaccine = "YF", activity_type = "campaign"))
   baseline_vaccine_delivery <- list(
     list(vaccine = "none", activity_type = "none"))
+  focal_scenario_type = "default"
   countries <- "UGA"
   vaccination_years <- 2000:2030
   ## TODO: What about if vaccines != diseases? Getting FVPs for HepB where there
   ## are multiple vaccines tis probably works because of Xiangs magic file
   new_fvps <- get_fvps(
     con, touchstone, baseline_vaccine_delivery = baseline_vaccine_delivery,
-    focal_vaccine_delivery = focal_vaccine_delivery, countries = countries,
+    focal_vaccine_delivery = focal_vaccine_delivery, focal_scenario_type = focal_scenario_type,
+    countries = countries,
     vaccination_years = vaccination_years) %>%
     dplyr::arrange(activity_type, year, age) %>%
     dplyr::collect()

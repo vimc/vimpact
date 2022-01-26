@@ -482,7 +482,7 @@ impact_by_year_of_vaccination_activity_type <- function(
     dplyr::inner_join(impact_ratio, by = c("country", "activity_type")) %>%
     dplyr::mutate(impact = impact_ratio * fvps) %>%
     dplyr::select(country, vaccine, activity_type, year, burden_outcome,
-                  impact, impact_ratio) %>%
+                  impact, impact_ratio, fvps) %>%
     dplyr::arrange(country, vaccine, activity_type, burden_outcome, year) %>%
     dplyr::ungroup() %>%
     dplyr::collect()
