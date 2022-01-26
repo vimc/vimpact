@@ -205,6 +205,7 @@ get_comparison_table <- function(touchstone, modelling_group, disease,
     focal_scenario_type = focal_scenario_type, 
     focal_vaccine_delivery = focal_vaccine_delivery,
     baseline_scenario_type = baseline_scenario_type,
+    baseline_vaccine_delivery = baseline_vaccine_delivery,
     burden_outcomes = burden_outcome_plot)
   out <- merge(old_impact, impact, all.x = TRUE, all.y = TRUE,
                by = c("country", "vaccine", "activity_type", "year",
@@ -222,10 +223,13 @@ yf_data <- get_comparison_table(
   disease = "YF",
   focal_scenario_type = "default",
   focal_vaccine_delivery = list(
+    list(vaccine = "YF", activity_type = "routine"),
+    list(vaccine = "YF", activity_type = "campaign")
+  ),
+  baseline_scenario_type = "default",
+  baseline_vaccine_delivery = list(
     list(vaccine = "YF", activity_type = "routine")
   ),
-  baseline_scenario_type = "novac",
-  baseline_vaccine_delivery = NULL,
   burden_outcome_extract = "deaths;cases;dalys",
   burden_outcome_plot = "dalys")
 ```
