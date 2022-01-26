@@ -44,7 +44,7 @@ test_that("test replace_burden_outcomes",{
                                 code = c("deaths", "cases", "dalys"))
   expect_equal(replace_burden_outcome(burden_outcomes, "deaths;cases;dalys"), "1;2;3") # match burden outcome
   expect_equal(replace_burden_outcome(burden_outcomes, "deaths;dalys;cases"), "1;2;3") # order of burden outcome dose not matter
-  expect_error(replace_burden_outcome(burden_outcomes, "cases;dalys")) # must have at least three burden outcomes
-  expect_error(replace_burden_outcome(burden_outcomes, "deaths;cases;dalys;d")) # must have three burden outcomes
+  expect_equal(replace_burden_outcome(burden_outcomes, "cases;dalys"), "2;3") # match and order burden outcomes
+  expect_error(replace_burden_outcome(burden_outcomes, "deaths;cases;dalys;d")) # burden outcome not defined in Montagu
 
 })

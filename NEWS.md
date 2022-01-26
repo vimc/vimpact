@@ -1,3 +1,7 @@
+# vimpact 0.0.7
+
+* Fix both csv and function interfaces, so that they work for 2021 runs and generate identical results.
+
 # vimpact 0.0.6
 
 * Add wrapper function for running impact calculations for many scenarios

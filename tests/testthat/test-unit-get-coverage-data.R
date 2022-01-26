@@ -2,6 +2,7 @@ test_args <- list(
   con = NULL,
   touchstone = "t1",
   delivery_methods = list("HepB-routine"),
+  focal_scenario_type = "bestcase",
   countries = list("AFG"),
   vaccination_years = 2020:2024
 )
@@ -23,6 +24,16 @@ test_that("returns coverage data tibble", {
                                                                                gender = 1))
   mockery::stub(get_coverage_data, "get_country", function(con) mock_country(id = "AFG"))
   mockery::stub(get_coverage_data, "get_gender", function(con) mock_gender())
+  mockery::stub(get_coverage_data, "get_scenario", function(con) mock_scenario(id = c(1, 2, 3, 4),
+                                                                               touchstone = rep("t1", 4),
+                                                                               scenario_description = c("desc1", "desc2", "desc3", "desc4"),
+                                                                               focal_coverage_set = 11:14))
+  mockery::stub(get_coverage_data, "get_scenario_description", function(con) mock_scenario_description(
+    id = c("desc1", "desc2", "desc3", "desc4"),
+    description = rep("desc", 4),
+    disease = rep("HepB", 4),
+    scenario_type = rep("bestcase", 4)
+  ))
   mockery::stub(get_coverage_data, "CONCAT", function(x, sep, y) paste(x, y, sep = sep))
   result <- do.call(get_coverage_data, test_args)
   expect_equal(names(result), c("coverage_set", "vaccine", "country", "year", "activity_type",
@@ -44,6 +55,8 @@ test_that("only gets coverage for correct coverage sets", {
   mockery::stub(get_coverage_data, "get_coverage", function(con) mock_coverage(coverage_set = 100))
   mockery::stub(get_coverage_data, "get_country", function(con) mock_country())
   mockery::stub(get_coverage_data, "get_gender", function(con) mock_gender())
+  mockery::stub(get_coverage_data, "get_scenario", function(con) mock_scenario())
+  mockery::stub(get_coverage_data, "get_scenario_description", function(con) mock_scenario_description())
   mockery::stub(get_coverage_data, "CONCAT", function(x, sep, y) paste(x, y, sep = sep))
   result <- do.call(get_coverage_data, test_args)
   expect_equal(nrow(result), 0)
@@ -56,6 +69,8 @@ test_that("only gets coverage sets for given touchstone", {
   mockery::stub(get_coverage_data, "get_coverage", function(con) mock_coverage())
   mockery::stub(get_coverage_data, "get_country", function(con) mock_country())
   mockery::stub(get_coverage_data, "get_gender", function(con) mock_gender())
+  mockery::stub(get_coverage_data, "get_scenario", function(con) mock_scenario())
+  mockery::stub(get_coverage_data, "get_scenario_description", function(con) mock_scenario_description())
   mockery::stub(get_coverage_data, "CONCAT", function(x, sep, y) paste(x, y, sep = sep))
   result <- do.call(get_coverage_data, test_args)
   expect_equal(nrow(result), 5)
@@ -66,6 +81,8 @@ test_that("only gets coverage sets for given activity type", {
   mockery::stub(get_coverage_data, "get_coverage", function(con) mock_coverage())
   mockery::stub(get_coverage_data, "get_country", function(con) mock_country())
   mockery::stub(get_coverage_data, "get_gender", function(con) mock_gender())
+  mockery::stub(get_coverage_data, "get_scenario", function(con) mock_scenario())
+  mockery::stub(get_coverage_data, "get_scenario_description", function(con) mock_scenario_description())
   mockery::stub(get_coverage_data, "CONCAT", function(x, sep, y) paste(x, y, sep = sep))
   result <- do.call(get_coverage_data, test_args)
   expect_equal(nrow(result), 0)
@@ -76,6 +93,8 @@ test_that("only gets coverage sets for given vaccine", {
   mockery::stub(get_coverage_data, "get_coverage", function(con) mock_coverage())
   mockery::stub(get_coverage_data, "get_country", function(con) mock_country())
   mockery::stub(get_coverage_data, "get_gender", function(con) mock_gender())
+  mockery::stub(get_coverage_data, "get_scenario", function(con) mock_scenario())
+  mockery::stub(get_coverage_data, "get_scenario_description", function(con) mock_scenario_description())
   mockery::stub(get_coverage_data, "CONCAT", function(x, sep, y) paste(x, y, sep = sep))
   result <- do.call(get_coverage_data, test_args)
   expect_equal(nrow(result), 0)
@@ -86,6 +105,8 @@ test_that("only gets coverage for given countries", {
   mockery::stub(get_coverage_data, "get_coverage", function(con) mock_coverage(country = "UGA"))
   mockery::stub(get_coverage_data, "get_country", function(con) mock_country())
   mockery::stub(get_coverage_data, "get_gender", function(con) mock_gender())
+  mockery::stub(get_coverage_data, "get_scenario", function(con) mock_scenario())
+  mockery::stub(get_coverage_data, "get_scenario_description", function(con) mock_scenario_description())
   mockery::stub(get_coverage_data, "CONCAT", function(x, sep, y) paste(x, y, sep = sep))
   result <- do.call(get_coverage_data, test_args)
   expect_equal(nrow(result), 0)
@@ -96,6 +117,8 @@ test_that("only gets coverage for given years", {
   mockery::stub(get_coverage_data, "get_coverage", function(con) mock_coverage(year = "2000"))
   mockery::stub(get_coverage_data, "get_country", function(con) mock_country())
   mockery::stub(get_coverage_data, "get_gender", function(con) mock_gender())
+  mockery::stub(get_coverage_data, "get_scenario", function(con) mock_scenario())
+  mockery::stub(get_coverage_data, "get_scenario_description", function(con) mock_scenario_description())
   mockery::stub(get_coverage_data, "CONCAT", function(x, sep, y) paste(x, y, sep = sep))
   result <- do.call(get_coverage_data, test_args)
   expect_equal(nrow(result), 0)
@@ -106,8 +129,33 @@ test_that("only gets non-zero coverage", {
   mockery::stub(get_coverage_data, "get_coverage", function(con) mock_coverage(coverage = 0))
   mockery::stub(get_coverage_data, "get_country", function(con) mock_country())
   mockery::stub(get_coverage_data, "get_gender", function(con) mock_gender())
+  mockery::stub(get_coverage_data, "get_scenario", function(con) mock_scenario())
+  mockery::stub(get_coverage_data, "get_scenario_description", function(con) mock_scenario_description())
   mockery::stub(get_coverage_data, "CONCAT", function(x, sep, y) paste(x, y, sep = sep))
   result <- do.call(get_coverage_data, test_args)
   expect_equal(nrow(result), 0)
 })
 
+test_that("only gets coverage for given focal coverage set", {
+  mockery::stub(get_coverage_data, "get_coverage_set_by_touchstone", function(con, touchstone) mock_coverage_set())
+  mockery::stub(get_coverage_data, "get_coverage", function(con) mock_coverage())
+  mockery::stub(get_coverage_data, "get_country", function(con) mock_country())
+  mockery::stub(get_coverage_data, "get_gender", function(con) mock_gender())
+  mockery::stub(get_coverage_data, "get_scenario", function(con) mock_scenario(focal_coverage_set = 20))
+  mockery::stub(get_coverage_data, "get_scenario_description", function(con) mock_scenario_description())
+  mockery::stub(get_coverage_data, "CONCAT", function(x, sep, y) paste(x, y, sep = sep))
+  result <- do.call(get_coverage_data, test_args)
+  expect_equal(nrow(result), 0)
+})
+
+test_that("only gets coverage for given scenario type", {
+  mockery::stub(get_coverage_data, "get_coverage_set_by_touchstone", function(con, touchstone) mock_coverage_set())
+  mockery::stub(get_coverage_data, "get_coverage", function(con) mock_coverage())
+  mockery::stub(get_coverage_data, "get_country", function(con) mock_country())
+  mockery::stub(get_coverage_data, "get_gender", function(con) mock_gender())
+  mockery::stub(get_coverage_data, "get_scenario", function(con) mock_scenario())
+  mockery::stub(get_coverage_data, "get_scenario_description", function(con) mock_scenario_description(scenario_type = "bestminus"))
+  mockery::stub(get_coverage_data, "CONCAT", function(x, sep, y) paste(x, y, sep = sep))
+  result <- do.call(get_coverage_data, test_args)
+  expect_equal(nrow(result), 0)
+})

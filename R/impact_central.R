@@ -28,7 +28,7 @@ get_raw_impact_details <- function(con, meta1, burden_outcome, is_under5 = FALSE
     stop("method2a is vaccine delivery specific, cannot include both routine and campaign impact at the same time.")
   }
 
-  # constain db extraction by country and age
+  # constrain db extraction by country and age
 
   age_constrain <- ifelse(is_under5, "AND age < 5", "") #applies to all methods
 
@@ -36,7 +36,7 @@ get_raw_impact_details <- function(con, meta1, burden_outcome, is_under5 = FALSE
     country_constrain <- ""
   } else{
     countries_to_extract <- DBI::dbGetQuery(con, sprintf("SELECT nid FROM country WHERE id IN %s",
-                                                         sql_in(countries_to_extract)))
+                                                         sql_in(countries_to_extract)))[["nid"]]
     country_constrain <- sprintf("AND country IN %s", sql_in(countries_to_extract, text_item = FALSE))
   }
 
@@ -193,17 +193,6 @@ determine_vaccine_delivery <- function(meta1){
   setdiff(unlist(strsplit(meta1$vaccine_delivery[meta1$meta_type == "focal"], ",")),
           unlist(strsplit(meta1$vaccine_delivery[meta1$meta_type=="baseline"], ",")))
 }
-
-## todo: hepb xili method2 impact needs de-double-counting
-# post_processing_hepb_li_method2a <- function(meta, dat, fvps){
-#   ids_li <- unique(meta$index[meta$disease == "HepB" & meta$modelling_group == "Li"])
-#
-#   d_keep <- dat[!(dat$index %in% ids_li), ]
-#
-#   d1 <- dat[dat$index %in% ids_li, ]
-#
-#
-# }
 
 #' Calculate impact by year of vaccination country perspective
 #'
@@ -431,24 +420,22 @@ impact_by_year_of_vaccination_activity_type <- function(
   baseline_burden, focal_burden, fvps, vaccination_years) {
   assert_has_columns(
     baseline_burden,
-    c("country", "burden_outcome", "activity_type", "year", "age", "value"))
+    c("country", "burden_outcome", "year", "age", "value"))
   assert_has_columns(
     focal_burden,
-    c("country", "burden_outcome", "activity_type", "year", "age", "value"))
+    c("country", "burden_outcome", "year", "age", "value"))
   assert_has_columns(
     fvps,
     c("country", "year", "vaccine", "activity_type", "age", "fvps"))
   activity_types <- c("novax", "routine", "campaign")
-  assert_allowed_values(baseline_burden, "activity_type", activity_types)
-  assert_allowed_values(focal_burden, "activity_type", c("routine", "campaign"))
   assert_allowed_values(fvps, "activity_type", activity_types)
-  activity <- focal_burden %>%
+  activity <- fvps %>%
     dplyr::ungroup() %>%
     dplyr::select(activity_type) %>%
     dplyr::distinct() %>%
     dplyr::collect()
   if (nrow(activity) != 1L) {
-    stop("Focal burden must have only one activity_type.")
+    stop("FVPs must have only one activity_type.")
   }
   activity <- as.character(activity)
 
@@ -469,8 +456,7 @@ impact_by_year_of_vaccination_activity_type <- function(
       impact_by_birth_year(focal_burden) %>%
       dplyr::rename(time = birth_cohort) %>%
       dplyr::mutate(activity_type = activity) %>%
-      dplyr::filter(time >= min(fvps$year - fvps$age) &
-                      time <= max(fvps$year - fvps$age))
+      dplyr::filter(time %in% (vaccination_years - min(fvps$age)))
   }
 
   ## Campaign
@@ -496,7 +482,7 @@ impact_by_year_of_vaccination_activity_type <- function(
     dplyr::inner_join(impact_ratio, by = c("country", "activity_type")) %>%
     dplyr::mutate(impact = impact_ratio * fvps) %>%
     dplyr::select(country, vaccine, activity_type, year, burden_outcome,
-                  impact) %>%
+                  impact, impact_ratio, fvps) %>%
     dplyr::arrange(country, vaccine, activity_type, burden_outcome, year) %>%
     dplyr::ungroup() %>%
     dplyr::collect()
@@ -578,7 +564,8 @@ impact_by_year_of_vaccination_birth_cohort <- function(
     dplyr::mutate(impact = impact_ratio * fvps) %>%
     dplyr::group_by(country, year, burden_outcome,
                     vaccine, activity_type) %>%
-    dplyr::summarise(impact = sum(impact, na.rm = TRUE)) %>%
+    dplyr::summarise(impact = sum(impact, na.rm = TRUE),
+                     fvps = sum(fvps, na.rm = TRUE)) %>%
     dplyr::arrange(country, burden_outcome, vaccine,
                    activity_type, year) %>%
     dplyr::ungroup() %>%
