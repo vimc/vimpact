@@ -9,8 +9,8 @@ test_that("coverage set by touchstone table connection setup correctly", {
                      data.frame(touchstone = c("1", "1", "2"),
                                 gavi_support_level = c("none", "test", "none")))
   coverage_by_touchstone <- get_coverage_set_by_touchstone(con)
-  expect_true(dplyr::is.tbl(coverage))
-  expect_equal(nrow(dplyr::collect(coverage)), 1)
+  expect_true(dplyr::is.tbl(coverage_by_touchstone))
+  expect_equal(nrow(dplyr::collect(coverage_by_touchstone)), 1)
 })
 
 test_that("coverage table connection setup correctly", {
