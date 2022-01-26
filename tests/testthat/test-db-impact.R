@@ -379,24 +379,6 @@ test_that("impact by year of vaccination activity type: only routine", {
       "impact", "impact_ratio", "fvps"))
 })
 
-# test_that("impact by YOV activity type: different impact & fvp", {
-#   ## Xiang review
-#   ## Xiang's comment: previously, we let focal burden to determine which activity_type to work on
-#   ## therefore, when focal activity_type dose not exist in fvps, you'd expect zero rows
-#   ## now we swtiched to fvps for determining which activity_type to work on
-#   ## hence expect_equal(nrow(impact), 0) is no longer true
-#   ## I guess this test is no longer useful, but good to keep here as a record of what changes we've made
-#   baseline <- impact_test_data_baseline[
-#     impact_test_data_baseline$activity_type == "routine", ]
-#   focal <- impact_test_data_focal[
-#     impact_test_data_focal$activity_type == "routine", ]
-#   fvps <- fvp_test_data_15[fvp_test_data_15$activity_type == "campaign", ]
-#   impact <- impact_by_year_of_vaccination_activity_type(baseline, focal,
-#                                                         fvps, 2000:2030)
-#   ## No common entries for impact and fvps so return empty
-#   expect_equal(nrow(impact), 0)
-# })
-
 test_that("impact by YOV activity type: only works with single activity type", {
   expect_error(impact_by_year_of_vaccination_activity_type(
     impact_test_data_baseline, impact_test_data_focal, fvp_test_data_15,
