@@ -381,6 +381,7 @@ test_that("impact by year of vaccination activity type: only routine", {
 
 test_that("impact by YOV activity type: different impact & fvp", {
   ## Xiang review
+  browser()
   baseline <- impact_test_data_baseline[
     impact_test_data_baseline$activity_type == "routine", ]
   focal <- impact_test_data_focal[

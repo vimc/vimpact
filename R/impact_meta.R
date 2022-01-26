@@ -123,8 +123,8 @@ get_meta_from_recipe <- function(default_recipe = TRUE, method = "method0", reci
     ## remove yf reactive sias - otherwise cannot match with recipe
     i <- meta_all$scenario_type == "novac"
     j <- meta_all$gavi_support_level == "none"
-    meta_all$vaccine[i] <- "none"
-    meta_all$activity_type[i] <- "none"
+    meta_all$vaccine[i & j] <- "none"
+    meta_all$activity_type[i & j] <- "none"
     meta_all <- meta_all[!(!i & j), ]
     meta_all$gavi_support_level <- NULL
     meta_all$vaccine_delivery <- paste(meta_all$vaccine, meta_all$activity_type, sep = "-")
