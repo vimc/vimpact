@@ -194,17 +194,6 @@ determine_vaccine_delivery <- function(meta1){
           unlist(strsplit(meta1$vaccine_delivery[meta1$meta_type=="baseline"], ",")))
 }
 
-## todo: hepb xili method2 impact needs de-double-counting
-# post_processing_hepb_li_method2a <- function(meta, dat, fvps){
-#   ids_li <- unique(meta$index[meta$disease == "HepB" & meta$modelling_group == "Li"])
-#
-#   d_keep <- dat[!(dat$index %in% ids_li), ]
-#
-#   d1 <- dat[dat$index %in% ids_li, ]
-#
-#
-# }
-
 #' Calculate impact by year of vaccination country perspective
 #'
 #' This will calculate the impact by year of vaccination by country and
@@ -493,7 +482,7 @@ impact_by_year_of_vaccination_activity_type <- function(
     dplyr::inner_join(impact_ratio, by = c("country", "activity_type")) %>%
     dplyr::mutate(impact = impact_ratio * fvps) %>%
     dplyr::select(country, vaccine, activity_type, year, burden_outcome,
-                  impact, fvps) %>%
+                  impact, impact_ratio, fvps) %>%
     dplyr::arrange(country, vaccine, activity_type, burden_outcome, year) %>%
     dplyr::ungroup() %>%
     dplyr::collect()

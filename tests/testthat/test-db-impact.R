@@ -361,7 +361,7 @@ test_that("impact by year of vaccination activity type: only campaign", {
   expect_equal(
     colnames(impact),
     c("country", "vaccine", "activity_type", "year", "burden_outcome",
-      "impact", "fvps"))
+      "impact", "impact_ratio", "fvps"))
 })
 
 test_that("impact by year of vaccination activity type: only routine", {
@@ -376,20 +376,7 @@ test_that("impact by year of vaccination activity type: only routine", {
   expect_equal(
     colnames(impact),
     c("country", "vaccine", "activity_type", "year", "burden_outcome",
-      "impact", "fvps"))
-})
-
-test_that("impact by YOV activity type: different impact & fvp", {
-  ## Xiang review
-  baseline <- impact_test_data_baseline[
-    impact_test_data_baseline$activity_type == "routine", ]
-  focal <- impact_test_data_focal[
-    impact_test_data_focal$activity_type == "routine", ]
-  fvps <- fvp_test_data_15[fvp_test_data_15$activity_type == "campaign", ]
-  impact <- impact_by_year_of_vaccination_activity_type(baseline, focal,
-                                                        fvps, 2000:2030)
-  ## No common entries for impact and fvps so return empty
-  expect_equal(nrow(impact), 0)
+      "impact", "impact_ratio", "fvps"))
 })
 
 test_that("impact by YOV activity type: only works with single activity type", {

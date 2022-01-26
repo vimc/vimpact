@@ -372,13 +372,10 @@ get_burden_estimate_set_ids <- function(
   con, baseline_scenario_type, baseline_scenario, focal_scenario_type,
   focal_scenario, touchstone, modelling_group, disease) {
 
-  zz <- function(x){
-    y <- unlist(strsplit(x, ";"))
-    y <- y[order(y)]
-    paste(y, collapse = ";")
-  }
-  focal_scenario <- zz(focal_scenario)
-  baseline_scenario <- zz(baseline_scenario)
+  focal_scenarios <- strsplit(focal_scenario, ";")[[1]]
+  focal_scenarios_len <- length(focal_scenarios)
+  baseline_scenarios <- strsplit(baseline_scenario, ";")[[1]]
+  baseline_scenarios_len <- length(baseline_scenarios)
 
   scenario_type <- id <- scenario_id <- vaccine <- activity_type <- NULL
   CONCAT <- current_burden_estimate_set <- str_flatten <- delivery <- NULL
@@ -412,22 +409,21 @@ get_burden_estimate_set_ids <- function(
                   "delivery" = CONCAT(scenario_type, "-",
                                       vaccine, "-", activity_type)) %>%
     dplyr::filter(!(scenario_type != "novac" & vaccine == "none")) %>%
-    # the problem was that str_flatten glues deliveries in an order different from our recipe
-    ## I spent a few hours trying to resolve this ordering issue, but failed again and again
-    ## In the end, this select() + distinct() combination gives the increasing order
-    ## I don't know why it works, but it works
     dplyr::select(current_burden_estimate_set, delivery) %>%
     dplyr::distinct() %>%
     dplyr::group_by(current_burden_estimate_set) %>%
-    dplyr::summarise(delivery = str_flatten(delivery, collapse = ";"),
-                     .groups = "keep") %>%
+    dplyr::mutate(counts = dplyr::n()) %>%
     dplyr::mutate(scenario = dplyr::case_when(
-      delivery == focal_scenario ~ "focal",
-      delivery == baseline_scenario ~ "baseline"
+      delivery %in% focal_scenarios & counts == focal_scenarios_len ~ "focal",
+      delivery %in% baseline_scenarios & counts == baseline_scenarios_len ~ "baseline"
     )) %>%
     dplyr::filter(!is.na(scenario)) %>%
+    dplyr::group_by(current_burden_estimate_set, scenario) %>%
+    dplyr::summarise(delivery = str_flatten(delivery, collapse = ";"),
+                     .groups = "keep") %>%
     dplyr::select(scenario, delivery,
-                  burden_estimate_set = current_burden_estimate_set)
+                  burden_estimate_set = current_burden_estimate_set) %>%
+    dplyr::distinct()
 }
 
 
