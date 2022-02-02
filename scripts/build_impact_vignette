@@ -19,10 +19,10 @@ htmltools::tags$iframe( \
 )\
 ```\
 \
-### YF \
+### Measles \
 ```{r} \
 htmltools::tags$iframe( \
-  src = "impact_comparisons_yf.html", \
+  src = "impact_comparisons_measles.html", \
   width = "100%", \
   height = "400", \
   scrolling = "no", \
@@ -32,10 +32,13 @@ htmltools::tags$iframe( \
 )\
 ```\
 \
-### Measles \
+### Comparisons of HepB, Measles & YF \
+This shows bars of mean difference between old impact & new impact method for each \
+country for HepB, Measles and YF. Tooltips show the number of observations and the \
+min and max order of the values. i.e. an impact of 23432.342 has order 5.\
 ```{r} \
 htmltools::tags$iframe( \
-  src = "impact_comparisons_measles.html", \
+  src = "impact_comparisons.html", \
   width = "100%", \
   height = "400", \
   scrolling = "no", \
@@ -49,5 +52,5 @@ sed -s 's/[[:space:]]*$//' vignettes_src/internal-impact.md |
     sed "s/HEADER/$header/" |
     sed "s/<!-- WIDGET -->/$widget/" > vignettes/internal-impact.Rmd
 cp vignettes_src/impact_comparisons_hepb.html vignettes/impact_comparisons_hepb.html
-cp vignettes_src/impact_comparisons_yf.html vignettes/impact_comparisons_yf.html
 cp vignettes_src/impact_comparisons_measles.html vignettes/impact_comparisons_measles.html
+cp vignettes_src/impact_comparisons.html vignettes/impact_comparisons.html

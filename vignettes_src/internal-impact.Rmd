@@ -307,18 +307,68 @@ hepb_data <- merge(old_impact, impact, all.x = TRUE, all.y = TRUE,
                     by = c("country", "vaccine", "activity_type", "year",
                            "burden_outcome"))
 hepb_plot <- make_plot(hepb_data)
-yf_plot <- make_plot(yf_data)
 measles_plot <- make_plot(measles_data)
+```
+
+```{r include = FALSE}
+n_digits <- function(x) nchar( trunc( abs(x) ) )
+comparison_data <- 
+  hepb_data %>%
+  dplyr::mutate(disease = "HepB") %>%
+  dplyr::union(measles_data) %>%
+  dplyr::union(yf_data) %>%
+  dplyr::mutate(diff = abs(impact.x - impact.y)) %>%
+  dplyr::group_by(disease, country) %>%
+  dplyr::summarise(mean = mean(diff), 
+                   sd = if (!is.na(sd(diff))) sd(diff) else 0, 
+                   n = length(diff), 
+                   min = n_digits(min(impact.x)), 
+                   max = n_digits(max(impact.x)))
+
+comparison_plot <- function(data) {
+  diseases <- unique(data$disease)
+  data <- data %>%
+    dplyr::mutate(text = sprintf("n=%s, n-digits=%s to %s", n, min, max)) %>%
+    tidyr::pivot_wider(names_from = disease, 
+                       values_from = c(mean, sd, n, min, max, text))
+  data <- as.data.frame(data)
+  disease_filter <- lapply(diseases, function(disease) {
+    button <- list(
+      method = "restyle",
+      args = list(
+        list(y = list(data[, paste0("mean_", disease)]), 
+             error_y = list(list(array = data[, paste0("sd_", disease)], color = '#000000')),
+             text = list(data[, paste0("text_", disease)]))),
+      label = disease
+    )
+  })
+  plot <- plotly::plot_ly(
+    data = data, x = ~country,
+    y = ~mean_Measles, type = "bar", 
+    text = ~text_Measles,
+    texttemplate = "",
+    error_y = ~list(array = sd_Measles, color = '#000000')) %>%
+    plotly::layout(
+      yaxis = list(title = "mean"),
+      updatemenus = list(
+        list(
+          y = 0.7,
+          buttons = disease_filter
+        )
+      ))
+  plot
+}
+comparisons <- comparison_plot(comparison_data)
 ```
 
 
 ```{r include = FALSE}
 htmlwidgets::saveWidget(plotly::partial_bundle(hepb_plot), 
                         "impact_comparisons_hepb.html")
-htmlwidgets::saveWidget(plotly::partial_bundle(yf_plot), 
-                        "impact_comparisons_yf.html")
 htmlwidgets::saveWidget(plotly::partial_bundle(measles_plot), 
                         "impact_comparisons_measles.html")
+htmlwidgets::saveWidget(plotly::partial_bundle(comparisons), 
+                        "impact_comparisons.html")
 ```
 
 <!-- WIDGET -->
