@@ -32,8 +32,8 @@ htmltools::tags$iframe( \
 )\
 ```\
 \
-### Comparisons of HepB, Measles & YF \
-This shows bars of mean difference between old impact & new impact method for each \
+### Comparisons of HepB, Measles \& YF \
+This shows bars of mean difference between old impact \& new impact method for each \
 country for HepB, Measles and YF. Tooltips show the number of observations and the \
 min and max order of the values. i.e. an impact of 23432.342 has order 5.\
 ```{r} \
