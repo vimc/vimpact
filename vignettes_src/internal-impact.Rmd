@@ -273,13 +273,13 @@ make_plot <- function(data) {
     )
   })
   plot <- plotly::plot_ly(data = impact_plot) %>%
-    plotly::add_trace(x = ~year, y = ~recipe_impact_AGO, name = "recipe", 
+    plotly::add_trace(x = ~year, y = ~recipe_impact_AFG, name = "recipe", 
                       type = "scatter", mode = "markers", text = ~vaccine,
                       marker = list(
                         color = "rgb(235, 204, 42)",
                         size = 10
                       )) %>%
-    plotly::add_trace(x = ~year, y = ~function_impact_AGO, name = "function",
+    plotly::add_trace(x = ~year, y = ~function_impact_AFG, name = "function",
                       type = "scatter", mode = "markers", text = ~vaccine,
                       marker = list(
                         color = "rgb(60, 154, 178)",
