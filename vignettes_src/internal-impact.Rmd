@@ -311,7 +311,7 @@ measles_plot <- make_plot(measles_data)
 ```
 
 ```{r include = FALSE}
-n_digits <- function(x) nchar( trunc( abs(x) ) )
+n_digits <- function(x) nchar(trunc(abs(x)))
 comparison_data <- 
   hepb_data %>%
   dplyr::mutate(disease = "HepB") %>%
@@ -352,6 +352,7 @@ comparison_plot <- function(data) {
       yaxis = list(title = "mean"),
       updatemenus = list(
         list(
+          active = 1, ## Select the 2nd item in drop down "Measles"
           y = 0.7,
           buttons = disease_filter
         )
