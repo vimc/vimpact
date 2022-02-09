@@ -1,3 +1,7 @@
+# vimpact 0.0.8
+
+* Fix impact_meta.R.
+
 # vimpact 0.0.7
 
 * Fix both csv and function interfaces, so that they work for 2021 runs and generate identical results.
