@@ -1,3 +1,7 @@
 #!/usr/bin/env bash
 set -e
-docker rm -f vimpact-pg
+HERE=$(dirname $0)
+
+. ${HERE}/common
+
+cleanup

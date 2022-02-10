@@ -1,8 +1,9 @@
 get_db_info <- function() {
   list(
-    dbname = "vimpact_test_db",
-    user = "postgres",
-    host = "localhost"
+    dbname = "montagu",
+    user = "vimc",
+    host = "localhost",
+    password = "changeme"
   )
 }
 
@@ -10,7 +11,7 @@ prepare_example_postgres_db <- function() {
   info <- get_db_info()
   tryCatch({
     con <- retry::retry(
-      get_postgres_connection(info$dbname, info$user, info$host),
+      get_postgres_connection(info$dbname, info$user, info$host, info$password),
       until = function(val, cnd) !is.null(val),
       max_tries = 25,
       interval = 0.2)
@@ -27,31 +28,31 @@ prepare_example_postgres_db <- function() {
 ## Use inside of test - calls testthat::skip on error
 get_test_connection <- function() {
   info <- get_db_info()
-  vimpact_test_postgres_connection(info$dbname, info$user, info$host)
-  con <- get_postgres_connection(info$dbname, info$user, info$host)
+  vimpact_test_postgres_connection(info$dbname, info$user, info$host, info$password)
+  con <- get_postgres_connection(info$dbname, info$user, info$host, info$password)
   withr::defer_parent(DBI::dbDisconnect(con))
   con
 }
 
-vimpact_test_postgres_connection <- function(dbname, user, host) {
+vimpact_test_postgres_connection <- function(dbname, user, host, password) {
   tryCatch(
-    get_postgres_connection(dbname, user, host),
+    get_postgres_connection(dbname, user, host, password),
     error = function(e) testthat::skip(sprintf(
     "Failed to open db connection to postgres db %s with user %s and host %s.",
     dbname, user, host))
   )
 }
 
-get_postgres_connection <- function(dbname, user, host) {
+get_postgres_connection <- function(dbname, user, host, password) {
   DBI::dbConnect(RPostgres::Postgres(), dbname = dbname, user = user,
-                 host = host)
+                 host = host, password = password)
 }
 
 add_dummy_data <- function(con) {
   db_name <- DBI::dbGetQuery(con, "SELECT current_database()")
-  if (db_name != "vimpact_test_db") {
+  if (db_name != "montagu") {
     stop(sprintf(
-      "Can't add dummy data to db %s expected test db 'vimpact_test_db'",
+      "Can't add dummy data to db %s expected test db 'montagu'",
       db_name))
   } else {
     message("Adding dummy data to database")

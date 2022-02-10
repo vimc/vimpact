@@ -22,6 +22,7 @@ Imports:
     RPostgres,
     vaultr
 Suggests:
+    fakerbase,
     ggplot2,
     htmltools,
     knitr,
@@ -32,6 +33,7 @@ Suggests:
     rmarkdown,
     RSQLite,
     withr
+Remotes: reside-ic/fakerbase
 RoxygenNote: 7.1.1
 VignetteBuilder: knitr
 Config/testthat/edition: 3
