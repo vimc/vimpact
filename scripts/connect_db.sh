@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -e
 
-psql -h localhost -p 5432 -Upostgres vimpact_test_db
+PGPASSWORD=changeme psql -h localhost -p 5432 -U vimc montagu
