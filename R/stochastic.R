@@ -16,7 +16,10 @@ fetch_stochastic_data <- function(annex, table,
                                   filters = NULL) {
   if (!(table %in% c("cross_all", "cross_under5", "cohort_all",
                      "cohort_under5", "cross_all_2019", "cross_under5_2019",
-                     "cohort_all_2019", "cohort_under5_2019"))) {
+                     "cohort_all_2019", "cohort_under5_2019",
+                     "cross_all_2021", "cross_under5_2021",
+                     "cohort_all_2021", "cohort_under5_2021"
+                    ))) {
     stop(paste0("Table must be one of cross_all, cross_under5, cohort_all or",
                 " cohort_under5 got ", table, "."))
   }
@@ -30,18 +33,48 @@ fetch_stochastic_data <- function(annex, table,
     avg(dalys_default) as dalys_default_mid,
     avg(dalys_novac) as dalys_novac_mid,
     avg(dalys_impact) as dalys_impact_mid,
-    percentile_cont(0.025) WITHIN GROUP (ORDER BY deaths_default) AS deaths_default_lo,
-    percentile_cont(0.025) WITHIN GROUP (ORDER BY deaths_novac) AS deaths_novac_lo,
-    percentile_cont(0.025) WITHIN GROUP (ORDER BY deaths_impact) AS deaths_impact_lo,
-    percentile_cont(0.025) WITHIN GROUP (ORDER BY dalys_default) AS dalys_default_lo,
-    percentile_cont(0.025) WITHIN GROUP (ORDER BY dalys_novac) AS dalys_novac_lo,
-    percentile_cont(0.025) WITHIN GROUP (ORDER BY dalys_impact) AS dalys_impact_lo,
-    percentile_cont(0.975) WITHIN GROUP (ORDER BY deaths_default) AS deaths_default_hi,
-    percentile_cont(0.975) WITHIN GROUP (ORDER BY deaths_novac) AS deaths_novac_hi,
-    percentile_cont(0.975) WITHIN GROUP (ORDER BY deaths_impact) AS deaths_impact_hi,
-    percentile_cont(0.975) WITHIN GROUP (ORDER BY dalys_default) AS dalys_default_hi,
-    percentile_cont(0.975) WITHIN GROUP (ORDER BY dalys_novac) AS dalys_novac_hi,
-    percentile_cont(0.975) WITHIN GROUP (ORDER BY dalys_impact) AS dalys_impact_hi
+    percentile_cont(0.5) WITHIN GROUP (ORDER BY deaths_default) AS deaths_default_med,
+    percentile_cont(0.5) WITHIN GROUP (ORDER BY deaths_novac) AS deaths_novac_med,
+    percentile_cont(0.5) WITHIN GROUP (ORDER BY deaths_impact) AS deaths_impact_med,
+    percentile_cont(0.5) WITHIN GROUP (ORDER BY dalys_default) AS dalys_default_med,
+    percentile_cont(0.5) WITHIN GROUP (ORDER BY dalys_novac) AS dalys_novac_med,
+    percentile_cont(0.5) WITHIN GROUP (ORDER BY dalys_impact) AS dalys_impact_med,
+    percentile_cont(0.025) WITHIN GROUP (ORDER BY deaths_default) AS deaths_default_95_lo,
+    percentile_cont(0.025) WITHIN GROUP (ORDER BY deaths_novac) AS deaths_novac_95_lo,
+    percentile_cont(0.025) WITHIN GROUP (ORDER BY deaths_impact) AS deaths_impact_95_lo,
+    percentile_cont(0.025) WITHIN GROUP (ORDER BY dalys_default) AS dalys_default_95_lo,
+    percentile_cont(0.025) WITHIN GROUP (ORDER BY dalys_novac) AS dalys_novac_95_lo,
+    percentile_cont(0.025) WITHIN GROUP (ORDER BY dalys_impact) AS dalys_impact_95_lo,
+    percentile_cont(0.975) WITHIN GROUP (ORDER BY deaths_default) AS deaths_default_95_hi,
+    percentile_cont(0.975) WITHIN GROUP (ORDER BY deaths_novac) AS deaths_novac_95_hi,
+    percentile_cont(0.975) WITHIN GROUP (ORDER BY deaths_impact) AS deaths_impact_95_hi,
+    percentile_cont(0.975) WITHIN GROUP (ORDER BY dalys_default) AS dalys_default_95_hi,
+    percentile_cont(0.975) WITHIN GROUP (ORDER BY dalys_novac) AS dalys_novac_95_hi,
+    percentile_cont(0.975) WITHIN GROUP (ORDER BY dalys_impact) AS dalys_impact_95_hi,
+    percentile_cont(0.1) WITHIN GROUP (ORDER BY deaths_default) AS deaths_default_80_lo,
+    percentile_cont(0.1) WITHIN GROUP (ORDER BY deaths_novac) AS deaths_novac_80_lo,
+    percentile_cont(0.1) WITHIN GROUP (ORDER BY deaths_impact) AS deaths_impact_80_lo,
+    percentile_cont(0.1) WITHIN GROUP (ORDER BY dalys_default) AS dalys_default_80_lo,
+    percentile_cont(0.1) WITHIN GROUP (ORDER BY dalys_novac) AS dalys_novac_80_lo,
+    percentile_cont(0.1) WITHIN GROUP (ORDER BY dalys_impact) AS dalys_impact_80_lo,
+    percentile_cont(0.9) WITHIN GROUP (ORDER BY deaths_default) AS deaths_default_80_hi,
+    percentile_cont(0.9) WITHIN GROUP (ORDER BY deaths_novac) AS deaths_novac_80_hi,
+    percentile_cont(0.9) WITHIN GROUP (ORDER BY deaths_impact) AS deaths_impact_80_hi,
+    percentile_cont(0.9) WITHIN GROUP (ORDER BY dalys_default) AS dalys_default_80_hi,
+    percentile_cont(0.9) WITHIN GROUP (ORDER BY dalys_novac) AS dalys_novac_80_hi,
+    percentile_cont(0.9) WITHIN GROUP (ORDER BY dalys_impact) AS dalys_impact_80_hi,
+    percentile_cont(0.25) WITHIN GROUP (ORDER BY deaths_default) AS deaths_default_50_lo,
+    percentile_cont(0.25) WITHIN GROUP (ORDER BY deaths_novac) AS deaths_novac_50_lo,
+    percentile_cont(0.25) WITHIN GROUP (ORDER BY deaths_impact) AS deaths_impact_50_lo,
+    percentile_cont(0.25) WITHIN GROUP (ORDER BY dalys_default) AS dalys_default_50_lo,
+    percentile_cont(0.25) WITHIN GROUP (ORDER BY dalys_novac) AS dalys_novac_50_lo,
+    percentile_cont(0.25) WITHIN GROUP (ORDER BY dalys_impact) AS dalys_impact_50_lo,
+    percentile_cont(0.75) WITHIN GROUP (ORDER BY deaths_default) AS deaths_default_50_hi,
+    percentile_cont(0.75) WITHIN GROUP (ORDER BY deaths_novac) AS deaths_novac_50_hi,
+    percentile_cont(0.75) WITHIN GROUP (ORDER BY deaths_impact) AS deaths_impact_50_hi,
+    percentile_cont(0.75) WITHIN GROUP (ORDER BY dalys_default) AS dalys_default_50_hi,
+    percentile_cont(0.75) WITHIN GROUP (ORDER BY dalys_novac) AS dalys_novac_50_hi,
+    percentile_cont(0.75) WITHIN GROUP (ORDER BY dalys_impact) AS dalys_impact_50_hi
   FROM %s
   %s
   GROUP BY %s;", groups_str, table, where_clause, groups_str))
@@ -78,9 +111,11 @@ fetch_stochastic_data_year_groups <- function(
   include_proportion_averted = FALSE) {
   ## Really some test of table structure would be better here
   if (!(table %in% c("cross_all_2019", "cross_under5_2019", "cohort_all_2019",
-                     "cohort_under5_2019", "intervention_all_2019"))) {
-    stop(paste0("Table must be one of cross_all_2019, cross_under5_2019, ",
-                "cohort_all_2019 or cohort_under5_2019",
+                     "cohort_under5_2019", "intervention_all_2019",
+                     "cross_all_2021", "cross_under5_2021", "cohort_all_2021",
+                     "cohort_under5_2021", "intervention_all_2021"))) {
+    stop(paste0("Table must be one of cross_all_2019/21, cross_under5_2019/21, ",
+                "cohort_all_2019/21 or cohort_under5_2019/21",
                 " got ", table, "."))
   }
   if ("year" %in% names(filters)) {
@@ -93,22 +128,44 @@ fetch_stochastic_data_year_groups <- function(
     averted_avg <- paste0(
       "avg(deaths_impact / NULLIF(deaths_novac, 0)) as proportion_deaths_averted_mean,\n",
       "avg(dalys_impact / NULLIF(dalys_novac, 0)) as proportion_dalys_averted_mean,")
-    averted_q1 <- paste0(
-      "percentile_cont(0.025) WITHIN GROUP (ORDER BY deaths_impact / NULLIF(deaths_novac, 0)) AS proportion_deaths_averted_q1,\n",
-      "percentile_cont(0.025) WITHIN GROUP (ORDER BY dalys_impact / NULLIF(dalys_novac, 0)) AS proportion_dalys_averted_q1,")
-    averted_q3 <-  paste0(",\n",
-      "percentile_cont(0.975) WITHIN GROUP (ORDER BY deaths_impact / NULLIF(deaths_novac, 0)) AS proportion_deaths_averted_q3,\n",
-      "percentile_cont(0.975) WITHIN GROUP (ORDER BY dalys_impact / NULLIF(dalys_novac, 0)) AS proportion_dalys_averted_q3")
+    averted_med <- paste0(
+      "percentile_cont(0.5) WITHIN GROUP (ORDER BY deaths_impact / NULLIF(deaths_novac, 0)) AS proportion_deaths_averted_med,\n",
+      "percentile_cont(0.5) WITHIN GROUP (ORDER BY dalys_impact / NULLIF(dalys_novac, 0)) AS proportion_dalys_averted_med,")
+    averted_95_lo <- paste0(
+      "percentile_cont(0.025) WITHIN GROUP (ORDER BY deaths_impact / NULLIF(deaths_novac, 0)) AS proportion_deaths_averted_95_lo,\n",
+      "percentile_cont(0.025) WITHIN GROUP (ORDER BY dalys_impact / NULLIF(dalys_novac, 0)) AS proportion_dalys_averted_95_lo,")
+    averted_95_hi <-  paste0(",\n",
+      "percentile_cont(0.975) WITHIN GROUP (ORDER BY deaths_impact / NULLIF(deaths_novac, 0)) AS proportion_deaths_averted_95_hi,\n",
+      "percentile_cont(0.975) WITHIN GROUP (ORDER BY dalys_impact / NULLIF(dalys_novac, 0)) AS proportion_dalys_averted_95_hi")
+    averted_80_lo <- paste0(
+      "percentile_cont(0.1) WITHIN GROUP (ORDER BY deaths_impact / NULLIF(deaths_novac, 0)) AS proportion_deaths_averted_80_lo,\n",
+      "percentile_cont(0.1) WITHIN GROUP (ORDER BY dalys_impact / NULLIF(dalys_novac, 0)) AS proportion_dalys_averted_80_lo,")
+    averted_80_hi <-  paste0(",\n",
+      "percentile_cont(0.9) WITHIN GROUP (ORDER BY deaths_impact / NULLIF(deaths_novac, 0)) AS proportion_deaths_averted_80_hi,\n",
+      "percentile_cont(0.9) WITHIN GROUP (ORDER BY dalys_impact / NULLIF(dalys_novac, 0)) AS proportion_dalys_averted_80_hi")
+    averted_50_lo <- paste0(
+      "percentile_cont(0.25) WITHIN GROUP (ORDER BY deaths_impact / NULLIF(deaths_novac, 0)) AS proportion_deaths_averted_50_lo,\n",
+      "percentile_cont(0.25) WITHIN GROUP (ORDER BY dalys_impact / NULLIF(dalys_novac, 0)) AS proportion_dalys_averted_50_lo,")
+    averted_50_hi <-  paste0(",\n",
+      "percentile_cont(0.75) WITHIN GROUP (ORDER BY deaths_impact / NULLIF(deaths_novac, 0)) AS proportion_deaths_averted_50_hi,\n",
+      "percentile_cont(0.75) WITHIN GROUP (ORDER BY dalys_impact / NULLIF(dalys_novac, 0)) AS proportion_dalys_averted_50_hi")
   } else {
     averted_avg <- ""
-    averted_q1 <- ""
-    averted_q3 <- ""
+    averted_med <- ""
+    averted_95_lo <- ""
+    averted_95_hi <- ""
+    averted_80_lo <- ""
+    averted_80_hi <- ""
+    averted_50_lo <- ""
+    averted_50_hi <- ""
   }
   sql <- readLines(system_file("sql/aggregate_stochastic.sql"))
   DBI::dbGetQuery(annex, glue::glue(paste(sql, collapse = "\n"),
     groups = groups_str, table = table, years = years_clause,
-    where = where_clause, averted_avg = averted_avg, averted_q1 = averted_q1,
-    averted_q3 = averted_q3))
+    where = where_clause, averted_avg = averted_avg, averted_med = averted_med,
+    averted_95_lo = averted_95_lo, averted_95_hi = averted_95_hi,
+    averted_80_lo = averted_80_lo, averted_80_hi = averted_80_hi,  
+    averted_50_lo = averted_50_lo, averted_50_hi = averted_50_hi))
 }
 
 build_where <- function(filters) {
