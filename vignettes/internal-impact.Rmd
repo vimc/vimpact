@@ -1,7 +1,7 @@
 ---
 title: "Using vimpact for estimating vaccine impact - internal"
 author: "Rob Ashton"
-date: "2021-10-12"
+date: "2022-02-02"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Using vimpact for estimating vaccine impact - internal}
@@ -54,7 +54,7 @@ recipe <- data.frame(
   modelling_group = "CDA-Razavi", disease = "HepB",
   focal = "default:HepB_BD-routine;HepB-routine",
   baseline = "novac",
-  burden_outcome = "hepb_deaths_acute,hepb_deaths_dec_cirrh,hepb_deaths_hcc;hepb_cases_acute_severe,hepb_cases_dec_cirrh,hepb_cases_hcc")
+  burden_outcome = "hepb_deaths_acute,hepb_deaths_dec_cirrh,hepb_deaths_hcc;hepb_cases_acute_severe,hepb_cases_dec_cirrh,hepb_cases_hcc;dalys")
 t <- tempfile(fileext = ".csv")
 write.csv(recipe, t, row.names = FALSE)
 ```
@@ -100,13 +100,15 @@ impact <- vimpact::calculate_impact(
   baseline_scenario_type = "novac",
   burden_outcomes = "dalys")
 str(impact)
-#> tibble [4,432 × 6] (S3: tbl_df/tbl/data.frame)
-#>  $ country       : chr [1:4432] "AFG" "AFG" "AFG" "AFG" ...
-#>  $ vaccine       : chr [1:4432] "HepB" "HepB" "HepB" "HepB" ...
-#>  $ activity_type : chr [1:4432] "routine" "routine" "routine" "routine" ...
-#>  $ year          : int [1:4432] 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 ...
-#>  $ burden_outcome: chr [1:4432] "dalys" "dalys" "dalys" "dalys" ...
-#>  $ impact        : num [1:4432] 91667 94065 93427 98811 101646 ...
+#> tibble [4,279 × 8] (S3: tbl_df/tbl/data.frame)
+#>  $ country       : chr [1:4279] "AFG" "AFG" "AFG" "AFG" ...
+#>  $ vaccine       : chr [1:4279] "HepB" "HepB" "HepB" "HepB" ...
+#>  $ activity_type : chr [1:4279] "routine" "routine" "routine" "routine" ...
+#>  $ year          : int [1:4279] 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 ...
+#>  $ burden_outcome: chr [1:4279] "dalys" "dalys" "dalys" "dalys" ...
+#>  $ impact        : num [1:4279] 103859 106575 105852 111953 115165 ...
+#>  $ impact_ratio  : num [1:4279] 0.154 0.154 0.154 0.154 0.154 ...
+#>  $ fvps          : num [1:4279] 676396 694088 689380 729111 750028 ...
 ```
 
 or use `method = "yov_birth_cohort` for impact by year of vaccination stratified by birth cohort. This uses the same logic as other impact methods but before calling the public facing impact function it will also extract FVP data from the data base for this `touchstone` and vaccine delivery. It then calls either `impact_by_year_of_vaccination_activity_type` or `impact_by_year_of_vaccination_birth_cohort` to get impact.
@@ -153,31 +155,31 @@ old_impact <- vimpact:::impact_by_year_of_vaccination(
 str(old_impact)
 #> 'data.frame':	4964 obs. of  27 variables:
 #>  $ country             : int  4 4 4 4 4 4 4 4 4 4 ...
-#>  $ vaccine             : chr  "HepB_BD" "HepB_BD" "HepB_BD" "HepB" ...
+#>  $ vaccine             : chr  "HepB_BD" "HepB" "HepB_BD" "HepB_BD" ...
 #>  $ activity_type       : chr  "routine" "routine" "routine" "routine" ...
 #>  $ scenario_description: chr  "best-estimates" "best-estimates" "best-estimates" "best-estimates" ...
-#>  $ coverage_set        : int  1750 1750 1750 1751 1750 1750 1751 1751 1751 1751 ...
-#>  $ delivery_id         : int  1174 1170 1172 2983 1183 1171 3997 2459 2982 3224 ...
+#>  $ coverage_set        : int  1750 1751 1750 1750 1751 1751 1751 1751 1751 1751 ...
+#>  $ delivery_id         : int  487 3093 1169 1175 3376 4029 4272 3375 4564 3096 ...
 #>  $ disease             : chr  "HepB" "HepB" "HepB" "HepB" ...
 #>  $ scenario_type       : chr  "default" "default" "default" "default" ...
 #>  $ gavi_support_level  : chr  "with" "with" "with" "with" ...
-#>  $ year                : int  2028 2024 2025 2030 2018 2022 2023 2017 2027 2011 ...
+#>  $ year                : int  2016 2017 2014 2025 2030 2015 2019 2027 2029 2020 ...
 #>  $ gavi_support        : logi  FALSE FALSE FALSE FALSE FALSE FALSE ...
 #>  $ gender              : chr  "Both" "Both" "Both" "Both" ...
 #>  $ age                 : num  0 0 0 0 0 0 0 0 0 0 ...
-#>  $ target_source       : num  1185633 1179945 1180725 1188620 1145921 ...
-#>  $ coverage_source     : num  0.621 0.423 0.473 0.749 0.18 ...
-#>  $ cohort_size         : num  1185633 1179945 1180725 1188620 1145921 ...
-#>  $ delivery_population : num  1185633 1179945 1180725 1188620 1145921 ...
-#>  $ fvps_source         : num  736634 499471 558483 890514 206266 ...
-#>  $ fvps_adjusted       : num  736634 499471 558483 890514 206266 ...
-#>  $ coverage_adjusted   : num  0.621 0.423 0.473 0.749 0.18 ...
+#>  $ target_source       : num  1118424 1131834 1103729 1180725 1188620 ...
+#>  $ coverage_source     : num  0.18 0.66 0.04 0.473 0.749 ...
+#>  $ cohort_size         : num  1118424 1131834 1103729 1180725 1188620 ...
+#>  $ delivery_population : num  1118424 1131834 1103729 1180725 1188620 ...
+#>  $ fvps_source         : num  201316 747010 44149 558483 890514 ...
+#>  $ fvps_adjusted       : num  201316 747010 44149 558483 890514 ...
+#>  $ coverage_adjusted   : num  0.18 0.66 0.04 0.473 0.749 ...
 #>  $ country_nid         : int  4 4 4 4 4 4 4 4 4 4 ...
-#>  $ fvps                : num  736634 499471 558483 890514 206266 ...
-#>  $ time                : num  2028 2024 2025 2030 2018 ...
+#>  $ fvps                : num  201316 747010 44149 558483 890514 ...
+#>  $ time                : num  2016 2017 2014 2025 2030 ...
 #>  $ burden_outcome      : chr  "dalys" "dalys" "dalys" "dalys" ...
 #>  $ impact_ratio        : num  0.154 0.154 0.154 0.154 0.154 ...
-#>  $ impact              : num  113108 76692 85754 136736 31672 ...
+#>  $ impact              : num  30912 114701 6779 85754 136736 ...
 #>  $ index               : int  1 1 1 1 1 1 1 1 1 1 ...
 ```
 
@@ -207,56 +209,51 @@ str(old_impact)
 and we can see from a plot that the output is very similar
 
 
-```r
-impact_plot <- merge(old_impact, impact, all.x = TRUE, all.y = TRUE,
-                     by = c("country", "vaccine", "activity_type", "year",
-                            "burden_outcome"))
-countries <- unique(impact_plot$country)
-impact_plot <- impact_plot %>%
-  dplyr::rename(recipe_impact = impact.x, function_impact = impact.y) %>%
-  tidyr::pivot_wider(names_from = country,
-                     values_from = c(recipe_impact, function_impact))
-impact_plot <- as.data.frame(impact_plot)
-countries_filter <- lapply(unique(countries), function(country) {
-  button <- list(
-    method = "restyle",
-    args = list("y", c(
-      list(impact_plot[, paste0("recipe_impact_", country)]),
-      list(impact_plot[, paste0("function_impact_", country)]))),
-    label = country
-  )
-})
-plot <- plotly::plot_ly(data = impact_plot) %>%
-  plotly::add_trace(x = ~year, y = ~recipe_impact_AFG, name = "recipe",
-                    type = "scatter", mode = "markers", text = ~vaccine,
-                    marker = list(
-                      color = "rgb(235, 204, 42)",
-                      size = 10
-                    )) %>%
-  plotly::add_trace(x = ~year, y = ~function_impact_AFG, name = "function",
-                    type = "scatter", mode = "markers", text = ~vaccine,
-                    marker = list(
-                      color = "rgb(60, 154, 178)",
-                      symbol = "circle-open",
-                      size = 10,
-                      line = list(
-                        color = "rgb(60, 154, 178)",
-                        width = 2
-                      )
-                    )) %>%
-  plotly::layout(
-    yaxis = list(title = "impact"),
-    updatemenus = list(
-      list(
-        y = 0.7,
-        buttons = countries_filter
-      )
-    ))
-```
+
+
+
+
+
+
+
+
+
+
+
 
 
 
  
+### HepB 
+```{r} 
+htmltools::tags$iframe( 
+  src = "impact_comparisons_hepb.html", 
+  width = "100%", 
+  height = "400", 
+  scrolling = "no", 
+  seamless = "seamless", 
+  frameBorder = "0", 
+  `data-external` = "1" 
+)
+```
+
+### Measles 
+```{r} 
+htmltools::tags$iframe( 
+  src = "impact_comparisons_measles.html", 
+  width = "100%", 
+  height = "400", 
+  scrolling = "no", 
+  seamless = "seamless", 
+  frameBorder = "0", 
+  `data-external` = "1" 
+)
+```
+
+### Comparisons of HepB, Measles & YF 
+This shows bars of mean difference between old impact & new impact method for each 
+country for HepB, Measles and YF. Tooltips show the number of observations and the 
+min and max order of the values. i.e. an impact of 23432.342 has order 5.
 ```{r} 
 htmltools::tags$iframe( 
   src = "impact_comparisons.html", 
