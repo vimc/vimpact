@@ -127,7 +127,7 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
                                 FROM coverage_set
                                 WHERE touchstone = $1
                                 AND gavi_support_level != 'none'", touchstone_cov)
-    cov_sets2 <- merge_by_common_cols(disease_vaccine_delivery, cov_sets2, all.x = TRUE)
+    cov_sets2 <- merge_by_common_cols(disease_vaccine_delivery, cov_sets2, all.y = TRUE)
     cov_sets2$scenario_type <- "default"
     cov_sets2$scenario_description <- paste(cov_sets2$vaccine,
                                             cov_sets2$activity_type,
