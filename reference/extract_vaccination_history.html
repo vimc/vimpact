@@ -26,7 +26,7 @@
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -63,49 +63,72 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">extract_vaccination_history</span><span class="op">(</span>
-  <span class="va">con</span>,
-  touchstone_cov <span class="op">=</span> <span class="st">"201710gavi"</span>,
-  touchstone_pop <span class="op">=</span> <span class="cn">NULL</span>,
-  year_min <span class="op">=</span> <span class="fl">2000</span>,
-  year_max <span class="op">=</span> <span class="fl">2100</span>,
-  vaccine_to_ignore <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"DTP3"</span>, <span class="st">"HepB_BD_home"</span>, <span class="st">"none"</span><span class="op">)</span>,
-  disease_to_extract <span class="op">=</span> <span class="cn">NULL</span>,
-  countries_to_extract <span class="op">=</span> <span class="cn">NULL</span>,
-  gavi_support_levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"with"</span>, <span class="st">"bestminus"</span><span class="op">)</span>,
-  scenario_type <span class="op">=</span> <span class="st">"default"</span>,
-  external_population_estimates <span class="op">=</span> <span class="cn">NULL</span>,
-  full_description <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">extract_vaccination_history</span><span class="op">(</span></span>
+<span>  <span class="va">con</span>,</span>
+<span>  touchstone_cov <span class="op">=</span> <span class="st">"201710gavi"</span>,</span>
+<span>  touchstone_pop <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  year_min <span class="op">=</span> <span class="fl">2000</span>,</span>
+<span>  year_max <span class="op">=</span> <span class="fl">2100</span>,</span>
+<span>  vaccine_to_ignore <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"DTP3"</span>, <span class="st">"HepB_BD_home"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
+<span>  disease_to_extract <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  countries_to_extract <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  gavi_support_levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"with"</span>, <span class="st">"bestminus"</span><span class="op">)</span>,</span>
+<span>  scenario_type <span class="op">=</span> <span class="st">"default"</span>,</span>
+<span>  external_population_estimates <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  full_description <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>con</dt>
 <dd><p>Datebase connection</p></dd>
+
+
 <dt>touchstone_cov</dt>
 <dd><p>Coverage touchstone</p></dd>
+
+
 <dt>touchstone_pop</dt>
 <dd><p>Demography touchstone</p></dd>
+
+
 <dt>year_min</dt>
 <dd><p>extract data from year_min</p></dd>
+
+
 <dt>year_max</dt>
 <dd><p>extract data to year_max</p></dd>
+
+
 <dt>vaccine_to_ignore</dt>
 <dd><p>Ignore defined vaccines</p></dd>
+
+
 <dt>disease_to_extract</dt>
 <dd><p>extract data for specific diseases</p></dd>
+
+
 <dt>countries_to_extract</dt>
 <dd><p>extract data for specific countries</p></dd>
+
+
 <dt>gavi_support_levels</dt>
 <dd><p>gavi support levels</p></dd>
+
+
 <dt>scenario_type</dt>
 <dd><p>scenario type</p></dd>
+
+
 <dt>external_population_estimates</dt>
 <dd><p>The rationales are 1. we can use external population estimates if any and if necessary;
 2. demographic uncertainty not only affects models, but also FVPs. If we are to conduct sensitivity analysis on impact_by_year_of_vaccination, we need to vary population input for adjusting FVPs.</p></dd>
+
+
 <dt>full_description</dt>
 <dd><p>TRUE if including scenario_descriptions (coverage estimates will be duplicated for scenarios); and FALSE if only providing coverage estimates</p></dd>
+
 </dl></div>
 
   </div>
@@ -120,7 +143,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

@@ -34,7 +34,7 @@ because of herd protection)."><!-- mathjax --><script src="https://cdnjs.cloudfl
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -79,7 +79,7 @@ because of herd protection).</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">impact_by_birth_year</span><span class="op">(</span><span class="va">baseline_burden</span>, <span class="va">focal_burden</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">impact_by_birth_year</span><span class="op">(</span><span class="va">baseline_burden</span>, <span class="va">focal_burden</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -87,13 +87,18 @@ because of herd protection).</p>
     <dl><dt>baseline_burden</dt>
 <dd><p>Data frame of baseline burden data this needs to have
 columns country, burden_outcome, year, age, value</p></dd>
+
+
 <dt>focal_burden</dt>
 <dd><p>Data frame of focal burden data this needs to have
 columns country, burden_outcome, year, age, value</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Vaccine impact by country and birth year for burden outcomes as a
+    
+
+<p>Vaccine impact by country and birth year for burden outcomes as a
 data frame with columns country, year, burden_outcome and impact</p>
     </div>
 
@@ -109,7 +114,7 @@ data frame with columns country, year, burden_outcome and impact</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

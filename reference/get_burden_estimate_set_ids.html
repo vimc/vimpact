@@ -32,7 +32,7 @@ the vaccine_delivery we are interested in."><!-- mathjax --><script src="https:/
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -75,42 +75,59 @@ the vaccine_delivery we are interested in.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">get_burden_estimate_set_ids</span><span class="op">(</span>
-  <span class="va">con</span>,
-  <span class="va">baseline_scenario_type</span>,
-  <span class="va">baseline_scenario</span>,
-  <span class="va">focal_scenario_type</span>,
-  <span class="va">focal_scenario</span>,
-  <span class="va">touchstone</span>,
-  <span class="va">modelling_group</span>,
-  <span class="va">disease</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">get_burden_estimate_set_ids</span><span class="op">(</span></span>
+<span>  <span class="va">con</span>,</span>
+<span>  <span class="va">baseline_scenario_type</span>,</span>
+<span>  <span class="va">baseline_scenario</span>,</span>
+<span>  <span class="va">focal_scenario_type</span>,</span>
+<span>  <span class="va">focal_scenario</span>,</span>
+<span>  <span class="va">touchstone</span>,</span>
+<span>  <span class="va">modelling_group</span>,</span>
+<span>  <span class="va">disease</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>con</dt>
 <dd><p>DB connection</p></dd>
+
+
 <dt>baseline_scenario_type</dt>
 <dd><p>Baseling scenario type, e.g. default, novac</p></dd>
+
+
 <dt>baseline_scenario</dt>
 <dd><p>Scenario specification a string with form e.g.
 scenario_type-vaccine1-activity_type1;scenario_type-vaccine2-activity_type2</p></dd>
+
+
 <dt>focal_scenario_type</dt>
 <dd><p>Focal scenario type e.g. default, novac</p></dd>
+
+
 <dt>focal_scenario</dt>
 <dd><p>Scenario specification a string with form e.g.
 scenario_type-vaccine1-activity_type1;scenario_type-vaccine2-activity_type2</p></dd>
+
+
 <dt>touchstone</dt>
 <dd><p>The touchstone to get data for</p></dd>
+
+
 <dt>modelling_group</dt>
 <dd><p>The modelling group to get data for</p></dd>
+
+
 <dt>disease</dt>
 <dd><p>The disease to get data for</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>dbplyr lazy db connection containing the burden estimate set ids
+    
+
+<p>dbplyr lazy db connection containing the burden estimate set ids
   which match the baseline and focal scenarios</p>
     </div>
 
@@ -126,7 +143,7 @@ scenario_type-vaccine1-activity_type1;scenario_type-vaccine2-activity_type2</p><
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

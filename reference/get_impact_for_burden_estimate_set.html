@@ -28,7 +28,7 @@ under 5 ages or for a particular country"><!-- mathjax --><script src="https://c
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -67,32 +67,43 @@ under 5 ages or for a particular country</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">get_impact_for_burden_estimate_set</span><span class="op">(</span>
-  <span class="va">con</span>,
-  <span class="va">burden_estimate_sets</span>,
-  <span class="va">outcomes</span>,
-  <span class="va">countries</span>,
-  <span class="va">is_under5</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">get_impact_for_burden_estimate_set</span><span class="op">(</span></span>
+<span>  <span class="va">con</span>,</span>
+<span>  <span class="va">burden_estimate_sets</span>,</span>
+<span>  <span class="va">outcomes</span>,</span>
+<span>  <span class="va">countries</span>,</span>
+<span>  <span class="va">is_under5</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>con</dt>
 <dd><p>DB connection</p></dd>
+
+
 <dt>burden_estimate_sets</dt>
 <dd><p>Burden estimate set ids to get data from</p></dd>
+
+
 <dt>outcomes</dt>
 <dd><p>Burden outcome ids to get data for</p></dd>
+
+
 <dt>countries</dt>
 <dd><p>Optional filter of countries to pull data for</p></dd>
+
+
 <dt>is_under5</dt>
 <dd><p>If TRUE only gets burden estimate data for under 5
 ages</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>dbplyr lazy db connection containing the raw impact data</p>
+    
+
+<p>dbplyr lazy db connection containing the raw impact data</p>
     </div>
 
   </div>
@@ -107,7 +118,7 @@ ages</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

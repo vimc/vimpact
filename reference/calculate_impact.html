@@ -26,7 +26,7 @@
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -63,42 +63,56 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">calculate_impact</span><span class="op">(</span>
-  <span class="va">con</span>,
-  <span class="va">method</span>,
-  <span class="va">touchstone</span>,
-  <span class="va">modelling_group</span>,
-  <span class="va">disease</span>,
-  <span class="va">focal_scenario_type</span>,
-  <span class="va">baseline_scenario_type</span>,
-  focal_vaccine_delivery <span class="op">=</span> <span class="cn">NULL</span>,
-  baseline_vaccine_delivery <span class="op">=</span> <span class="cn">NULL</span>,
-  burden_outcomes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"deaths"</span>, <span class="st">"cases"</span>, <span class="st">"dalys"</span><span class="op">)</span>,
-  countries <span class="op">=</span> <span class="cn">NULL</span>,
-  is_under5 <span class="op">=</span> <span class="cn">FALSE</span>,
-  vaccination_years <span class="op">=</span> <span class="fl">2000</span><span class="op">:</span><span class="fl">2030</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">calculate_impact</span><span class="op">(</span></span>
+<span>  <span class="va">con</span>,</span>
+<span>  <span class="va">method</span>,</span>
+<span>  <span class="va">touchstone</span>,</span>
+<span>  <span class="va">modelling_group</span>,</span>
+<span>  <span class="va">disease</span>,</span>
+<span>  <span class="va">focal_scenario_type</span>,</span>
+<span>  <span class="va">baseline_scenario_type</span>,</span>
+<span>  focal_vaccine_delivery <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  baseline_vaccine_delivery <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  burden_outcomes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"deaths"</span>, <span class="st">"cases"</span>, <span class="st">"dalys"</span><span class="op">)</span>,</span>
+<span>  countries <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  is_under5 <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  vaccination_years <span class="op">=</span> <span class="fl">2000</span><span class="op">:</span><span class="fl">2030</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>con</dt>
 <dd><p>Connection to database.</p></dd>
+
+
 <dt>method</dt>
 <dd><p>Impact method to use one of calendar_year, birth_year,
 yov_activity_type, yov_birth_cohort.</p></dd>
+
+
 <dt>touchstone</dt>
 <dd><p>The montagu touchstone to calculate impact for. Either
 touchstone ID or touchstone name.</p></dd>
+
+
 <dt>modelling_group</dt>
 <dd><p>The modelling group to calculate impact for.</p></dd>
+
+
 <dt>disease</dt>
 <dd><p>The disease to calculate impact for.</p></dd>
+
+
 <dt>focal_scenario_type</dt>
 <dd><p>The focal scenario scenario type e.g. "default"</p></dd>
+
+
 <dt>baseline_scenario_type</dt>
 <dd><p>The baseline scenario scenario type e.g.
 "novac"</p></dd>
+
+
 <dt>focal_vaccine_delivery</dt>
 <dd><p>The focal vaccine delivery methods. This should
 be a list of lists or NULL if scenario type is novac. Each element of first
@@ -113,26 +127,39 @@ list(
     activity_type = "routine"
   )
  )</p></dd>
+
+
 <dt>baseline_vaccine_delivery</dt>
 <dd><p>Like `focal_vaccine_delivery` this should be
 a list of lists, each element containing vaccination and activity type. If
 `baseline_vaccine_delivery` is `novac` then this should be NULL.</p></dd>
+
+
 <dt>burden_outcomes</dt>
 <dd><p>List of burden outcomes, defaults to "deaths", "cases"
 and "dalys".</p></dd>
+
+
 <dt>countries</dt>
 <dd><p>Vector of countries to get impact for. If NULL then impact
 calculated for all countries.</p></dd>
+
+
 <dt>is_under5</dt>
 <dd><p>If TRUE then only include data for age under 5, otherwise
 calculate impact for all ages</p></dd>
+
+
 <dt>vaccination_years</dt>
 <dd><p>Years of vaccination of interest, only used for
 year of vaccination (yov) methods</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Impact for this set of parameters.</p>
+    
+
+<p>Impact for this set of parameters.</p>
     </div>
 
   </div>
@@ -147,7 +174,7 @@ year of vaccination (yov) methods</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

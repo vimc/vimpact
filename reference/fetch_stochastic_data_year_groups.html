@@ -29,7 +29,7 @@ individual years to get mean and quantiles for a year alone.d"><!-- mathjax --><
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -69,41 +69,54 @@ individual years to get mean and quantiles for a year alone.d</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">fetch_stochastic_data_year_groups</span><span class="op">(</span>
-  <span class="va">annex</span>,
-  <span class="va">table</span>,
-  groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"disease"</span>, <span class="st">"country"</span><span class="op">)</span>,
-  filters <span class="op">=</span> <span class="cn">NULL</span>,
-  year_groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2000</span><span class="op">:</span><span class="fl">2019</span><span class="op">)</span><span class="op">)</span>,
-  include_proportion_averted <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">fetch_stochastic_data_year_groups</span><span class="op">(</span></span>
+<span>  <span class="va">annex</span>,</span>
+<span>  <span class="va">table</span>,</span>
+<span>  groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"disease"</span>, <span class="st">"country"</span><span class="op">)</span>,</span>
+<span>  filters <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  year_groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2000</span><span class="op">:</span><span class="fl">2019</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  include_proportion_averted <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>annex</dt>
 <dd><p>Connection to annex db</p></dd>
+
+
 <dt>table</dt>
 <dd><p>One of cross_all, cross_under5, cohort_all or cohort_under5</p></dd>
+
+
 <dt>groups</dt>
 <dd><p>Categories to group by for aggregating in query, can be any
 combination of disease and/or country</p></dd>
+
+
 <dt>filters</dt>
 <dd><p>Filters to apply before aggregation</p></dd>
+
+
 <dt>year_groups</dt>
 <dd><p>List of year groups to sum over before calculating
 mean and quantiles. This will sum over all years within range from min &amp; max
 of each year group. Note that passing a range of years wider than
 the data itself will only aggregate over the years for which there is data
 available</p></dd>
+
+
 <dt>include_proportion_averted</dt>
 <dd><p>If TRUE then calculates mean and quantiles
 for proportion_deaths_averted = deaths_impact / deaths_novac and
 for proportion_dalys_averted = dalys_impact / dalys_novac</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Mean, 0.025 and 0.975 quantiles for deaths_default, deaths_novac.
+    
+
+<p>Mean, 0.025 and 0.975 quantiles for deaths_default, deaths_novac.
 deaths_impact, dalys_default, dalys_novac, dalys_impact with specified
 groupings.</p>
     </div>
@@ -120,7 +133,7 @@ groupings.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

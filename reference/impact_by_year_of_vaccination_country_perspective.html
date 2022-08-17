@@ -27,7 +27,7 @@ burden outcome for a single disease and vaccine."><!-- mathjax --><script src="h
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -65,12 +65,12 @@ burden outcome for a single disease and vaccine.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">impact_by_year_of_vaccination_country_perspective</span><span class="op">(</span>
-  <span class="va">raw_impact</span>,
-  <span class="va">fvps</span>,
-  <span class="va">activity_type</span>,
-  <span class="va">vaccination_years</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">impact_by_year_of_vaccination_country_perspective</span><span class="op">(</span></span>
+<span>  <span class="va">raw_impact</span>,</span>
+<span>  <span class="va">fvps</span>,</span>
+<span>  <span class="va">activity_type</span>,</span>
+<span>  <span class="va">vaccination_years</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -78,17 +78,26 @@ burden outcome for a single disease and vaccine.</p>
     <dl><dt>raw_impact</dt>
 <dd><p>Data frame of raw impact data this needs to have
 columns country, value, burden_outcome and either year &amp; age or birth_cohort</p></dd>
+
+
 <dt>fvps</dt>
 <dd><p>Data frame of fully vaccination person data with columns
 country, fvps and either year &amp; age or birth_cohort</p></dd>
+
+
 <dt>activity_type</dt>
 <dd><p>`routine` or `campaign` activity type</p></dd>
+
+
 <dt>vaccination_years</dt>
 <dd><p>Years of vaccination of interest</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Impact ratio by country and burden outcome</p>
+    
+
+<p>Impact ratio by country and burden outcome</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -108,7 +117,7 @@ by birth cohort year.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

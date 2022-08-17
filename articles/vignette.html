@@ -43,7 +43,7 @@
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -80,7 +80,7 @@
       <h1 data-toc-skip>Using vimpact for estimating vaccine impact - VIMC members</h1>
                         <h4 data-toc-skip class="author">Xiang Li</h4>
             
-            <h4 data-toc-skip class="date">2022-02-15</h4>
+            <h4 data-toc-skip class="date">2022-08-17</h4>
       
       
       <div class="hidden name"><code>vignette.Rmd</code></div>
@@ -99,20 +99,20 @@
 <p>There are a set of frequently used functions that extracts data from VIMC databases.</p>
 <p><strong>Determine latest touchstone version</strong></p>
 <p>Montagu data is touchstone based. Each touchstone may contain multiple versions as it is developed. The most recent version of touchstone can be determined by <code>get_touchstone</code> where <code>con</code> specifies the database machine, and <code>touchstone_name</code> indicates the touchstone of interest.</p>
-<pre><code><span class="fu"><a href="../reference/get_touchstone.html">get_touchstone</a></span><span class="op">(</span><span class="va">con</span>, touchstone_name <span class="op">=</span> <span class="st">"201710gavi"</span><span class="op">)</span></code></pre>
+<pre><code><span><span class="fu"><a href="../reference/get_touchstone.html">get_touchstone</a></span><span class="op">(</span><span class="va">con</span>, touchstone_name <span class="op">=</span> <span class="st">"201710gavi"</span><span class="op">)</span></span></code></pre>
 <p>This will return <code>201710gavi-6</code>. <code>201710gavi</code> touchstone has 6 versions. And Version 6 has the most recent coverage scenarios.</p>
 <p><strong>Extract demographic data</strong> Demographic data is frequently used for analysis. It is therefore useful to have a standardized function extracting demographic data from Montagu.</p>
-<pre><code><span class="fu"><a href="../reference/get_population.html">get_population</a></span><span class="op">(</span><span class="va">con</span>, touchstone_pop <span class="op">=</span> <span class="st">"201710gavi-5"</span>, demographic_statistic <span class="op">=</span> <span class="st">"int_pop"</span>, gender <span class="op">=</span> <span class="st">"Both"</span>,
-               country_ <span class="op">=</span> <span class="cn">NULL</span>, year_ <span class="op">=</span> <span class="cn">NULL</span>, age_ <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></code></pre>
+<pre><code><span><span class="fu"><a href="../reference/get_population.html">get_population</a></span><span class="op">(</span><span class="va">con</span>, touchstone_pop <span class="op">=</span> <span class="st">"201710gavi-5"</span>, demographic_statistic <span class="op">=</span> <span class="st">"int_pop"</span>, gender <span class="op">=</span> <span class="st">"Both"</span>,</span>
+<span>               country_ <span class="op">=</span> <span class="cn">NULL</span>, year_ <span class="op">=</span> <span class="cn">NULL</span>, age_ <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre>
 <p><code>demographic_statistic</code> is demographic_statistic_type code; <code>gender</code> can be <code>Female, Male or Both</code> if specified or all three selections if NULL; <code>country_</code> is all VIMC countries if NULL or an array of selected countries; similar for <code>year_</code> and <code>age_</code>.</p>
 <p><strong>Extract vaccination coverage data</strong></p>
-<pre><code><span class="fu"><a href="../reference/extract_vaccination_history.html">extract_vaccination_history</a></span><span class="op">(</span><span class="va">con</span>, touchstone_cov <span class="op">=</span> <span class="st">"201710gavi"</span>, touchstone_pop <span class="op">=</span> <span class="cn">NULL</span>,
-                            year_min <span class="op">=</span> <span class="fl">2000</span>, year_max <span class="op">=</span> <span class="fl">2100</span>,
-                            vaccine_to_ignore <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"DTP3"</span>, <span class="st">"HepB_BD_home"</span>, <span class="st">"none"</span><span class="op">)</span>,
-                            disease_to_extract <span class="op">=</span> <span class="cn">NULL</span>,
-                            countries_to_extract <span class="op">=</span> <span class="cn">NULL</span>,
-                            gavi_support_levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"with"</span>, <span class="st">"bestminus"</span><span class="op">)</span>,
-                            scenario_type <span class="op">=</span> <span class="st">"default"</span>, external_population_estimates <span class="op">=</span> <span class="cn">NULL</span>, full_description <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre>
+<pre><code><span><span class="fu"><a href="../reference/extract_vaccination_history.html">extract_vaccination_history</a></span><span class="op">(</span><span class="va">con</span>, touchstone_cov <span class="op">=</span> <span class="st">"201710gavi"</span>, touchstone_pop <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>                            year_min <span class="op">=</span> <span class="fl">2000</span>, year_max <span class="op">=</span> <span class="fl">2100</span>,</span>
+<span>                            vaccine_to_ignore <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"DTP3"</span>, <span class="st">"HepB_BD_home"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
+<span>                            disease_to_extract <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>                            countries_to_extract <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>                            gavi_support_levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"with"</span>, <span class="st">"bestminus"</span><span class="op">)</span>,</span>
+<span>                            scenario_type <span class="op">=</span> <span class="st">"default"</span>, external_population_estimates <span class="op">=</span> <span class="cn">NULL</span>, full_description <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="annex-views-susy-to-add">Annex views (Susy to add)<a class="anchor" aria-label="anchor" href="#annex-views-susy-to-add"></a>
@@ -123,64 +123,64 @@
 </h3>
 <p><strong>prepare impact calculation recipe</strong> Impact calculation differs according to vaccination scenarios under investigation. Vimpact compares two distinct scenarios, namely the baseline and the focal. Vaccination impact is evaluated as excessive disease burden of focal scenario compared to the baseline. A impact recipe contains meta information of the two scenarios for each particular disease, touchstone and modelling group.</p>
 <p>Firstly, <code>recipe_tempate</code> generates a sample impact recipe, from which users can develop their own recipes. Current vimpact allows four views of impact recipes (method0, method1, method2a and method2b) representing vaccine impact by calendar year, year of birth, year of vaccination (vaccination activity perspective) and year of vaccination (birth cohort perspective). The following row of code gives an example recipe of impact by year of birth.</p>
-<pre><code><span class="fu"><a href="../reference/recipe_template.html">recipe_template</a></span><span class="op">(</span>template_version <span class="op">=</span> <span class="st">"201710"</span>, method <span class="op">=</span> <span class="st">"method1"</span><span class="op">)</span></code></pre>
+<pre><code><span><span class="fu"><a href="../reference/recipe_template.html">recipe_template</a></span><span class="op">(</span>template_version <span class="op">=</span> <span class="st">"201710"</span>, method <span class="op">=</span> <span class="st">"method1"</span><span class="op">)</span></span></code></pre>
 <p>Once impact recipes are complete, vimpact prepares meta data needed for communicating with VIMC databases via <code>get_meta_from_recipe function</code>. Each pair of scenarios (focal and baseline) are indexed for further impact calculation.</p>
-<pre><code><span class="fu">get_meta_from_recipe</span><span class="op">(</span>default_recipe <span class="op">=</span> <span class="cn">TRUE</span>, method <span class="op">=</span> <span class="st">"method1"</span>, recipe_version <span class="op">=</span> <span class="st">"201710"</span>, recipe <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">con</span>, disease <span class="op">=</span> <span class="st">"Hib"</span><span class="op">)</span></code></pre>
+<pre><code><span><span class="fu">get_meta_from_recipe</span><span class="op">(</span>default_recipe <span class="op">=</span> <span class="cn">TRUE</span>, method <span class="op">=</span> <span class="st">"method1"</span>, recipe_version <span class="op">=</span> <span class="st">"201710"</span>, recipe <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">con</span>, disease <span class="op">=</span> <span class="st">"Hib"</span><span class="op">)</span></span></code></pre>
 <p><code>default_recipe, method and recipe_version</code> combined determine default VIMC impact recipes commonly used for reporting. If user specified recipe is used (a recipe developed from recipe_template), the recipe csv file path should be specified as <code>recipe = &lt;file_path&gt;``.</code>disease` can help to allow focused evaluation of vaccine impact. If it is NULL, all diseases will be considered.</p>
 <p><strong>impact by calendar year</strong></p>
-<pre><code><span class="va">meta</span> <span class="op">&lt;-</span> <span class="fu">get_meta_from_recipe</span><span class="op">(</span>default_recipe <span class="op">=</span> <span class="cn">TRUE</span>, method <span class="op">=</span> <span class="st">"method0"</span>, recipe_version <span class="op">=</span> <span class="st">"201710"</span>, recipe <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">con</span>, disease <span class="op">=</span> <span class="st">"Hib"</span><span class="op">)</span>
-
-<span class="va">meta_s</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/split.html" class="external-link">split</a></span><span class="op">(</span><span class="va">meta</span>, <span class="va">meta</span><span class="op">$</span><span class="va">index</span><span class="op">)</span>
-
-<span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">meta_s</span>, <span class="kw">function</span><span class="op">(</span><span class="va">meta1</span><span class="op">)</span> <span class="fu">get_raw_impact_details</span><span class="op">(</span>con <span class="op">=</span> <span class="va">con_test</span>, <span class="va">meta1</span>, burden_outcome <span class="op">=</span> <span class="st">"deaths"</span><span class="op">)</span><span class="op">)</span>
-
-<span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="va">dat</span><span class="op">)</span></code></pre>
+<pre><code><span><span class="va">meta</span> <span class="op">&lt;-</span> <span class="fu">get_meta_from_recipe</span><span class="op">(</span>default_recipe <span class="op">=</span> <span class="cn">TRUE</span>, method <span class="op">=</span> <span class="st">"method0"</span>, recipe_version <span class="op">=</span> <span class="st">"201710"</span>, recipe <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">con</span>, disease <span class="op">=</span> <span class="st">"Hib"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">meta_s</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/split.html" class="external-link">split</a></span><span class="op">(</span><span class="va">meta</span>, <span class="va">meta</span><span class="op">$</span><span class="va">index</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">meta_s</span>, <span class="kw">function</span><span class="op">(</span><span class="va">meta1</span><span class="op">)</span> <span class="fu">get_raw_impact_details</span><span class="op">(</span>con <span class="op">=</span> <span class="va">con_test</span>, <span class="va">meta1</span>, burden_outcome <span class="op">=</span> <span class="st">"deaths"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="va">dat</span><span class="op">)</span></span></code></pre>
 <p><strong>impact by year of birth</strong></p>
-<pre><code><span class="va">meta</span> <span class="op">&lt;-</span> <span class="fu">get_meta_from_recipe</span><span class="op">(</span>default_recipe <span class="op">=</span> <span class="cn">TRUE</span>, method <span class="op">=</span> <span class="st">"method1"</span>, recipe_version <span class="op">=</span> <span class="st">"201710"</span>, recipe <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">con</span>, disease <span class="op">=</span> <span class="st">"Hib"</span><span class="op">)</span>
-
-<span class="va">meta_s</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/split.html" class="external-link">split</a></span><span class="op">(</span><span class="va">meta</span>, <span class="va">meta</span><span class="op">$</span><span class="va">index</span><span class="op">)</span>
-
-<span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">meta_s</span>, <span class="kw">function</span><span class="op">(</span><span class="va">meta1</span><span class="op">)</span> <span class="fu">get_raw_impact_details</span><span class="op">(</span>con <span class="op">=</span> <span class="va">con_test</span>, <span class="va">meta1</span>, burden_outcome <span class="op">=</span> <span class="st">"deaths"</span><span class="op">)</span><span class="op">)</span>
-
-<span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="va">dat</span><span class="op">)</span></code></pre>
+<pre><code><span><span class="va">meta</span> <span class="op">&lt;-</span> <span class="fu">get_meta_from_recipe</span><span class="op">(</span>default_recipe <span class="op">=</span> <span class="cn">TRUE</span>, method <span class="op">=</span> <span class="st">"method1"</span>, recipe_version <span class="op">=</span> <span class="st">"201710"</span>, recipe <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">con</span>, disease <span class="op">=</span> <span class="st">"Hib"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">meta_s</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/split.html" class="external-link">split</a></span><span class="op">(</span><span class="va">meta</span>, <span class="va">meta</span><span class="op">$</span><span class="va">index</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">meta_s</span>, <span class="kw">function</span><span class="op">(</span><span class="va">meta1</span><span class="op">)</span> <span class="fu">get_raw_impact_details</span><span class="op">(</span>con <span class="op">=</span> <span class="va">con_test</span>, <span class="va">meta1</span>, burden_outcome <span class="op">=</span> <span class="st">"deaths"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="va">dat</span><span class="op">)</span></span></code></pre>
 <p><strong>impact by year of vaccination: impact ratio stratified by activity type (method 2a)</strong></p>
-<pre><code><span class="va">vaccination_years</span> <span class="op">&lt;-</span> <span class="fl">2000</span><span class="op">:</span><span class="fl">2018</span>
-
-<span class="va">meta</span> <span class="op">&lt;-</span> <span class="fu">get_meta_from_recipe</span><span class="op">(</span>default_recipe <span class="op">=</span> <span class="cn">TRUE</span>, method <span class="op">=</span> <span class="st">"method2a"</span>, recipe_version <span class="op">=</span> <span class="st">"201710"</span>, recipe <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">con</span>, disease <span class="op">=</span> <span class="st">"Hib"</span><span class="op">)</span>
-
-<span class="va">meta_s</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/split.html" class="external-link">split</a></span><span class="op">(</span><span class="va">meta</span>, <span class="va">meta</span><span class="op">$</span><span class="va">index</span><span class="op">)</span>
-
-<span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">metas</span>, <span class="kw">function</span><span class="op">(</span><span class="va">meta1</span><span class="op">)</span> <span class="fu">get_raw_impact_details</span><span class="op">(</span>con <span class="op">=</span> <span class="va">con_test</span>, <span class="va">meta1</span>, burden_outcome <span class="op">=</span> <span class="st">"deaths"</span><span class="op">)</span><span class="op">)</span>
-
-<span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="va">dat</span><span class="op">)</span>
-
-<span class="va">fvps</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/extract_vaccination_history.html">extract_vaccination_history</a></span><span class="op">(</span><span class="va">con</span>, touchstone_cov <span class="op">=</span> <span class="st">"201710gavi"</span>, touchstone_pop <span class="op">=</span> <span class="cn">NULL</span>,
-                                    year_min <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">vaccination_years</span><span class="op">)</span>, year_max <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">vaccination_years</span><span class="op">)</span>,
-                                    disease_to_extract <span class="op">=</span> <span class="st">"Hib"</span>,
-                                    countries_to_extract <span class="op">=</span> <span class="st">"AFG"</span><span class="op">)</span>
-
-<span class="va">dat2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">metas</span>, <span class="kw">function</span><span class="op">(</span><span class="va">meta1</span><span class="op">)</span> <span class="fu">impact_by_year_of_vaccination</span><span class="op">(</span><span class="va">meta1</span>, raw_impact <span class="op">=</span> <span class="va">dat</span>, fvps <span class="op">=</span> <span class="va">fvps</span>,
-                                                                    vaccination_years <span class="op">=</span> <span class="va">vaccination_years</span><span class="op">)</span><span class="op">)</span>
-
-<span class="va">dat2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="va">dat2</span><span class="op">)</span></code></pre>
+<pre><code><span><span class="va">vaccination_years</span> <span class="op">&lt;-</span> <span class="fl">2000</span><span class="op">:</span><span class="fl">2018</span></span>
+<span></span>
+<span><span class="va">meta</span> <span class="op">&lt;-</span> <span class="fu">get_meta_from_recipe</span><span class="op">(</span>default_recipe <span class="op">=</span> <span class="cn">TRUE</span>, method <span class="op">=</span> <span class="st">"method2a"</span>, recipe_version <span class="op">=</span> <span class="st">"201710"</span>, recipe <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">con</span>, disease <span class="op">=</span> <span class="st">"Hib"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">meta_s</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/split.html" class="external-link">split</a></span><span class="op">(</span><span class="va">meta</span>, <span class="va">meta</span><span class="op">$</span><span class="va">index</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">metas</span>, <span class="kw">function</span><span class="op">(</span><span class="va">meta1</span><span class="op">)</span> <span class="fu">get_raw_impact_details</span><span class="op">(</span>con <span class="op">=</span> <span class="va">con_test</span>, <span class="va">meta1</span>, burden_outcome <span class="op">=</span> <span class="st">"deaths"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="va">dat</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">fvps</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/extract_vaccination_history.html">extract_vaccination_history</a></span><span class="op">(</span><span class="va">con</span>, touchstone_cov <span class="op">=</span> <span class="st">"201710gavi"</span>, touchstone_pop <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>                                    year_min <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">vaccination_years</span><span class="op">)</span>, year_max <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">vaccination_years</span><span class="op">)</span>,</span>
+<span>                                    disease_to_extract <span class="op">=</span> <span class="st">"Hib"</span>,</span>
+<span>                                    countries_to_extract <span class="op">=</span> <span class="st">"AFG"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">dat2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">metas</span>, <span class="kw">function</span><span class="op">(</span><span class="va">meta1</span><span class="op">)</span> <span class="fu">impact_by_year_of_vaccination</span><span class="op">(</span><span class="va">meta1</span>, raw_impact <span class="op">=</span> <span class="va">dat</span>, fvps <span class="op">=</span> <span class="va">fvps</span>,</span>
+<span>                                                                    vaccination_years <span class="op">=</span> <span class="va">vaccination_years</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">dat2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="va">dat2</span><span class="op">)</span></span></code></pre>
 <p><strong>impact by year of vaccination: impact ratio stratified by birth cohort (method 2b)</strong></p>
-<pre><code><span class="va">meta</span> <span class="op">&lt;-</span> <span class="fu">get_meta_from_recipe</span><span class="op">(</span>default_recipe <span class="op">=</span> <span class="cn">TRUE</span>, method <span class="op">=</span> <span class="st">"method2b"</span>, recipe_version <span class="op">=</span> <span class="st">"201710"</span>, recipe <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">con</span>, disease <span class="op">=</span> <span class="st">"Hib"</span><span class="op">)</span>
-
-<span class="va">meta_s</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/split.html" class="external-link">split</a></span><span class="op">(</span><span class="va">meta</span>, <span class="va">meta</span><span class="op">$</span><span class="va">index</span><span class="op">)</span>
-
-<span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">metas</span>, <span class="kw">function</span><span class="op">(</span><span class="va">meta1</span><span class="op">)</span> <span class="fu">get_raw_impact_details</span><span class="op">(</span>con <span class="op">=</span> <span class="va">con_test</span>, <span class="va">meta1</span>, burden_outcome <span class="op">=</span> <span class="st">"deaths"</span><span class="op">)</span><span class="op">)</span>
-
-<span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="va">dat</span><span class="op">)</span>
-
-<span class="va">fvps</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/extract_vaccination_history.html">extract_vaccination_history</a></span><span class="op">(</span><span class="va">con</span>, touchstone_cov <span class="op">=</span> <span class="st">"201710gavi"</span>, touchstone_pop <span class="op">=</span> <span class="cn">NULL</span>,
-                                    year_min <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">vaccination_years</span><span class="op">)</span>, year_max <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">vaccination_years</span><span class="op">)</span>,
-                                    disease_to_extract <span class="op">=</span> <span class="st">"Hib"</span>,
-                                    countries_to_extract <span class="op">=</span> <span class="st">"AFG"</span><span class="op">)</span>
-
-<span class="va">dat2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">metas</span>, <span class="kw">function</span><span class="op">(</span><span class="va">meta1</span><span class="op">)</span> <span class="fu">impact_by_year_of_vaccination</span><span class="op">(</span><span class="va">meta1</span>, raw_impact <span class="op">=</span> <span class="va">dat</span>, fvps <span class="op">=</span> <span class="va">fvps</span>,
-                                                                    vaccination_years <span class="op">=</span> <span class="va">vaccination_years</span><span class="op">)</span><span class="op">)</span>
-
-<span class="va">dat2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="va">dat2</span><span class="op">)</span></code></pre>
+<pre><code><span><span class="va">meta</span> <span class="op">&lt;-</span> <span class="fu">get_meta_from_recipe</span><span class="op">(</span>default_recipe <span class="op">=</span> <span class="cn">TRUE</span>, method <span class="op">=</span> <span class="st">"method2b"</span>, recipe_version <span class="op">=</span> <span class="st">"201710"</span>, recipe <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">con</span>, disease <span class="op">=</span> <span class="st">"Hib"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">meta_s</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/split.html" class="external-link">split</a></span><span class="op">(</span><span class="va">meta</span>, <span class="va">meta</span><span class="op">$</span><span class="va">index</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">metas</span>, <span class="kw">function</span><span class="op">(</span><span class="va">meta1</span><span class="op">)</span> <span class="fu">get_raw_impact_details</span><span class="op">(</span>con <span class="op">=</span> <span class="va">con_test</span>, <span class="va">meta1</span>, burden_outcome <span class="op">=</span> <span class="st">"deaths"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="va">dat</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">fvps</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/extract_vaccination_history.html">extract_vaccination_history</a></span><span class="op">(</span><span class="va">con</span>, touchstone_cov <span class="op">=</span> <span class="st">"201710gavi"</span>, touchstone_pop <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>                                    year_min <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">vaccination_years</span><span class="op">)</span>, year_max <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">vaccination_years</span><span class="op">)</span>,</span>
+<span>                                    disease_to_extract <span class="op">=</span> <span class="st">"Hib"</span>,</span>
+<span>                                    countries_to_extract <span class="op">=</span> <span class="st">"AFG"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">dat2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">metas</span>, <span class="kw">function</span><span class="op">(</span><span class="va">meta1</span><span class="op">)</span> <span class="fu">impact_by_year_of_vaccination</span><span class="op">(</span><span class="va">meta1</span>, raw_impact <span class="op">=</span> <span class="va">dat</span>, fvps <span class="op">=</span> <span class="va">fvps</span>,</span>
+<span>                                                                    vaccination_years <span class="op">=</span> <span class="va">vaccination_years</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">dat2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="va">dat2</span><span class="op">)</span></span></code></pre>
 </div>
   </div>
 
@@ -199,7 +199,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer>
