@@ -53,6 +53,7 @@ get_touchstone_id <- function(con, touchstone) {
 ##' @param external_population_estimates The rationales are 1. we can use external population estimates if any and if necessary;
 ##' 2. demographic uncertainty not only affects models, but also FVPs. If we are to conduct sensitivity analysis on impact_by_year_of_vaccination, we need to vary population input for adjusting FVPs.
 ##' @param full_description TRUE if including scenario_descriptions (coverage estimates will be duplicated for scenarios); and FALSE if only providing coverage estimates
+##' @param demographic_source this is a 2nd option for getting population data from montagu
 ##' @export
 extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touchstone_pop = NULL,
                                         year_min = 2000, year_max = 2100,
@@ -60,7 +61,8 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
                                         disease_to_extract = NULL,
                                         countries_to_extract = NULL,
                                         gavi_support_levels = c("with", "bestminus"),
-                                        scenario_type = "default", external_population_estimates = NULL, full_description = FALSE) {
+                                        scenario_type = "default", external_population_estimates = NULL,
+                                        full_description = FALSE, demographic_source = NULL) {
 
   ### This function converts input coverage data to be dis-aggregated by gender and age
   ### i.e. input data by country, year and age
@@ -91,7 +93,7 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
   if (is.null(external_population_estimates)) {
     p_int_pop <- get_population(con, touchstone_pop = touchstone_pop, demographic_statistic = 'int_pop',
 
-                                year_ = year_min:year_max, gender = c('Male', 'Female', 'Both'), country_ = countries_to_extract)
+                                year_ = year_min:year_max, gender = c('Male', 'Female', 'Both'), country_ = countries_to_extract, demographic_source = demographic_source)
   } else {
     p_int_pop <- external_population_estimates
   }
@@ -250,7 +252,6 @@ get_population <- function(con, touchstone_pop = "201710gavi-5", demographic_sta
     }
     ## this table get population data as you wish
     sql <- read_sql(system_file("sql/population.sql"))
-    sql <- sprintf(sql, sql_in(gender), constrains_)
     pop_src <- touchstone_pop
   } else {
     sql <- read_sql(system_file("sql/population2.sql"))

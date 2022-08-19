@@ -47,6 +47,19 @@ test_that("test get_population",{
   expect_equal(dat, test_dat)
 })
 
+test_that("test get_population - two ways one result",{
+  con <- test_montagu_readonly_connection()
+  d1 <- get_population(con, "201710gavi-5", country_= "CHN", year_ = 2020, age_ = 0, demographic_source = NULL)
+  d2 <- get_population(con, touchstone_pop = NULL, country_= "CHN", year_ = 2020, age_ = 0, demographic_source = "dds-201710")
+  expect_equal(d1, d2)
+
+  d1 <- extract_vaccination_history(con, year_max = 2000, disease_to_extract = "Measles", countries_to_extract = "CHN")
+  d2 <- extract_vaccination_history(con, year_max = 2000, disease_to_extract = "Measles", countries_to_extract = "CHN",
+                                    demographic_source = "dds-201710")
+  expect_equal(d1, d2)
+
+})
+
 test_that("test sql_constrain",{
   dat <- sql_constrains(country_ = NULL, year_ = NULL, age_ = NULL, burden_estimate_table = FALSE)
   expect_equal("\t \t \t", dat)
