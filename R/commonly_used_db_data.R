@@ -240,7 +240,7 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
 ##' @param country_ All countries if NULL. Or specify a vector of countries
 ##' @param year_ All years if NULL. Or specify a vector of years
 ##' @param age_ All age groups if NULL. Or specify a vector of age groups
-##' @param demographic_source one of demographic_source.code, this works for IU where demography is no a model run version
+##' @param demographic_source one of demographic_source.code, this works for IU where demography is not a model run version
 ##' @export
 get_population <- function(con, touchstone_pop = "201710gavi-5", demographic_statistic = "int_pop", gender = "Both",
                            country_ = NULL, year_ = NULL, age_ = NULL, demographic_source = NULL) {
