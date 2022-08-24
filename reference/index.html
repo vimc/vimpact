@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">vimpact</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.0.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.0.9</span>
       </span>
     </div>
 
@@ -75,7 +75,11 @@
       </tr><tr><td>
           <p><code><a href="extract_vaccination_history.html">extract_vaccination_history()</a></code> </p>
         </td>
-        <td><p>Generate target, fvps, coverage for a touchstone</p></td>
+        <td><p>Generate target, fvps, coverage for a touchstone
+This function pulls vaccination and population data from Montagu database, and transform them into target, coverage and fvps.
+There are two modes of pulling population data: 1.) through touchstone_pop parameter 2.) through demographic_source parameter
+touchstone_pop is one of touchstone_demographic_dataset.touchstone; this parameter is null-able, when it is null, touchstone_cov is used
+demographic_source is one of demographic_source.code; by default it is null, when it is not null, it rulls out touchstone_pop parameter</p></td>
       </tr><tr><td>
           <p><code><a href="fetch_stochastic_data.html">fetch_stochastic_data()</a></code> </p>
         </td>
