@@ -24,6 +24,15 @@ test_that("test extract_vaccination_history",{
           It is because previous and current approach cap campaign coverage at 100% differently.
           Current approahc is more accurate.")
 
+  ## validate parameter
+  expect_error(extract_vaccination_history(con, touchstone_cov = "201710gavi", year_min = 2000, year_max = 2000,
+                                           countries_to_extract = unique(test_data$country),
+                                           disease_to_extract = "Measles", full_description = FALSE,
+                                           demographic_source = "dds"))
+  expect_message(extract_vaccination_history(con, touchstone_cov = "201710gavi", year_min = 2000, year_max = 2000,
+                                             countries_to_extract = unique(test_data$country),
+                                             disease_to_extract = "Measles", full_description = FALSE,
+                                             demographic_source = "dds-201710"))
 })
 
 test_that("test get_population",{
