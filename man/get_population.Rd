@@ -11,7 +11,8 @@ get_population(
   gender = "Both",
   country_ = NULL,
   year_ = NULL,
-  age_ = NULL
+  age_ = NULL,
+  demographic_source = NULL
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ get_population(
 \item{year_}{All years if NULL. Or specify a vector of years}
 
 \item{age_}{All age groups if NULL. Or specify a vector of age groups}
+
+\item{demographic_source}{one of demographic_source.code, this works for IU where demography is not a model run version}
 }
 \description{
 Extract demographic data

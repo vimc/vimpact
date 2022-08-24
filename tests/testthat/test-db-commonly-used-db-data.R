@@ -24,6 +24,15 @@ test_that("test extract_vaccination_history",{
           It is because previous and current approach cap campaign coverage at 100% differently.
           Current approahc is more accurate.")
 
+  ## validate parameter
+  expect_error(extract_vaccination_history(con, touchstone_cov = "201710gavi", year_min = 2000, year_max = 2000,
+                                           countries_to_extract = unique(test_data$country),
+                                           disease_to_extract = "Measles", full_description = FALSE,
+                                           demographic_source = "dds"))
+  expect_message(extract_vaccination_history(con, touchstone_cov = "201710gavi", year_min = 2000, year_max = 2000,
+                                             countries_to_extract = unique(test_data$country),
+                                             disease_to_extract = "Measles", full_description = FALSE,
+                                             demographic_source = "dds-201710"))
 })
 
 test_that("test get_population",{
@@ -45,6 +54,19 @@ test_that("test get_population",{
                               AND age_from = 0
                               AND year = 2019")
   expect_equal(dat, test_dat)
+})
+
+test_that("test get_population - two ways one result",{
+  con <- test_montagu_readonly_connection()
+  d1 <- get_population(con, "201710gavi-5", country_= "CHN", year_ = 2020, age_ = 0, demographic_source = NULL)
+  d2 <- get_population(con, touchstone_pop = NULL, country_= "CHN", year_ = 2020, age_ = 0, demographic_source = "dds-201710")
+  expect_equal(d1, d2)
+
+  d1 <- extract_vaccination_history(con, year_max = 2000, disease_to_extract = "Measles", countries_to_extract = "CHN")
+  d2 <- extract_vaccination_history(con, year_max = 2000, disease_to_extract = "Measles", countries_to_extract = "CHN",
+                                    demographic_source = "dds-201710")
+  expect_equal(d1, d2)
+
 })
 
 test_that("test sql_constrain",{

@@ -1,3 +1,7 @@
+# vimpact 0.0.9
+
+* Build get_population and extract_vaccination_history functions to pull data for specified demographic_source
+
 # vimpact 0.0.8
 
 * Fix impact_meta.R.
