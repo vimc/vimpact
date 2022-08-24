@@ -2,7 +2,11 @@
 % Please edit documentation in R/commonly_used_db_data.R
 \name{extract_vaccination_history}
 \alias{extract_vaccination_history}
-\title{Generate target, fvps, coverage for a touchstone}
+\title{Generate target, fvps, coverage for a touchstone
+This function pulls vaccination and population data from Montagu database, and transform them into target, coverage and fvps.
+There are two modes of pulling population data: 1.) through touchstone_pop parameter 2.) through demographic_source parameter
+touchstone_pop is one of touchstone_demographic_dataset.touchstone; this parameter is null-able, when it is null, touchstone_cov is used
+demographic_source is one of demographic_source.code; by default it is null, when it is not null, it rulls out touchstone_pop parameter}
 \usage{
 extract_vaccination_history(
   con,
@@ -25,7 +29,7 @@ extract_vaccination_history(
 
 \item{touchstone_cov}{Coverage touchstone}
 
-\item{touchstone_pop}{Demography touchstone}
+\item{touchstone_pop}{touchstone_demographic_dataset.touchstone}
 
 \item{year_min}{extract data from year_min}
 
@@ -46,7 +50,7 @@ extract_vaccination_history(
 
 \item{full_description}{TRUE if including scenario_descriptions (coverage estimates will be duplicated for scenarios); and FALSE if only providing coverage estimates}
 
-\item{demographic_source}{this is a 2nd option for getting population data from montagu}
+\item{demographic_source}{Demographic_source.code}
 }
 \description{
 Replace jenner:::fix_covreage_fvps() function

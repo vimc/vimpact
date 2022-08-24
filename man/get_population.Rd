@@ -30,7 +30,7 @@ get_population(
 
 \item{age_}{All age groups if NULL. Or specify a vector of age groups}
 
-\item{demographic_source}{one of demographic_source.code, this works for IU where demography is no a model run version}
+\item{demographic_source}{one of demographic_source.code, this works for IU where demography is not a model run version}
 }
 \description{
 Extract demographic data
