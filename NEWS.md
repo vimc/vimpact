@@ -1,3 +1,7 @@
+# vimpact 0.0.10
+
+* Include DTP3 in the disease vaccine delivery table to extract the coverage values from the DB
+
 # vimpact 0.0.9
 
 * Build get_population and extract_vaccination_history functions to pull data for specified demographic_source
