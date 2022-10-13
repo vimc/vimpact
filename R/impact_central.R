@@ -1,7 +1,7 @@
 get_raw_impact_details <- function(con, meta1, burden_outcome, is_under5 = FALSE, countries_to_extract = NULL){
   #verify parameters
   stopifnot(nrow(meta1) == 2L)
-  stopifnot(burden_outcome %in% c("deaths", "cases", "dalys"))
+  stopifnot(burden_outcome %in% c("deaths", "cases", "dalys", "ylls"))
   stopifnot(is_under5 %in% c(TRUE, FALSE))
 
   #preparation
@@ -12,8 +12,10 @@ get_raw_impact_details <- function(con, meta1, burden_outcome, is_under5 = FALSE
     k <- 2
   } else if(burden_outcome == "dalys"){
     k <- 3
+  }else if(burden_outcome == "ylls"){
+    k <- 4
   } else {
-    stop("Can only take burden outcome as one of deaths, cases, dalys")
+    stop("Can only take burden outcome as one of deaths, cases, dalys, ylls")
   }
 
   # determine whether a recipe is for routine or campaign vaccine delivery
@@ -22,11 +24,14 @@ get_raw_impact_details <- function(con, meta1, burden_outcome, is_under5 = FALSE
   # if campaign, by calendar
   meta1$vaccine_delivery[meta1$vaccine_delivery == "no-vaccination"] <- ""
   v <- determine_vaccine_delivery(meta1)
-  i <- unique(grepl("routine", v))
-  j <- unique(grepl("campaign", v))
-  if(any(i) && any(j) && meta1$method[1] == "method2a"){
-    stop("method2a is vaccine delivery specific, cannot include both routine and campaign impact at the same time.")
+  if(length(v) > 0){
+    i <- unique(grepl("routine", v))
+    j <- unique(grepl("campaign", v))
+    if(any(i) && any(j) && meta1$method[1] == "method2a"){
+      stop("method2a is vaccine delivery specific, cannot include both routine and campaign impact at the same time.")
+    }
   }
+
 
   # constrain db extraction by country and age
 
@@ -136,7 +141,7 @@ impact_by_year_of_vaccination <- function(meta1, raw_impact, fvps, fvps_updates 
   for (i in seq_along(v)){
     m <- unlist(strsplit(v[i], "-"))
     vaccine_delivery$vaccine[i] <- m[1]
-    vaccine_delivery$activity_type[i] <- m[2]
+    vaccine_delivery$activity_type[i] <- paste(m[-1], collapse = "-")
   }
   if (length(unique(vaccine_delivery$activity_type)) > 1L && method == "method2a"){
     stop("method2a can not accommodate both routine and campaign impact in the same time, as routine and campaign impact are calculated differently.")
@@ -212,10 +217,10 @@ determine_vaccine_delivery <- function(meta1){
 #' @return Impact ratio by country and burden outcome
 #' @export
 impact_by_year_of_vaccination_country_perspective <- function(
-  raw_impact, fvps, activity_type, vaccination_years) {
-  if (!(activity_type %in% c("routine", "campaign"))) {
+    raw_impact, fvps, activity_type, vaccination_years) {
+  if (!(activity_type %in% c("routine", "campaign", "routine-intensified"))) {
     stop(sprintf(
-      'Activity type must be "routine" or "campaign" got "%s".', activity_type))
+      'Activity type must be "routine", "campaign", "routine-intensified" got "%s".', activity_type))
   }
 
   ## Aggregate FVPs over years of vaccination
@@ -228,7 +233,7 @@ impact_by_year_of_vaccination_country_perspective <- function(
   ## Aggregate raw_impact grouped by country & burden_outcome where birth
   ## cohort is in range
   raw_impact$birth_cohort <- get_birth_cohort(raw_impact)
-  if (activity_type == "routine"){
+  if (grepl("routine", activity_type)){
     raw_impact <- raw_impact[raw_impact$birth_cohort %in%
                                (vaccination_years - min(fvps$age)), ]
   } else {
@@ -263,7 +268,7 @@ impact_by_year_of_vaccination_country_perspective <- function(
 #' @return Impact ratio by country, birth cohort and burden outcome
 #' @export
 impact_by_year_of_vaccination_cohort_perspective <- function(
-  raw_impact, fvps, vaccination_years) {
+    raw_impact, fvps, vaccination_years) {
 
   ## Aggregate FVPs by birth cohort and country
   fvps <- fvps[fvps$year %in% vaccination_years, ]
@@ -417,7 +422,7 @@ impact_by_birth_year <- function(baseline_burden, focal_burden) {
 #' and burden outcome
 #' @export
 impact_by_year_of_vaccination_activity_type <- function(
-  baseline_burden, focal_burden, fvps, vaccination_years) {
+    baseline_burden, focal_burden, fvps, vaccination_years) {
   assert_has_columns(
     baseline_burden,
     c("country", "burden_outcome", "year", "age", "value"))
@@ -451,7 +456,7 @@ impact_by_year_of_vaccination_activity_type <- function(
   }
 
   ## Routine
-  if (activity == "routine") {
+  if (grepl("routine", activity)) {
     raw_impact <- baseline_burden %>%
       impact_by_birth_year(focal_burden) %>%
       dplyr::rename(time = birth_cohort) %>%
@@ -515,7 +520,7 @@ impact_by_year_of_vaccination_activity_type <- function(
 #' and burden outcome
 #' @export
 impact_by_year_of_vaccination_birth_cohort <- function(
-  baseline_burden, focal_burden, fvps, vaccination_years) {
+    baseline_burden, focal_burden, fvps, vaccination_years) {
   assert_has_columns(
     baseline_burden,
     c("country", "burden_outcome", "year", "age", "value"))

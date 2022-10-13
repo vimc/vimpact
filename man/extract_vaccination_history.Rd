@@ -21,7 +21,8 @@ extract_vaccination_history(
   scenario_type = "default",
   external_population_estimates = NULL,
   full_description = FALSE,
-  demographic_source = NULL
+  demographic_source = NULL,
+  coverage_scenario_type = NULL
 )
 }
 \arguments{
@@ -51,6 +52,9 @@ extract_vaccination_history(
 \item{full_description}{TRUE if including scenario_descriptions (coverage estimates will be duplicated for scenarios); and FALSE if only providing coverage estimates}
 
 \item{demographic_source}{Demographic_source.code}
+
+\item{coverage_scenario_type}{Coverage scenario type. This is particularly useful for a coverage touchstone. Montagu coverage.name follows <disease>:<vaccine>,<activity_type>,<gavi_support_level>:<coverage_scenario_type>
+It is NULL by default. When it is not null, only pulls coverage.name that contains specified pattern.}
 }
 \description{
 Replace jenner:::fix_covreage_fvps() function
