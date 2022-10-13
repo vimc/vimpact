@@ -61,7 +61,7 @@ get_meta_from_recipe <- function(default_recipe = TRUE, method = "method0", reci
   recipe$baseline <- gsub(";", ",", recipe$baseline)
   for (i in seq_along(recipe$burden_outcome)){
     if (recipe$burden_outcome[i] == "*"){
-      recipe$burden_outcome[i] <- "deaths;cases;dalys;ylls"
+      recipe$burden_outcome[i] <- "deaths;cases;dalys;yll"
     } else {
       recipe$burden_outcome[i] <- paste(recipe$burden_outcome[i], sep = ";")
     }
@@ -228,7 +228,7 @@ replace_burden_outcome <- function(burden_outcomes, a){
       m2[ii] <- m[k]
       ii <- ii+1
     }
-    k <- grepl("ylls", v)
+    k <- grepl("yll", v)
     if(any(k)){
       m2[ii] <- m[k]
       ii <- ii+1
