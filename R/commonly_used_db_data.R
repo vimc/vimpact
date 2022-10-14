@@ -238,7 +238,7 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
   cov2$country_nid <- country_id$nid[match(cov2$country, country_id$id)]
 
   if (!full_description) {
-    cov2$scenario_description <- scenario_type
+    cov2$scenario_description <- cov2$scenario_type
     cov2 <- unique(cov2)
   }
   cov2 <- cov2[order(cov2$scenario_description, cov2$delivery_id),]
