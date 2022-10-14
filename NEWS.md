@@ -1,6 +1,6 @@
 # vimpact 0.1.0
 
-* Increase flexibility - allow addition activity types, comparison between different scenario types, external fvps for calculating impact ratios. 
+* Increase flexibility - recognize new activity type, compare impact between different scenario types. 
 
 # vimpact 0.0.10
 
