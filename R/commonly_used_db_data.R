@@ -156,7 +156,6 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
                                             cov_sets2$activity_type,
                                             cov_sets2$gavi_support_level,
                                             sep = "-")
-    cov_sets2$name <- NULL
     cov_sets <- cov_sets2[c("scenario_type", "scenario_description", "disease", "coverage_set", "vaccine", "activity_type", "gavi_support_level")]
   }
 
