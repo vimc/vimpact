@@ -25,7 +25,7 @@ demographic_source is one of demographic_source.code; by default it is null, whe
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">vimpact</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.0.10</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0</span>
       </span>
     </div>
 
@@ -88,7 +88,8 @@ demographic_source is one of demographic_source.code; by default it is null, whe
 <span>  scenario_type <span class="op">=</span> <span class="st">"default"</span>,</span>
 <span>  external_population_estimates <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  full_description <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  demographic_source <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  demographic_source <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  coverage_scenario_type <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -145,6 +146,11 @@ demographic_source is one of demographic_source.code; by default it is null, whe
 
 <dt>demographic_source</dt>
 <dd><p>Demographic_source.code</p></dd>
+
+
+<dt>coverage_scenario_type</dt>
+<dd><p>Coverage scenario type. This is particularly useful for a coverage touchstone. Montagu coverage.name follows &lt;disease&gt;:&lt;vaccine&gt;,&lt;activity_type&gt;,&lt;gavi_support_level&gt;:&lt;coverage_scenario_type&gt;
+It is NULL by default. When it is not null, only pulls coverage.name that contains specified pattern.</p></dd>
 
 </dl></div>
 
