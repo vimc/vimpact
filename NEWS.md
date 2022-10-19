@@ -1,3 +1,7 @@
+# vimpact 0.1.0
+
+* Increase flexibility - recognize new activity type, compare impact between different scenario types. 
+
 # vimpact 0.0.10
 
 * Include DTP3 in the disease vaccine delivery table to extract the coverage values from the DB

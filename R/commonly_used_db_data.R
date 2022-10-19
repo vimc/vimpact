@@ -57,6 +57,8 @@ get_touchstone_id <- function(con, touchstone) {
 ##' 2. demographic uncertainty not only affects models, but also FVPs. If we are to conduct sensitivity analysis on impact_by_year_of_vaccination, we need to vary population input for adjusting FVPs.
 ##' @param full_description TRUE if including scenario_descriptions (coverage estimates will be duplicated for scenarios); and FALSE if only providing coverage estimates
 ##' @param demographic_source Demographic_source.code
+##' @param coverage_scenario_type Coverage scenario type. This is particularly useful for a coverage touchstone. Montagu coverage.name follows <disease>:<vaccine>,<activity_type>,<gavi_support_level>:<coverage_scenario_type>
+##' It is NULL by default. When it is not null, only pulls coverage.name that contains specified pattern.
 ##' @export
 extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touchstone_pop = NULL,
                                         year_min = 2000, year_max = 2100,
@@ -64,8 +66,11 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
                                         disease_to_extract = NULL,
                                         countries_to_extract = NULL,
                                         gavi_support_levels = c("with", "bestminus"),
-                                        scenario_type = "default", external_population_estimates = NULL,
-                                        full_description = FALSE, demographic_source = NULL) {
+                                        scenario_type = "default",
+                                        external_population_estimates = NULL,
+                                        full_description = FALSE,
+                                        demographic_source = NULL,
+                                        coverage_scenario_type = NULL) {
 
   ## validate demography parameter
   ## when touchstone_pop is null, touchstone_cov is used for touchstone_pop
@@ -138,23 +143,25 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
                               touchstone_cov)
   if (nrow(cov_sets) == 0L) {
     # this is not a model run touchstone, need to extract coverage set directly
-    cov_sets2 <- DBI::dbGetQuery(con, "SELECT coverage_set.id AS coverage_set, vaccine, activity_type, gavi_support_level
+    cov_sets2 <- DBI::dbGetQuery(con, "SELECT name, coverage_set.id AS coverage_set, vaccine, activity_type, gavi_support_level
                                 FROM coverage_set
                                 WHERE touchstone = $1
                                 AND gavi_support_level != 'none'", touchstone_cov)
     cov_sets2 <- merge_by_common_cols(disease_vaccine_delivery, cov_sets2, all.y = TRUE)
-    cov_sets2$scenario_type <- "default"
+    if(!is.null(coverage_scenario_type)){
+      cov_sets2 <- cov_sets2[grepl(coverage_scenario_type, cov_sets2$name), ]
+    }
+    cov_sets2$scenario_type <- ifelse(is.null(coverage_scenario_type), "default", coverage_scenario_type)
     cov_sets2$scenario_description <- paste(cov_sets2$vaccine,
                                             cov_sets2$activity_type,
                                             cov_sets2$gavi_support_level,
                                             sep = "-")
-    cov_sets <- cov_sets2[names(cov_sets)]
+    cov_sets <- cov_sets2[c("scenario_type", "scenario_description", "disease", "coverage_set", "vaccine", "activity_type", "gavi_support_level")]
   }
 
   if (!is.null(disease_to_extract)) {
     cov_sets <- cov_sets[cov_sets$disease %in% disease_to_extract,]
   }
-
   country_ <- ifelse(is.null(countries_to_extract),
                      "",
                      sprintf("AND country IN %s", sql_in(countries_to_extract, text_item = TRUE)))
@@ -186,9 +193,10 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
   }
 
   ## spliting coverage data by age groups
-  cov1 <- cov[cov$activity_type == "routine",]
+  ll <- grepl("campaign", cov$activity_type)
+  cov1 <- cov[!ll,]
   cov1$age <- cov1$age_from
-  cov2 <- cov[cov$activity_type == "campaign",]
+  cov2 <- cov[ll,]
 
   d <- list(NULL)
   for (i in seq_along(cov2$activity_id)) {
@@ -229,7 +237,7 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
   cov2$country_nid <- country_id$nid[match(cov2$country, country_id$id)]
 
   if (!full_description) {
-    cov2$scenario_description <- "best-estimates"
+    cov2$scenario_description <- cov2$scenario_type
     cov2 <- unique(cov2)
   }
   cov2 <- cov2[order(cov2$scenario_description, cov2$delivery_id),]
