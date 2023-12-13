@@ -121,7 +121,7 @@ get_meta_from_recipe <- function(default_recipe = TRUE, method = "method0", reci
 
     meta_all <- DBI::dbGetQuery(con, sql)
     ## remove yf reactive sias - otherwise cannot match with recipe
-    l <- meta_all$scenario_type == "novac"
+    l <- grepl("novac", meta_all$scenario_type)
     j <- meta_all$gavi_support_level == "none"
     meta_all$vaccine[l & j] <- "none"
     meta_all$activity_type[i & j] <- "none"
