@@ -1,3 +1,7 @@
+# vimpact 0.1.1
+
+* Able to recognise different no-vaccination scenario types.
+
 # vimpact 0.1.0
 
 * Increase flexibility - recognize new activity type, compare impact between different scenario types. 
