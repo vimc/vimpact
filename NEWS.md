@@ -1,3 +1,7 @@
+# vimpact 0.1.2
+
+* Add to readme installation instruction.
+
 # vimpact 0.1.1
 
 * Able to recognise different no-vaccination scenario types.
