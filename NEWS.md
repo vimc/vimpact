@@ -1,3 +1,7 @@
+# vimpact 0.1.3
+
+* Recognise new burden outcomes.
+
 # vimpact 0.1.2
 
 * Add to readme installation instruction.
