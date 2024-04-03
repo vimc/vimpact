@@ -1,7 +1,8 @@
 get_raw_impact_details <- function(con, meta1, burden_outcome, is_under5 = FALSE, countries_to_extract = NULL){
   #verify parameters
   stopifnot(nrow(meta1) == 2L)
-  stopifnot(burden_outcome %in% c("deaths", "cases", "dalys", "yll"))
+  stopifnot(burden_outcome %in% c("deaths", "cases", "dalys", "yll",
+                                  "deaths_cwyx", "cases_cwyx", "dalys_cwyx", "yll_cwyx")) # _cwyx outcomes are MenA specific.
   stopifnot(is_under5 %in% c(TRUE, FALSE))
 
   #preparation
@@ -12,10 +13,18 @@ get_raw_impact_details <- function(con, meta1, burden_outcome, is_under5 = FALSE
     k <- 2
   } else if(burden_outcome == "dalys"){
     k <- 3
-  }else if(burden_outcome == "yll"){
+  } else if(burden_outcome == "yll"){
     k <- 4
+  } else if(burden_outcome == "deaths_cwyx"){
+    k <- 5
+  } else if(burden_outcome == "cases_cwyx"){
+    k <- 6
+  } else if(burden_outcome == "dalys_cwyx"){
+    k <- 7
+  } else if(burden_outcome == "yll_cwyx"){
+    k <- 8
   } else {
-    stop("Can only take burden outcome as one of deaths, cases, dalys, yll")
+    stop("Can only take burden outcome as one of deaths, cases, dalys, yll, deaths_cwyx, cases_cwyx, dalys_cwyx, yll_cwyx")
   }
 
   # determine whether a recipe is for routine or campaign vaccine delivery
