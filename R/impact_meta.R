@@ -213,22 +213,22 @@ replace_burden_outcome <- function(burden_outcomes, a){
     }
     m2 <- m
     ii <- 1
-    k <- grepl("deaths", v)
+    k <- grepl("deaths", v) & !grepl("cwyx", v)
     if(any(k)){
       m2[ii] <- m[k]
       ii <- ii+1
     }
-    k <- grepl("cases", v)
+    k <- grepl("cases", v) & !grepl("cwyx", v)
     if(any(k)){
       m2[ii] <- m[k]
       ii <- ii+1
     }
-    k <- grepl("dalys", v)
+    k <- grepl("dalys", v) & !grepl("cwyx", v)
     if(any(k)){
       m2[ii] <- m[k]
       ii <- ii+1
     }
-    k <- grepl("yll", v)
+    k <- grepl("yll", v) & !grepl("cwyx", v)
     if(any(k)){
       m2[ii] <- m[k]
       ii <- ii+1
