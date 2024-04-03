@@ -2,7 +2,7 @@ get_raw_impact_details <- function(con, meta1, burden_outcome, is_under5 = FALSE
   #verify parameters
   stopifnot(nrow(meta1) == 2L)
   stopifnot(burden_outcome %in% c("deaths", "cases", "dalys", "yll",
-                                  "deaths_cwyx", "cases_cwyx", "dalys_cwyx", "yll_cwyx"))
+                                  "deaths_cwyx", "cases_cwyx", "dalys_cwyx", "yll_cwyx")) # _cwyx outcomes are MenA specific.
   stopifnot(is_under5 %in% c(TRUE, FALSE))
 
   #preparation
