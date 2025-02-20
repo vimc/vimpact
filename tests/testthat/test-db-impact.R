@@ -180,6 +180,7 @@ test_that("impact calculation by year of vaccination country perspective", {
 })
 
 test_that("impact calculation by year of vaccination cohort perspective", {
+
   impact <- impact_by_year_of_vaccination_cohort_perspective(
     impact_test_data, fvp_test_data_15, 2000:2030)
   expect_equal(colnames(impact),
@@ -272,11 +273,13 @@ test_that("impact by calendar year: external and internal functions agree", {
 
   meta <- data_frame(
     scenario_type = c("default", "default"),
+    disease = c("YF", "YF"),
     vaccine_delivery = c("YF-campaign,YF-routine", "YF-routine"),
     meta_type = c("baseline", "focal"),
     index = c(1, 1),
     method = c("method0", "method0"),
     burden_estimate_set = c(1, 2),
+    burden_outcome = c("deaths", "deaths"),
     burden_outcome_id = c("1", "1"))
 
   vimc_impact <- get_raw_impact_details(con = con, meta,
@@ -332,14 +335,16 @@ test_that("impact by birth year: external and internal functions agree", {
 
   meta <- data_frame(
     scenario_type = c("default", "default"),
+    disease = c("YF", "YF"),
     vaccine_delivery = c("YF-campaign,YF-routine", "YF-routine"),
     meta_type = c("baseline", "focal"),
     index = c(1, 1),
     method = c("method1", "method1"),
     burden_estimate_set = c(1, 2),
+    burden_outcome = c("deaths", "deaths"),
     burden_outcome_id = c("1", "1"))
 
-  vimc_impact <- get_raw_impact_details(con = con, meta,
+    vimc_impact <- get_raw_impact_details(con = con, meta,
                                         burden_outcome = "deaths")
   public_impact <- impact_by_birth_year(impact_test_data_baseline,
                                            impact_test_data_focal)
@@ -426,6 +431,7 @@ test_that("impact activity type: functions agree - routine", {
     index = c(1, 1),
     method = c("method2a", "method2a"),
     burden_estimate_set = c(1, 2),
+    burden_outcome = c("deaths", "deaths"),
     burden_outcome_id = c("1", "1"))
 
   routine_raw_impact <- get_raw_impact_details(con = con, meta,
@@ -475,6 +481,7 @@ test_that("impact activity type: functions agree - campaign", {
     index = c(1, 1),
     method = c("method2a", "method2a"),
     burden_estimate_set = c(1, 2),
+    burden_outcome = c("deaths", "deaths"),
     burden_outcome_id = c("1", "1"))
 
   campaign_raw_impact <- get_raw_impact_details(con = con, meta,
@@ -541,6 +548,7 @@ test_that("impact birth cohort: internal and external functions agree", {
     index = c(1, 1),
     method = c("method2b", "method2b"),
     burden_estimate_set = c(1, 2),
+    burden_outcome = c("deaths", "deaths"),
     burden_outcome_id = c("1", "1"))
 
   vimc_raw_impact <- get_raw_impact_details(con = con, meta,

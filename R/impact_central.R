@@ -1,31 +1,9 @@
-get_raw_impact_details <- function(con, meta1, burden_outcome, is_under5 = FALSE, countries_to_extract = NULL){
+get_raw_impact_details <- function(con, meta1, burden_outcome, is_under5 = FALSE, countries_to_extract = NULL, age_specific = FALSE){
   #verify parameters
   stopifnot(nrow(meta1) == 2L)
   stopifnot(burden_outcome %in% c("deaths", "cases", "dalys", "yll",
                                   "deaths_cwyx", "cases_cwyx", "dalys_cwyx", "yll_cwyx")) # _cwyx outcomes are MenA specific.
   stopifnot(is_under5 %in% c(TRUE, FALSE))
-
-  #preparation
-  # determine burden outcome, k will be used to determine burden outcome ids
-  if(burden_outcome == "deaths"){
-    k <- 1
-  } else if(burden_outcome == "cases"){
-    k <- 2
-  } else if(burden_outcome == "dalys"){
-    k <- 3
-  } else if(burden_outcome == "yll"){
-    k <- 4
-  } else if(burden_outcome == "deaths_cwyx"){
-    k <- 5
-  } else if(burden_outcome == "cases_cwyx"){
-    k <- 6
-  } else if(burden_outcome == "dalys_cwyx"){
-    k <- 7
-  } else if(burden_outcome == "yll_cwyx"){
-    k <- 8
-  } else {
-    stop("Can only take burden outcome as one of deaths, cases, dalys, yll, deaths_cwyx, cases_cwyx, dalys_cwyx, yll_cwyx")
-  }
 
   # determine whether a recipe is for routine or campaign vaccine delivery
   # routine or campaign matters for method2a in terms of the shape of burden estimates to extract
@@ -56,13 +34,22 @@ get_raw_impact_details <- function(con, meta1, burden_outcome, is_under5 = FALSE
 
   # set up db extraction sql queries
   if((meta1$method[1] == "method0") || (meta1$method[1] == "method2a" && any(j))){
-    sql <- paste("SELECT country, year AS time, sum(value) AS value",
-                 "FROM burden_estimate",
-                 "WHERE burden_estimate_set = %s",
-                 "AND burden_outcome IN %s",
-                 age_constrain,
-                 country_constrain,
-                 "GROUP BY country, year")
+    if(meta1$method[1] == "method0" & age_specific){
+      sql <- paste("SELECT country, year AS time, age, value",
+                   "FROM burden_estimate",
+                   "WHERE burden_estimate_set = %s",
+                   "AND burden_outcome IN %s",
+                   age_constrain,
+                   country_constrain)
+    } else {
+      sql <- paste("SELECT country, year AS time, sum(value) AS value",
+                   "FROM burden_estimate",
+                   "WHERE burden_estimate_set = %s",
+                   "AND burden_outcome IN %s",
+                   age_constrain,
+                   country_constrain,
+                   "GROUP BY country, year")
+    }
   } else if((meta1$method[1] == "method1") || (meta1$method[1] == "method2a" && any(i)) || (meta1$method[1] == "method2b")){
     sql <- paste("SELECT country, (year-age) AS time, sum(value)AS value",
                  "FROM burden_estimate",
@@ -75,18 +62,23 @@ get_raw_impact_details <- function(con, meta1, burden_outcome, is_under5 = FALSE
 
   # get burden outcome ids
   i <- meta1$meta_type == "focal"
-  ii <- unlist(strsplit(meta1$burden_outcome_id[i], ";"))
+  ss_id <- unlist(strsplit(meta1$burden_outcome_id[i], ";"))
+  ss_code <- unlist(strsplit(meta1$burden_outcome[i], ";"))
+  ii <- ss_id[ss_code == burden_outcome]
+
   j <- meta1$meta_type == "baseline"
-  jj <- unlist(strsplit(meta1$burden_outcome_id[j], ";"))
+  ss_id <- unlist(strsplit(meta1$burden_outcome_id[j], ";"))
+  ss_code <- unlist(strsplit(meta1$burden_outcome[j], ";"))
+  jj <- ss_id[ss_code == burden_outcome]
 
   # extract burden estimates
   d_baseline <- DBI::dbGetQuery(con, sprintf(sql,
                                              sql_in(meta1$burden_estimate_set[j], text_item = FALSE),
-                                             sql_in(jj[k], text_item = FALSE)))
+                                             sql_in(jj, text_item = FALSE)))
 
   d_focal <- DBI::dbGetQuery(con, sprintf(sql,
                                           sql_in(meta1$burden_estimate_set[i], text_item = FALSE),
-                                          sql_in(ii[k], text_item = FALSE)))
+                                          sql_in(ii, text_item = FALSE)))
   if(meta1$disease[1] == "HepB" && (nrow(d_focal) == 0L || nrow(d_baseline) == 0L)) {
     # when you are extracting data for HepB - IC and CDA models - for specific countries
     # you may end out with 0 rows for d_baseline or d_focal
