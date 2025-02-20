@@ -1,3 +1,7 @@
+# vimpact 0.1.4
+
+* Produce age specific calendar impact.
+
 # vimpact 0.1.3
 
 * Recognise new burden outcomes.
