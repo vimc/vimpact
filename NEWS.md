@@ -1,3 +1,7 @@
+# vimpact 0.1.5
+
+* resolve a previous update that matches burden outcome to burden outcome code which did not capture the special case of rubella outcomes.
+
 # vimpact 0.1.4
 
 * Produce age specific calendar impact.
