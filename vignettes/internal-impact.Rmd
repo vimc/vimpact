@@ -1,7 +1,7 @@
 ---
 title: "Using vimpact for estimating vaccine impact - internal"
-author: "Rob Ashton"
-date: "2022-02-02"
+author: "Rob Ashton, Xiang Li, Katy Gaythorpe"
+date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Using vimpact for estimating vaccine impact - internal}
