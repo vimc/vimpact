@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Rob Ashton, Xiang Li, Katy Gaythorpe" />
+
+<meta name="date" content="2025-02-26" />
+
+<title>Using vimpact for estimating vaccine impact - internal</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Using vimpact for estimating vaccine impact
+- internal</h1>
+<h4 class="author">Rob Ashton, Xiang Li, Katy Gaythorpe</h4>
+<h4 class="date">2025-02-26</h4>
+
+
+
+<!-- DO NOT EDIT THIS FILE - see vignettes_src and make changes there -->
+<p>This vignette describes how to use vimpact to calculate impact as a
+member of VIMC. This requires a connection to the montagu database so
+can only be used internally. Note that this is all in development and
+the interface is likely to change.</p>
+<p>N.B. For VIMC Rubella models, disease burden is measured in terms of
+CRS cases affecting newborns, linked to their pregnant mothers. This is
+different from many other diseases (e.g., HepB, measles or YF in this
+vignette), where the burden is directly attributed to the infected
+individual. Consequently, when you see vimpact outputs for Rubella,
+please refer to the following interpretations.</p>
+<p>a.) Age-specific calendar impact</p>
+<p>Definition: The disease burden averted for newborns in a given
+calendar year, attributed to mothers in specific age groups during that
+year. Interpretation: How many CRS related burden are prevented among
+newborns, broken down by the age of the mother in the year of
+pregnancy.</p>
+<p>b.) Calendar impact</p>
+<p>Definition: The total disease burden averted for newborns in a given
+calendar year (regardless of the mother’s age). Interpretation: How many
+CRS related burden are prevented among newborns overall in that
+year.</p>
+<p>c.) Cohort impact</p>
+<p>Definition: The disease burden averted for newborns whose mothers
+were born in a specific birth year. Interpretation: How many CRS related
+burden are prevented among newborns, categorized by the mother’s year of
+birth.</p>
+<p>d.) Impact by year of vaccination</p>
+<p>Definition: The disease burden averted that is linked to immunization
+programs carried out in a particular year. Interpretation: How many CRS
+related burden are prevented among newborns, attributed to vaccinations
+given in that specific year.</p>
+<div id="impact-by-calendar-year-impact-by-birth-year" class="section level2">
+<h2>Impact by calendar year &amp; impact by birth year</h2>
+<div id="function-interface" class="section level3">
+<h3>Function interface</h3>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>impact <span class="ot">&lt;-</span> vimpact<span class="sc">::</span><span class="fu">calculate_impact</span>(</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>  con, <span class="at">method =</span> <span class="st">&quot;calendar_year&quot;</span>, <span class="at">touchstone =</span> <span class="st">&quot;201910gavi-5&quot;</span>,</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>  <span class="at">modelling_group =</span> <span class="st">&quot;CDA-Razavi&quot;</span>,  <span class="at">disease =</span> <span class="st">&quot;HepB&quot;</span>,</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>  <span class="at">focal_scenario_type =</span> <span class="st">&quot;default&quot;</span>, <span class="at">focal_vaccine_delivery =</span> <span class="fu">list</span>(</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>    <span class="fu">list</span>(<span class="at">vaccine =</span> <span class="st">&quot;HepB_BD&quot;</span>, <span class="at">activity_type =</span> <span class="st">&quot;routine&quot;</span>),</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>    <span class="fu">list</span>(<span class="at">vaccine =</span> <span class="st">&quot;HepB&quot;</span>, <span class="at">activity_type =</span> <span class="st">&quot;routine&quot;</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>  ),</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>  <span class="at">baseline_scenario_type =</span> <span class="st">&quot;novac&quot;</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>  <span class="at">burden_outcomes =</span> <span class="fu">c</span>(<span class="st">&quot;hepb_deaths_acute&quot;</span>, <span class="st">&quot;hepb_deaths_dec_cirrh&quot;</span>,</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>                      <span class="st">&quot;hepb_deaths_hcc&quot;</span>))</span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="fu">str</span>(impact)</span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="co">#&gt; tibble [9,898 × 4] (S3: tbl_df/tbl/data.frame)</span></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="co">#&gt;  $ country       : chr [1:9898] &quot;AFG&quot; &quot;AFG&quot; &quot;AFG&quot; &quot;AFG&quot; ...</span></span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="co">#&gt;  $ burden_outcome: chr [1:9898] &quot;deaths&quot; &quot;deaths&quot; &quot;deaths&quot; &quot;deaths&quot; ...</span></span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a><span class="co">#&gt;  $ year          : int [1:9898] 2000 2001 2002 2003 2004 2005 2006 2007 2008 2009 ...</span></span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a><span class="co">#&gt;  $ impact        : num [1:9898] 0 0 0 0 0 0 0 53 81 97 ...</span></span></code></pre></div>
+<p>Or for impact by birth year, use <code>method = &quot;birth_year&quot;</code>.
+This will get <code>burden_estimate_set</code> ids for the baseline and
+focal scenarios for this particular touchstone, modelling group,
+disease. Then uses those to pull the <code>burden_estimate</code> data
+for specified <code>burden_outcomes</code>. Optionally filtering on
+country via <code>countries</code> arg, year via
+<code>vaccination_years</code> and under 5 age groups if
+<code>is_under5 = TRUE</code>. We then use raw impact from
+<code>burden_estimate</code> table and call relevant public facing
+impact method. For <code>method = &quot;calendar_year&quot;</code>
+<code>impact_by_calendar_year</code>. For
+<code>method = &quot;birth_year&quot;</code>
+<code>impact_by_birth_year</code>.</p>
+</div>
+<div id="recipe-interface" class="section level3">
+<h3>Recipe interface</h3>
+<p>Define a recipe either as a csv or using
+<code>recipe_template</code></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>recipe <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>  <span class="at">touchstone =</span> <span class="st">&quot;201910gavi-5&quot;</span>,</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>  <span class="at">modelling_group =</span> <span class="st">&quot;CDA-Razavi&quot;</span>, <span class="at">disease =</span> <span class="st">&quot;HepB&quot;</span>,</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>  <span class="at">focal =</span> <span class="st">&quot;default:HepB_BD-routine;HepB-routine&quot;</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>  <span class="at">baseline =</span> <span class="st">&quot;novac&quot;</span>,</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>  <span class="at">burden_outcome =</span> <span class="st">&quot;hepb_deaths_acute,hepb_deaths_dec_cirrh,hepb_deaths_hcc;hepb_cases_acute_severe,hepb_cases_dec_cirrh,hepb_cases_hcc;dalys&quot;</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>t <span class="ot">&lt;-</span> <span class="fu">tempfile</span>(<span class="at">fileext =</span> <span class="st">&quot;.csv&quot;</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="fu">write.csv</span>(recipe, t, <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<p>This is a set of properties defining what data we want to extract
+from the db e.g. <code>touchstone</code>, <code>modelling_group</code>,
+<code>disease</code>, focal and baseline scenarios and
+<code>burden_outcome</code>. It captures the same info as the args to
+<code>calculate_impact</code> above. Then use the recipe to define meta
+data frame</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>meta <span class="ot">&lt;-</span> vimpact<span class="sc">:::</span><span class="fu">get_meta_from_recipe</span>(<span class="at">default_recipe =</span> <span class="cn">FALSE</span>, <span class="at">recipe =</span> t, <span class="at">con =</span> con)</span></code></pre></div>
+<p>And use this to calculate impact</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>old_impact <span class="ot">&lt;-</span> vimpact<span class="sc">:::</span><span class="fu">get_raw_impact_details</span>(con, meta, <span class="st">&quot;deaths&quot;</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="fu">str</span>(old_impact)</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="co">#&gt; &#39;data.frame&#39;:    9898 obs. of  7 variables:</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co">#&gt;  $ country       : int  104 104 104 104 104 104 104 104 104 104 ...</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co">#&gt;  $ time          : int  2000 2001 2002 2003 2004 2005 2006 2007 2008 2009 ...</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt;  $ baseline_value: num  5636 5765 5901 6034 6172 ...</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt;  $ focal_value   : num  5636 5765 5901 6015 6075 ...</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt;  $ value         : num  0 0 0 19 97 180 252 312 344 381 ...</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt;  $ index         : int  1 1 1 1 1 1 1 1 1 1 ...</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt;  $ burden_outcome: chr  &quot;deaths&quot; &quot;deaths&quot; &quot;deaths&quot; &quot;deaths&quot; ...</span></span></code></pre></div>
+</div>
+</div>
+<div id="impact-by-year-of-vaccination" class="section level2">
+<h2>Impact by year of vaccination</h2>
+<div id="function-interface-1" class="section level3">
+<h3>Function interface</h3>
+<p>Very similar to examples for calendar year and birth year, to
+calculate impact by year of vaccination stratified by activity type
+run</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>impact <span class="ot">&lt;-</span> vimpact<span class="sc">::</span><span class="fu">calculate_impact</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  con, <span class="at">method =</span> <span class="st">&quot;yov_activity_type&quot;</span>, <span class="at">touchstone =</span> <span class="st">&quot;201910gavi-5&quot;</span>,</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  <span class="at">modelling_group =</span> <span class="st">&quot;CDA-Razavi&quot;</span>,  <span class="at">disease =</span> <span class="st">&quot;HepB&quot;</span>,</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  <span class="at">focal_scenario_type =</span> <span class="st">&quot;default&quot;</span>, <span class="at">focal_vaccine_delivery =</span> <span class="fu">list</span>(</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>    <span class="fu">list</span>(<span class="at">vaccine =</span> <span class="st">&quot;HepB_BD&quot;</span>, <span class="at">activity_type =</span> <span class="st">&quot;routine&quot;</span>),</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>    <span class="fu">list</span>(<span class="at">vaccine =</span> <span class="st">&quot;HepB&quot;</span>, <span class="at">activity_type =</span> <span class="st">&quot;routine&quot;</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>  ),</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>  <span class="at">baseline_scenario_type =</span> <span class="st">&quot;novac&quot;</span>,</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>  <span class="at">burden_outcomes =</span> <span class="st">&quot;dalys&quot;</span>)</span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="fu">str</span>(impact)</span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co">#&gt; tibble [4,279 × 8] (S3: tbl_df/tbl/data.frame)</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="co">#&gt;  $ country       : chr [1:4279] &quot;AFG&quot; &quot;AFG&quot; &quot;AFG&quot; &quot;AFG&quot; ...</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co">#&gt;  $ vaccine       : chr [1:4279] &quot;HepB&quot; &quot;HepB&quot; &quot;HepB&quot; &quot;HepB&quot; ...</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co">#&gt;  $ activity_type : chr [1:4279] &quot;routine&quot; &quot;routine&quot; &quot;routine&quot; &quot;routine&quot; ...</span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co">#&gt;  $ year          : int [1:4279] 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 ...</span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="co">#&gt;  $ burden_outcome: chr [1:4279] &quot;dalys&quot; &quot;dalys&quot; &quot;dalys&quot; &quot;dalys&quot; ...</span></span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="co">#&gt;  $ impact        : num [1:4279] 103859 106575 105852 111953 115165 ...</span></span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="co">#&gt;  $ impact_ratio  : num [1:4279] 0.154 0.154 0.154 0.154 0.154 ...</span></span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a><span class="co">#&gt;  $ fvps          : num [1:4279] 676396 694088 689380 729111 750028 ...</span></span></code></pre></div>
+<p>or use <code>method = &quot;yov_birth_cohort</code> for impact by year of
+vaccination stratified by birth cohort. This uses the same logic as
+other impact methods but before calling the public facing impact
+function it will also extract FVP data from the data base for this
+<code>touchstone</code> and vaccine delivery. It then calls either
+<code>impact_by_year_of_vaccination_activity_type</code> or
+<code>impact_by_year_of_vaccination_birth_cohort</code> to get
+impact.</p>
+</div>
+<div id="recipe-interface-1" class="section level3">
+<h3>Recipe interface</h3>
+<p>We can re-use the recipe from above and get meta table for this
+method</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>meta <span class="ot">&lt;-</span> vimpact<span class="sc">:::</span><span class="fu">get_meta_from_recipe</span>(<span class="at">default_recipe =</span> <span class="cn">FALSE</span>, <span class="at">recipe =</span> t,</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>                                      <span class="at">method =</span> <span class="st">&quot;method2a&quot;</span>, <span class="at">con =</span> con)</span></code></pre></div>
+<p>Then use this to get raw impact</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>old_raw_impact <span class="ot">&lt;-</span> vimpact<span class="sc">:::</span><span class="fu">get_raw_impact_details</span>(con, meta, <span class="st">&quot;dalys&quot;</span>)</span></code></pre></div>
+<p>Extract the fvp data and map output to required interface</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>fvps <span class="ot">&lt;-</span> vimpact<span class="sc">::</span><span class="fu">extract_vaccination_history</span>(con, <span class="st">&quot;201910gavi-5&quot;</span>, <span class="at">year_min =</span> <span class="dv">2000</span>,</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>                                             <span class="at">year_max =</span> <span class="dv">2030</span>,</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>                                             <span class="at">disease_to_extract =</span> <span class="st">&quot;HepB&quot;</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="co">#&gt; User defined touchstone version is used.</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co">#&gt; Converting input coverage data......</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co">#&gt; Extracted interpolated population.</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="co">#&gt; Extracted raw coverage data...</span></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co">#&gt; Transformed coverage data.</span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>fvps<span class="sc">$</span>fvps <span class="ot">&lt;-</span> fvps<span class="sc">$</span>fvps_adjusted</span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>fvps<span class="sc">$</span>country <span class="ot">&lt;-</span> fvps<span class="sc">$</span>country_nid</span></code></pre></div>
+<p>Then can use <code>meta</code>, <code>raw_impact</code> and
+<code>fvps</code> to calculate impact by year of vaccination</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>old_impact <span class="ot">&lt;-</span> vimpact<span class="sc">:::</span><span class="fu">impact_by_year_of_vaccination</span>(</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>  meta, old_raw_impact, fvps, <span class="at">vaccination_years =</span> <span class="dv">2000</span><span class="sc">:</span><span class="dv">2030</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="fu">str</span>(old_impact)</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="co">#&gt; &#39;data.frame&#39;:    4964 obs. of  27 variables:</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="co">#&gt;  $ country             : int  4 4 4 4 4 4 4 4 4 4 ...</span></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="co">#&gt;  $ vaccine             : chr  &quot;HepB_BD&quot; &quot;HepB&quot; &quot;HepB_BD&quot; &quot;HepB_BD&quot; ...</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co">#&gt;  $ activity_type       : chr  &quot;routine&quot; &quot;routine&quot; &quot;routine&quot; &quot;routine&quot; ...</span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="co">#&gt;  $ scenario_description: chr  &quot;best-estimates&quot; &quot;best-estimates&quot; &quot;best-estimates&quot; &quot;best-estimates&quot; ...</span></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co">#&gt;  $ coverage_set        : int  1750 1751 1750 1750 1751 1751 1751 1751 1751 1751 ...</span></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co">#&gt;  $ delivery_id         : int  487 3093 1169 1175 3376 4029 4272 3375 4564 3096 ...</span></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="co">#&gt;  $ disease             : chr  &quot;HepB&quot; &quot;HepB&quot; &quot;HepB&quot; &quot;HepB&quot; ...</span></span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="co">#&gt;  $ scenario_type       : chr  &quot;default&quot; &quot;default&quot; &quot;default&quot; &quot;default&quot; ...</span></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="co">#&gt;  $ gavi_support_level  : chr  &quot;with&quot; &quot;with&quot; &quot;with&quot; &quot;with&quot; ...</span></span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a><span class="co">#&gt;  $ year                : int  2016 2017 2014 2025 2030 2015 2019 2027 2029 2020 ...</span></span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a><span class="co">#&gt;  $ gavi_support        : logi  FALSE FALSE FALSE FALSE FALSE FALSE ...</span></span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a><span class="co">#&gt;  $ gender              : chr  &quot;Both&quot; &quot;Both&quot; &quot;Both&quot; &quot;Both&quot; ...</span></span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a><span class="co">#&gt;  $ age                 : num  0 0 0 0 0 0 0 0 0 0 ...</span></span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a><span class="co">#&gt;  $ target_source       : num  1118424 1131834 1103729 1180725 1188620 ...</span></span>
+<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a><span class="co">#&gt;  $ coverage_source     : num  0.18 0.66 0.04 0.473 0.749 ...</span></span>
+<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a><span class="co">#&gt;  $ cohort_size         : num  1118424 1131834 1103729 1180725 1188620 ...</span></span>
+<span id="cb9-21"><a href="#cb9-21" tabindex="-1"></a><span class="co">#&gt;  $ delivery_population : num  1118424 1131834 1103729 1180725 1188620 ...</span></span>
+<span id="cb9-22"><a href="#cb9-22" tabindex="-1"></a><span class="co">#&gt;  $ fvps_source         : num  201316 747010 44149 558483 890514 ...</span></span>
+<span id="cb9-23"><a href="#cb9-23" tabindex="-1"></a><span class="co">#&gt;  $ fvps_adjusted       : num  201316 747010 44149 558483 890514 ...</span></span>
+<span id="cb9-24"><a href="#cb9-24" tabindex="-1"></a><span class="co">#&gt;  $ coverage_adjusted   : num  0.18 0.66 0.04 0.473 0.749 ...</span></span>
+<span id="cb9-25"><a href="#cb9-25" tabindex="-1"></a><span class="co">#&gt;  $ country_nid         : int  4 4 4 4 4 4 4 4 4 4 ...</span></span>
+<span id="cb9-26"><a href="#cb9-26" tabindex="-1"></a><span class="co">#&gt;  $ fvps                : num  201316 747010 44149 558483 890514 ...</span></span>
+<span id="cb9-27"><a href="#cb9-27" tabindex="-1"></a><span class="co">#&gt;  $ time                : num  2016 2017 2014 2025 2030 ...</span></span>
+<span id="cb9-28"><a href="#cb9-28" tabindex="-1"></a><span class="co">#&gt;  $ burden_outcome      : chr  &quot;dalys&quot; &quot;dalys&quot; &quot;dalys&quot; &quot;dalys&quot; ...</span></span>
+<span id="cb9-29"><a href="#cb9-29" tabindex="-1"></a><span class="co">#&gt;  $ impact_ratio        : num  0.154 0.154 0.154 0.154 0.154 ...</span></span>
+<span id="cb9-30"><a href="#cb9-30" tabindex="-1"></a><span class="co">#&gt;  $ impact              : num  30912 114701 6779 85754 136736 ...</span></span>
+<span id="cb9-31"><a href="#cb9-31" tabindex="-1"></a><span class="co">#&gt;  $ index               : int  1 1 1 1 1 1 1 1 1 1 ...</span></span></code></pre></div>
+</div>
+</div>
+<div id="comparison" class="section level2">
+<h2>Comparison</h2>
+<p><code>calculate_impact</code> has a very similar interface as a
+single row in an impact recipe. The output is slightly different format
+but output from previous method can be transformed into same format.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>country <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">tbl</span>(con, <span class="st">&quot;country&quot;</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>old_impact <span class="ot">&lt;-</span> old_impact <span class="sc">%&gt;%</span></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(country, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;country&quot;</span> <span class="ot">=</span> <span class="st">&quot;nid&quot;</span>), <span class="at">copy =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="at">country =</span> id, vaccine, activity_type, <span class="at">year =</span> time,</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>                burden_outcome, impact) <span class="sc">%&gt;%</span></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(impact)) <span class="sc">%&gt;%</span></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(activity_type, country, year, vaccine)</span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="fu">str</span>(old_impact)</span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="co">#&gt; &#39;data.frame&#39;:    4279 obs. of  6 variables:</span></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="co">#&gt;  $ country       : chr  &quot;AFG&quot; &quot;AFG&quot; &quot;AFG&quot; &quot;AFG&quot; ...</span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="co">#&gt;  $ vaccine       : chr  &quot;HepB&quot; &quot;HepB&quot; &quot;HepB&quot; &quot;HepB&quot; ...</span></span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a><span class="co">#&gt;  $ activity_type : chr  &quot;routine&quot; &quot;routine&quot; &quot;routine&quot; &quot;routine&quot; ...</span></span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a><span class="co">#&gt;  $ year          : num  2007 2008 2009 2010 2011 ...</span></span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a><span class="co">#&gt;  $ burden_outcome: chr  &quot;dalys&quot; &quot;dalys&quot; &quot;dalys&quot; &quot;dalys&quot; ...</span></span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a><span class="co">#&gt;  $ impact        : num  103859 106575 105852 111953 115165 ...</span></span></code></pre></div>
+<p>and we can see from a plot that the output is very similar</p>
+<div id="hepb" class="section level3">
+<h3>HepB</h3>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>htmltools<span class="sc">::</span>tags<span class="sc">$</span><span class="fu">iframe</span>( </span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>  <span class="at">src =</span> <span class="st">&quot;impact_comparisons_hepb.html&quot;</span>, </span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>  <span class="at">width =</span> <span class="st">&quot;100%&quot;</span>, </span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>  <span class="at">height =</span> <span class="st">&quot;400&quot;</span>, </span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>  <span class="at">scrolling =</span> <span class="st">&quot;no&quot;</span>, </span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>  <span class="at">seamless =</span> <span class="st">&quot;seamless&quot;</span>, </span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a>  <span class="at">frameBorder =</span> <span class="st">&quot;0&quot;</span>, </span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a>  <span class="st">`</span><span class="at">data-external</span><span class="st">`</span> <span class="ot">=</span> <span class="st">&quot;1&quot;</span> </span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a>)</span></code></pre></div>
+<iframe src="impact_comparisons_hepb.html" width="100%" height="400" scrolling="no" seamless="seamless" frameBorder="0" data-external="1"></iframe>
+</div>
+<div id="measles" class="section level3">
+<h3>Measles</h3>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>htmltools<span class="sc">::</span>tags<span class="sc">$</span><span class="fu">iframe</span>( </span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>  <span class="at">src =</span> <span class="st">&quot;impact_comparisons_measles.html&quot;</span>, </span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>  <span class="at">width =</span> <span class="st">&quot;100%&quot;</span>, </span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>  <span class="at">height =</span> <span class="st">&quot;400&quot;</span>, </span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>  <span class="at">scrolling =</span> <span class="st">&quot;no&quot;</span>, </span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>  <span class="at">seamless =</span> <span class="st">&quot;seamless&quot;</span>, </span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a>  <span class="at">frameBorder =</span> <span class="st">&quot;0&quot;</span>, </span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a>  <span class="st">`</span><span class="at">data-external</span><span class="st">`</span> <span class="ot">=</span> <span class="st">&quot;1&quot;</span> </span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a>)</span></code></pre></div>
+<iframe src="impact_comparisons_measles.html" width="100%" height="400" scrolling="no" seamless="seamless" frameBorder="0" data-external="1"></iframe>
+</div>
+<div id="comparisons-of-hepb-measles-yf" class="section level3">
+<h3>Comparisons of HepB, Measles &amp; YF</h3>
+<p>This shows bars of mean difference between old impact &amp; new
+impact method for each country for HepB, Measles and YF. Tooltips show
+the number of observations and the min and max order of the values.
+i.e. an impact of 23432.342 has order 5.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>htmltools<span class="sc">::</span>tags<span class="sc">$</span><span class="fu">iframe</span>( </span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>  <span class="at">src =</span> <span class="st">&quot;impact_comparisons.html&quot;</span>, </span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>  <span class="at">width =</span> <span class="st">&quot;100%&quot;</span>, </span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>  <span class="at">height =</span> <span class="st">&quot;400&quot;</span>, </span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>  <span class="at">scrolling =</span> <span class="st">&quot;no&quot;</span>, </span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>  <span class="at">seamless =</span> <span class="st">&quot;seamless&quot;</span>, </span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a>  <span class="at">frameBorder =</span> <span class="st">&quot;0&quot;</span>, </span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a>  <span class="st">`</span><span class="at">data-external</span><span class="st">`</span> <span class="ot">=</span> <span class="st">&quot;1&quot;</span> </span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a>)</span></code></pre></div>
+<iframe src="impact_comparisons.html" width="100%" height="400" scrolling="no" seamless="seamless" frameBorder="0" data-external="1"></iframe>
+<p>There are small differences in impact because of differences in
+precision. <code>calculate_impact</code> tries to do large parts of the
+aggregation on the database where <code>burden_estimate</code> values
+are stored as Postgres <code>real</code> type which has 4 bytes of
+storage size and 6 decimal digits of precision. Whereas if we pull this
+before aggregation the values are stored in R as doubles which are much
+higher precision leading to small differences when aggregated.</p>
+<p><code>calculate_impact</code> at the moment won’t be able to generate
+impact for you for more than 1 set of scenario comparisons. Next steps
+will be to add a wrapper which can take some data like the impact recipe
+and call <code>calculate_imapct</code> for multiple scenarios.</p>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
