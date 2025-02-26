@@ -4,6 +4,8 @@ get_raw_impact_details <- function(con, meta1, burden_outcome, is_under5 = FALSE
   stopifnot(burden_outcome %in% c("deaths", "cases", "dalys", "yll",
                                   "deaths_cwyx", "cases_cwyx", "dalys_cwyx", "yll_cwyx")) # _cwyx outcomes are MenA specific.
   stopifnot(is_under5 %in% c(TRUE, FALSE))
+  meta1$burden_outcome <- gsub("rubella_deaths_congenital", "deaths", meta1$burden_outcome)
+  meta1$burden_outcome <- gsub("rubella_cases_congenital", "cases", meta1$burden_outcome)
 
   # determine whether a recipe is for routine or campaign vaccine delivery
   # routine or campaign matters for method2a in terms of the shape of burden estimates to extract
