@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Rob Ashton, Xiang Li, Katy Gaythorpe" />
+
+<meta name="date" content="2025-02-26" />
+
+<title>Using vimpact for estimating vaccine impact</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Using vimpact for estimating vaccine
+impact</h1>
+<h4 class="author">Rob Ashton, Xiang Li, Katy Gaythorpe</h4>
+<h4 class="date">2025-02-26</h4>
+
+
+
+<p>This vignette describes how to use impact calculation methods used in
+VIMC as an external user.</p>
+<p>N.B. For VIMC Rubella models, disease burden is measured in terms of
+CRS cases affecting newborns, linked to their pregnant mothers. This is
+different from many other diseases (e.g., HepB, measles or YF in this
+vignette), where the burden is directly attributed to the infected
+individual. Consequently, when you see vimpact outputs for Rubella,
+please refer to the following interpretations.</p>
+<p>a.) Age-specific calendar impact</p>
+<p>Definition: The disease burden averted for newborns in a given
+calendar year, attributed to mothers in specific age groups during that
+year. Interpretation: How many CRS related burden are prevented among
+newborns, broken down by the age of the mother in the year of
+pregnancy.</p>
+<p>b.) Calendar impact</p>
+<p>Definition: The total disease burden averted for newborns in a given
+calendar year (regardless of the mother’s age). Interpretation: How many
+CRS related burden are prevented among newborns overall in that
+year.</p>
+<p>c.) Cohort impact</p>
+<p>Definition: The disease burden averted for newborns whose mothers
+were born in a specific birth year. Interpretation: How many CRS related
+burden are prevented among newborns, categorized by the mother’s year of
+birth.</p>
+<p>d.) Impact by year of vaccination</p>
+<p>Definition: The disease burden averted that is linked to immunization
+programs carried out in a particular year. Interpretation: How many CRS
+related burden are prevented among newborns, attributed to vaccinations
+given in that specific year.</p>
+<div id="data" class="section level2">
+<h2>Data</h2>
+<p>The simplest possible example is a static model with constant routine
+immunisation and a one-off campaign. Burden estimates from a theoretical
+country are found in 3 csv titled <code>example_novax_burden.csv</code>,
+<code>example_routine_burden.csv</code> and
+<code>example_routine_campaign_burden.csv</code>. These include
+estimates of burden in years 1900 - 2100 and display the format used by
+the functions.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>example_novax <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="fu">system.file</span>(<span class="st">&quot;extdata/example_novax_burden.csv&quot;</span>, <span class="at">package =</span> <span class="st">&quot;vimpact&quot;</span>))</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>example_routine <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="fu">system.file</span>(<span class="st">&quot;extdata/example_routine_burden.csv&quot;</span>, <span class="at">package =</span> <span class="st">&quot;vimpact&quot;</span>))</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>example_routine_campaign <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="fu">system.file</span>(<span class="st">&quot;extdata/example_routine_campaign_burden.csv&quot;</span>, <span class="at">package =</span> <span class="st">&quot;vimpact&quot;</span>))</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="fu">str</span>(example_novax)</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="co">#&gt; &#39;data.frame&#39;:    10201 obs. of  6 variables:</span></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co">#&gt;  $ country       : chr  &quot;ABC&quot; &quot;ABC&quot; &quot;ABC&quot; &quot;ABC&quot; ...</span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co">#&gt;  $ year          : int  2000 2000 2000 2000 2000 2000 2000 2000 2000 2000 ...</span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co">#&gt;  $ age           : int  0 1 2 3 4 5 6 7 8 9 ...</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="co">#&gt;  $ value         : int  16 15 14 13 13 12 12 11 11 10 ...</span></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co">#&gt;  $ activity_type : chr  &quot;novax&quot; &quot;novax&quot; &quot;novax&quot; &quot;novax&quot; ...</span></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="co">#&gt;  $ burden_outcome: chr  &quot;deaths&quot; &quot;deaths&quot; &quot;deaths&quot; &quot;deaths&quot; ...</span></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="fu">str</span>(example_routine)</span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="co">#&gt; &#39;data.frame&#39;:    10201 obs. of  6 variables:</span></span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a><span class="co">#&gt;  $ country       : chr  &quot;ABC&quot; &quot;ABC&quot; &quot;ABC&quot; &quot;ABC&quot; ...</span></span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a><span class="co">#&gt;  $ year          : int  2000 2000 2000 2000 2000 2000 2000 2000 2000 2000 ...</span></span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a><span class="co">#&gt;  $ age           : int  0 1 2 3 4 5 6 7 8 9 ...</span></span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a><span class="co">#&gt;  $ value         : int  16 15 14 13 13 12 12 11 11 10 ...</span></span>
+<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a><span class="co">#&gt;  $ activity_type : chr  &quot;routine&quot; &quot;routine&quot; &quot;routine&quot; &quot;routine&quot; ...</span></span>
+<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a><span class="co">#&gt;  $ burden_outcome: chr  &quot;deaths&quot; &quot;deaths&quot; &quot;deaths&quot; &quot;deaths&quot; ...</span></span>
+<span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a><span class="fu">str</span>(example_routine_campaign)</span>
+<span id="cb1-22"><a href="#cb1-22" tabindex="-1"></a><span class="co">#&gt; &#39;data.frame&#39;:    10201 obs. of  6 variables:</span></span>
+<span id="cb1-23"><a href="#cb1-23" tabindex="-1"></a><span class="co">#&gt;  $ country       : chr  &quot;ABC&quot; &quot;ABC&quot; &quot;ABC&quot; &quot;ABC&quot; ...</span></span>
+<span id="cb1-24"><a href="#cb1-24" tabindex="-1"></a><span class="co">#&gt;  $ year          : int  2000 2000 2000 2000 2000 2000 2000 2000 2000 2000 ...</span></span>
+<span id="cb1-25"><a href="#cb1-25" tabindex="-1"></a><span class="co">#&gt;  $ age           : int  0 1 2 3 4 5 6 7 8 9 ...</span></span>
+<span id="cb1-26"><a href="#cb1-26" tabindex="-1"></a><span class="co">#&gt;  $ value         : int  16 15 14 13 13 12 12 11 11 10 ...</span></span>
+<span id="cb1-27"><a href="#cb1-27" tabindex="-1"></a><span class="co">#&gt;  $ activity_type : chr  &quot;campaign&quot; &quot;campaign&quot; &quot;campaign&quot; &quot;campaign&quot; ...</span></span>
+<span id="cb1-28"><a href="#cb1-28" tabindex="-1"></a><span class="co">#&gt;  $ burden_outcome: chr  &quot;deaths&quot; &quot;deaths&quot; &quot;deaths&quot; &quot;deaths&quot; ...</span></span></code></pre></div>
+</div>
+<div id="impact-by-calendar-year-cross-sectional-impact" class="section level2">
+<h2>Impact by calendar year (cross-sectional impact)</h2>
+<p>Impact by calendar year calculates impact accrued over all ages for a
+specific year. This calculates the difference in disease burden between
+baseline and focal scenarios for a given year.</p>
+<p>To use this method you need to provide a data frame of baseline
+impact and a data frame of focal impact for the vaccine of interest for
+a given age, year and country.</p>
+<p>These data frames must contain columns for country, burden_outcome
+(e.g. cases, deaths, DALYs), year, age and value. It will sum the values
+over all ages for each year and return the impact as the difference
+between baseline and focal scenarios for each group.</p>
+<p>If the baseline and focal impact data contains groups which do not
+overlap then this will return impact only for groups contained in both
+datasets.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>calendar_year <span class="ot">&lt;-</span> vimpact<span class="sc">::</span><span class="fu">impact_by_calendar_year</span>(<span class="at">baseline_burden =</span> example_novax, <span class="at">focal_burden =</span> example_routine_campaign)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">str</span>(calendar_year)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co">#&gt; tibble [101 × 4] (S3: tbl_df/tbl/data.frame)</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co">#&gt;  $ country       : chr [1:101] &quot;ABC&quot; &quot;ABC&quot; &quot;ABC&quot; &quot;ABC&quot; ...</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">#&gt;  $ burden_outcome: chr [1:101] &quot;deaths&quot; &quot;deaths&quot; &quot;deaths&quot; &quot;deaths&quot; ...</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">#&gt;  $ year          : int [1:101] 2000 2001 2002 2003 2004 2005 2006 2007 2008 2009 ...</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt;  $ impact        : int [1:101] 0 0 0 0 0 3 11 18 27 35 ...</span></span></code></pre></div>
+</div>
+<div id="impact-by-birth-year-lifetime-impact" class="section level2">
+<h2>Impact by birth year (lifetime impact)</h2>
+<p>When calculating impact by birth year we account for the long-term
+impact of vaccination by finding the sum of the difference in burden
+between focal and baseline scenarios over the lifetime of a particular
+cohort. This can be written as <span class="math inline">\(D(c, k) =
+\sum_{y-a=k}D_{b-f}(a, c, y)\)</span> where <span class="math inline">\(y \in Y_{m}\)</span> and <span class="math inline">\(a \in A_{m}\)</span> where <span class="math inline">\(D\)</span> is the difference in burden, <span class="math inline">\(b\)</span> is baseline, <span class="math inline">\(f\)</span> is focal, <span class="math inline">\(a\)</span> is age, <span class="math inline">\(c\)</span> is country, <span class="math inline">\(y\)</span> is year, <span class="math inline">\(k\)</span> is birth cohort, <span class="math inline">\(Y_{m}\)</span> are the years modelled and <span class="math inline">\(A_{m}\)</span> are the ages modelled. This
+requires the same data as <code>impact_by_calendar_year</code>. You need
+to provide data frames containing baseline and focal impact for the
+vaccine of interest for a given age, year and country.</p>
+<p>These data frames must contain columns for country, burden_outcome
+(e.g. cases, deaths, DALYs), year, age and value. It will sum the impact
+grouped by country, burden_outcome, and birth year. Where birth year is
+<code>year - age</code>. Then calculates the impact for these
+groups.</p>
+<p>If the baseline and focal impact data contains groups which do not
+overlap then this will return impact only for groups contained in both
+datasets.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>birth_year <span class="ot">&lt;-</span> vimpact<span class="sc">::</span><span class="fu">impact_by_birth_year</span>(<span class="at">baseline_burden =</span> example_novax, <span class="at">focal_burden =</span> example_routine_campaign)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">str</span>(birth_year)</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co">#&gt; tibble [201 × 4] (S3: tbl_df/tbl/data.frame)</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#&gt;  $ country       : chr [1:201] &quot;ABC&quot; &quot;ABC&quot; &quot;ABC&quot; &quot;ABC&quot; ...</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt;  $ burden_outcome: chr [1:201] &quot;deaths&quot; &quot;deaths&quot; &quot;deaths&quot; &quot;deaths&quot; ...</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt;  $ birth_cohort  : int [1:201] 1900 1901 1902 1903 1904 1905 1906 1907 1908 1909 ...</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#&gt;  $ impact        : int [1:201] 0 0 0 0 0 0 0 0 0 0 ...</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>birth_year<span class="sc">$</span>year <span class="ot">&lt;-</span> birth_year<span class="sc">$</span>birth_cohort</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>birth_year<span class="sc">$</span>impact_birth_year <span class="ot">&lt;-</span> birth_year<span class="sc">$</span>impact</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>calendar_year<span class="sc">$</span>impact_calendar_year <span class="ot">&lt;-</span> calendar_year<span class="sc">$</span>impact</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>plot_data <span class="ot">&lt;-</span> <span class="fu">merge</span>(birth_year, calendar_year, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;country&quot;</span>, <span class="st">&quot;burden_outcome&quot;</span>, <span class="st">&quot;year&quot;</span>))</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>plot_data<span class="sc">$</span>year <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(<span class="fu">paste</span>(plot_data<span class="sc">$</span>year, <span class="st">&quot;01&quot;</span>, <span class="st">&quot;01&quot;</span>, <span class="at">sep =</span> <span class="st">&quot;-&quot;</span>))</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(plot_data, ggplot2<span class="sc">::</span><span class="fu">aes</span>(<span class="at">x =</span> year)) <span class="sc">+</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">geom_line</span>(ggplot2<span class="sc">::</span><span class="fu">aes</span>(<span class="at">y =</span> impact_birth_year, <span class="at">colour =</span> <span class="st">&quot;birth year&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">geom_line</span>(ggplot2<span class="sc">::</span><span class="fu">aes</span>(<span class="at">y =</span> impact_calendar_year, <span class="at">colour =</span> <span class="st">&quot;calendar year&quot;</span>)) <span class="sc">+</span> </span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">expand_limits</span>(<span class="at">y =</span> <span class="dv">0</span>) <span class="sc">+</span> </span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">ylab</span>(<span class="st">&quot;Impact&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">xlab</span>(<span class="st">&quot;Year&quot;</span>)</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+</div>
+<div id="impact-by-year-of-vaccination" class="section level2">
+<h2>Impact by year of vaccination</h2>
+<p>The final view of impact is by attributing it to the year in which
+vaccination took place. Impact by year of vaccination methods are vital
+for determining the long-term impact of of vaccination due to activities
+carried out in a particular year. We obtain the impact ratio as the
+impact attributable per fully vaccinated person (FVP) calculated as the
+coverage × cohort size. This ratio can be stratified by different
+characteristics, such as birth cohort in order to catch temporal changes
+in transmission or healthcare or by activity type to capture the
+differing effects of routine and campaign vaccination. The impact ratio
+allows effects due to a particular year’s worth of vaccination to be
+attributed to that year.</p>
+<div id="impact-by-year-of-vaccination-impact-ratio-stratified-by-activity-type" class="section level3">
+<h3>Impact by year of vaccination: impact ratio stratified by activity
+type</h3>
+<p>To calculate impact by year of vaccination with impact ratio
+stratified by activity type use function
+<code>impact_by_year_of_vaccination_activity_type</code>. You need to
+provide 3 data frames. Like the previous two impact methods this needs a
+data frame of baseline impact and focal impact. These must contain the
+same columns as in the previous two methods with the addition of a
+column for the <code>activity_type</code> of the vaccination - either
+routine or campaign.</p>
+<p>You also need to provide a data frame of FVP (fully vaccinated
+person) data which contains country, year, activity type, age and fvp.
+And a set of <code>vaccination_years</code> which is a range of years
+for which you want calculate impact for. This will be used to filter the
+baseline impact, focal impact and FVPs.</p>
+<p>This method produces impact values for a particular disease
+stratified by country, activity type, year and burden outcome.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>example_fvps <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="fu">system.file</span>(<span class="st">&quot;extdata/example_fvps.csv&quot;</span>, <span class="at">package =</span> <span class="st">&quot;vimpact&quot;</span>))</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>routine <span class="ot">&lt;-</span> vimpact<span class="sc">::</span><span class="fu">impact_by_year_of_vaccination_activity_type</span>(<span class="at">baseline_burden =</span> example_novax, <span class="at">focal_burden =</span> example_routine, <span class="at">fvps =</span> example_fvps[example_fvps<span class="sc">$</span>activity_type <span class="sc">==</span> <span class="st">&quot;routine&quot;</span>,], <span class="dv">2000</span><span class="sc">:</span><span class="dv">2030</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>campaign <span class="ot">&lt;-</span> vimpact<span class="sc">::</span><span class="fu">impact_by_year_of_vaccination_activity_type</span>(<span class="at">baseline_burden =</span> example_routine, <span class="at">focal_burden =</span> example_routine_campaign, <span class="at">fvps =</span> example_fvps[example_fvps<span class="sc">$</span>activity_type <span class="sc">==</span> <span class="st">&quot;campaign&quot;</span>,], <span class="dv">2000</span><span class="sc">:</span><span class="dv">2030</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>activity_type <span class="ot">&lt;-</span> <span class="fu">rbind</span>(routine, campaign)</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="fu">str</span>(activity_type)</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co">#&gt; tibble [35 × 8] (S3: tbl_df/tbl/data.frame)</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co">#&gt;  $ country       : chr [1:35] &quot;ABC&quot; &quot;ABC&quot; &quot;ABC&quot; &quot;ABC&quot; ...</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co">#&gt;  $ vaccine       : chr [1:35] &quot;YF&quot; &quot;YF&quot; &quot;YF&quot; &quot;YF&quot; ...</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="co">#&gt;  $ activity_type : chr [1:35] &quot;routine&quot; &quot;routine&quot; &quot;routine&quot; &quot;routine&quot; ...</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co">#&gt;  $ year          : int [1:35] 2004 2005 2006 2007 2008 2009 2010 2011 2012 2013 ...</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co">#&gt;  $ burden_outcome: chr [1:35] &quot;deaths&quot; &quot;deaths&quot; &quot;deaths&quot; &quot;deaths&quot; ...</span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co">#&gt;  $ impact        : num [1:35] 184 323 404 478 479 ...</span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="co">#&gt;  $ impact_ratio  : num [1:35] 0.168 0.168 0.168 0.168 0.168 ...</span></span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="co">#&gt;  $ fvps          : int [1:35] 1090 1919 2397 2838 2842 4008 2971 2310 1494 2996 ...</span></span></code></pre></div>
+</div>
+<div id="impact-by-year-of-vaccination-impact-ratio-stratified-by-birth-cohort" class="section level3">
+<h3>Impact by year of vaccination: impact ratio stratified by birth
+cohort</h3>
+<p>Impact by year of vaccination can be stratified by birth cohort to
+catch temporal changes in transmission or healthcare. This method is
+invariant to vaccination activity type. However, vaccine effect is
+assumed to vary over time through birth cohorts.</p>
+<p>This method requires basline impact, focal impact and FVPs
+disaggregated by country, burden outcome, year and age. The data doesn’t
+have to be disaggregated by <code>activity_type</code>. This returns
+impact for a particular vaccine by country, year and burden outcome.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>cohort_type <span class="ot">&lt;-</span> vimpact<span class="sc">::</span><span class="fu">impact_by_year_of_vaccination_birth_cohort</span>(<span class="at">baseline_burden =</span> example_novax, <span class="at">focal_burden =</span> example_routine_campaign, <span class="at">fvps =</span> example_fvps, <span class="dv">2000</span><span class="sc">:</span><span class="dv">2030</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="fu">str</span>(cohort_type)</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="co">#&gt; tibble [35 × 7] (S3: tbl_df/tbl/data.frame)</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="co">#&gt;  $ country       : chr [1:35] &quot;ABC&quot; &quot;ABC&quot; &quot;ABC&quot; &quot;ABC&quot; ...</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co">#&gt;  $ year          : int [1:35] 2013 2018 2019 2020 2021 2022 2023 2024 2004 2005 ...</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co">#&gt;  $ burden_outcome: chr [1:35] &quot;deaths&quot; &quot;deaths&quot; &quot;deaths&quot; &quot;deaths&quot; ...</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co">#&gt;  $ vaccine       : chr [1:35] &quot;YF&quot; &quot;YF&quot; &quot;YF&quot; &quot;YF&quot; ...</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">#&gt;  $ activity_type : chr [1:35] &quot;campaign&quot; &quot;campaign&quot; &quot;campaign&quot; &quot;campaign&quot; ...</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="co">#&gt;  $ impact        : num [1:35] 619 868 1314 1348 1891 ...</span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="co">#&gt;  $ fvps          : int [1:35] 9987 12378 18313 18310 25002 24999 24997 26681 1090 1919 ...</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>activity_sum <span class="ot">&lt;-</span> stats<span class="sc">::</span><span class="fu">aggregate</span>(impact <span class="sc">~</span> country <span class="sc">+</span> year <span class="sc">+</span> burden_outcome,</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>                                 activity_type, sum)</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>cohort_sum <span class="ot">&lt;-</span> stats<span class="sc">::</span><span class="fu">aggregate</span>(impact <span class="sc">~</span> country <span class="sc">+</span> year <span class="sc">+</span> burden_outcome,</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>                                 cohort_type, sum)</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>activity_sum<span class="sc">$</span>impact_activity_strat <span class="ot">&lt;-</span> activity_sum<span class="sc">$</span>impact</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>cohort_sum<span class="sc">$</span>impact_cohort_strat <span class="ot">&lt;-</span> cohort_sum<span class="sc">$</span>impact</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>plot_data <span class="ot">&lt;-</span> <span class="fu">merge</span>(activity_sum, cohort_sum, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;country&quot;</span>, <span class="st">&quot;burden_outcome&quot;</span>, <span class="st">&quot;year&quot;</span>))</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>plot_data<span class="sc">$</span>year <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(<span class="fu">paste</span>(plot_data<span class="sc">$</span>year, <span class="st">&quot;01&quot;</span>, <span class="st">&quot;01&quot;</span>, <span class="at">sep =</span> <span class="st">&quot;-&quot;</span>))</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(plot_data, ggplot2<span class="sc">::</span><span class="fu">aes</span>(<span class="at">x =</span> year)) <span class="sc">+</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">geom_line</span>(ggplot2<span class="sc">::</span><span class="fu">aes</span>(<span class="at">y =</span> impact_cohort_strat, <span class="at">colour =</span> <span class="st">&quot;cohort&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">geom_line</span>(ggplot2<span class="sc">::</span><span class="fu">aes</span>(<span class="at">y =</span> impact_activity_strat, <span class="at">colour =</span> <span class="st">&quot;activity&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">expand_limits</span>(<span class="at">y =</span> <span class="dv">0</span>) <span class="sc">+</span> </span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">ylab</span>(<span class="st">&quot;Impact&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">xlab</span>(<span class="st">&quot;Year&quot;</span>)</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+</div>
+</div>
+<div id="glossary" class="section level2">
+<h2>Glossary</h2>
+<p>All definitions and terminology can be found in the associated
+manuscript available at: <a href="https://www.medrxiv.org/content/10.1101/2021.01.08.21249378v1.full-text" class="uri">https://www.medrxiv.org/content/10.1101/2021.01.08.21249378v1.full-text</a>
+; we include a summary below.</p>
+<p>FVP - Fully vaccinated person</p>
+<p>Focal scenario - The vaccination scenario to be assessed in
+comparison to a baseline scenario</p>
+<p>Baseline scenario - The vaccination scenario to be compared against,
+often the situation without any vaccination (no-vac)</p>
+<p>Impact- The effect of vaccination often measure in deaths or cases
+averted and calculated as the difference in burden between a focal
+scenario and a baseline scenario</p>
+<p>Impact ratios - The impact per fully vaccinated person</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
