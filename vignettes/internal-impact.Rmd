@@ -15,6 +15,28 @@ vignette: >
 
 This vignette describes how to use vimpact to calculate impact as a member of VIMC. This requires a connection to the montagu database so can only be used internally. Note that this is all in development and the interface is likely to change.
 
+N.B. For VIMC Rubella models, disease burden is measured in terms of CRS cases affecting newborns, linked to their pregnant mothers. This is different from many other diseases (e.g., HepB, measles or YF in this vignette), where the burden is directly attributed to the infected individual. Consequently, when you see vimpact outputs for Rubella, please refer to the following interpretations.
+ 
+a.) Age-specific calendar impact
+ 
+Definition: The disease burden averted for newborns in a given calendar year, attributed to mothers in specific age groups during that year.
+Interpretation: How many CRS related burden are prevented among newborns, broken down by the age of the mother in the year of pregnancy.
+ 
+b.) Calendar impact
+ 
+Definition: The total disease burden averted for newborns in a given calendar year (regardless of the mother's age).
+Interpretation: How many CRS related burden are prevented among newborns overall in that year.
+ 
+c.) Cohort impact
+ 
+Definition: The disease burden averted for newborns whose mothers were born in a specific birth year.
+Interpretation: How many CRS related burden are prevented among newborns, categorized by the mother’s year of birth.
+ 
+d.) Impact by year of vaccination
+ 
+Definition: The disease burden averted that is linked to immunization programs carried out in a particular year.
+Interpretation: How many CRS related burden are prevented among newborns, attributed to vaccinations given in that specific year.
+
 ## Impact by calendar year & impact by birth year
 
 ### Function interface
