@@ -22,7 +22,8 @@ extract_vaccination_history(
   external_population_estimates = NULL,
   full_description = FALSE,
   demographic_source = NULL,
-  coverage_scenario_type = NULL
+  coverage_scenario_type = NULL,
+  db_memory = NULL
 )
 }
 \arguments{
@@ -55,6 +56,8 @@ extract_vaccination_history(
 
 \item{coverage_scenario_type}{Coverage scenario type. This is particularly useful for a coverage touchstone. Montagu coverage.name follows <disease>:<vaccine>,<activity_type>,<gavi_support_level>:<coverage_scenario_type>
 It is NULL by default. When it is not null, only pulls coverage.name that contains specified pattern.}
+
+\item{db_memory}{if not null, coverage is pulled from in-memory db; this is used from 202507july onwards, as we are moving away from db imports}
 }
 \description{
 Replace jenner:::fix_covreage_fvps() function

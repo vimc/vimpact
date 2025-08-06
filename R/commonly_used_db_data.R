@@ -59,6 +59,7 @@ get_touchstone_id <- function(con, touchstone) {
 ##' @param demographic_source Demographic_source.code
 ##' @param coverage_scenario_type Coverage scenario type. This is particularly useful for a coverage touchstone. Montagu coverage.name follows <disease>:<vaccine>,<activity_type>,<gavi_support_level>:<coverage_scenario_type>
 ##' It is NULL by default. When it is not null, only pulls coverage.name that contains specified pattern.
+##' @param db_memory if not null, coverage is pulled from in-memory db; this is used from 202507july onwards, as we are moving away from db imports
 ##' @export
 extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touchstone_pop = NULL,
                                         year_min = 2000, year_max = 2100,
@@ -70,7 +71,8 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
                                         external_population_estimates = NULL,
                                         full_description = FALSE,
                                         demographic_source = NULL,
-                                        coverage_scenario_type = NULL) {
+                                        coverage_scenario_type = NULL,
+                                        db_memory = NULL) {
 
   ## validate demography parameter
   ## when touchstone_pop is null, touchstone_cov is used for touchstone_pop
@@ -84,25 +86,32 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
 
   ### This function converts input coverage data to be dis-aggregated by gender and age
   ### i.e. input data by country, year and age
-
+  ### determine where to pull coverage
+  if(!is.null(db_memory)){
+    con_cov <- db_memory
+  } else {
+    con_cov <- con
+  }
   ## 1. touchstone specification
   ## which coverage touchstone to use - given touchstone name, use the latest version touchstone
   if (grepl("-", touchstone_cov)) {
-    tmp <- DBI::dbGetQuery(con, "SELECT * FROM touchstone WHERE id = $1", touchstone_cov)
+    tmp <- DBI::dbGetQuery(con_cov, "SELECT * FROM touchstone WHERE id = $1", touchstone_cov)
     if (nrow(tmp) == 1L) {
       message("User defined touchstone version is used.")
     } else {
       stop("User defined touchstone does not exist.")
     }
   } else {
-    touchstone_cov <- get_touchstone(con, touchstone_cov)
+    touchstone_cov <- get_touchstone(con_cov, touchstone_cov)
   }
 
   ## which demographic touchstone to use
-  if (is.null(touchstone_pop)) {
+  if(!is.null(touchstone_pop)){
+    touchstone_pop <- get_touchstone(con, touchstone_pop)
+  } else if(is.null(touchstone_pop) & is.null(db_memory)){
     touchstone_pop <- touchstone_cov
   } else {
-    touchstone_pop <- get_touchstone(con, touchstone_pop)
+    message("touchstone_pop is rulled out")
   }
 
   message("Converting input coverage data......")
@@ -124,7 +133,8 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
   ## select minimal needed coverage data from the db
   disease_vaccine_delivery <- read_csv(system_file("disease_vaccine_delivery.csv"))
 
-  cov_sets <- DBI::dbGetQuery(con, paste(sprintf("SELECT DISTINCT scenario_type, scenario_description, disease, coverage_set.id AS coverage_set, vaccine, activity_type, gavi_support_level
+  if(all(c("scenario_description", "scenario_type", "scenario", "scenario_coverage_set") %in% DBI::dbListTables(con_cov))){
+    cov_sets <- DBI::dbGetQuery(con_cov, paste(sprintf("SELECT DISTINCT scenario_type, scenario_description, disease, coverage_set.id AS coverage_set, vaccine, activity_type, gavi_support_level
                               FROM scenario
                               JOIN scenario_coverage_set
                               ON scenario_coverage_set.scenario = scenario.id
@@ -136,14 +146,18 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
                               AND scenario_type IN %s
                               AND gavi_support_level IN %s
                               AND vaccine NOT IN %s",
-                                                 sql_in(scenario_type),
-                                                 sql_in(gavi_support_levels),
-                                                 sql_in(vaccine_to_ignore)),
-                                         "AND scenario_description NOT LIKE '%LiST%'"),
-                              touchstone_cov)
+                                                       sql_in(scenario_type),
+                                                       sql_in(gavi_support_levels),
+                                                       sql_in(vaccine_to_ignore)),
+                                               "AND scenario_description NOT LIKE '%LiST%'"),
+                                touchstone_cov)
+  } else {
+    cov_sets <- data.frame(NULL)
+  }
+
   if (nrow(cov_sets) == 0L) {
     # this is not a model run touchstone, need to extract coverage set directly
-    cov_sets2 <- DBI::dbGetQuery(con, "SELECT name, coverage_set.id AS coverage_set, vaccine, activity_type, gavi_support_level
+    cov_sets2 <- DBI::dbGetQuery(con_cov, "SELECT name, coverage_set.id AS coverage_set, vaccine, activity_type, gavi_support_level
                                 FROM coverage_set
                                 WHERE touchstone = $1
                                 AND gavi_support_level != 'none'", touchstone_cov)
@@ -166,16 +180,16 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
                      "",
                      sprintf("AND country IN %s", sql_in(countries_to_extract, text_item = TRUE)))
 
-  cov <- DBI::dbGetQuery(con, sprintf("SELECT coverage_set, country, year, age_from, age_to, gender.name AS gender, gavi_support, target, coverage
+  cov <- DBI::dbGetQuery(con_cov, sprintf("SELECT coverage_set, country, year, age_from, age_to, gender.name AS gender, gavi_support, target, coverage
                                       FROM coverage
                                       JOIN gender ON gender.id = gender
                                       WHERE coverage_set IN %s
                                       AND coverage > 0
                                       AND year IN %s
                                       %s",
-                                      sql_in(unique(cov_sets$coverage_set), text_item = FALSE),
-                                      sql_in(year_min:year_max, text_item = FALSE),
-                                      country_))
+                                          sql_in(unique(cov_sets$coverage_set), text_item = FALSE),
+                                          sql_in(year_min:year_max, text_item = FALSE),
+                                          country_))
 
   message("Extracted raw coverage data...")
   ## transform coverage data
