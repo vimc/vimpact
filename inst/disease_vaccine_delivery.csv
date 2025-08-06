@@ -1,5 +1,7 @@
 disease,vaccine,activity_type
 Cholera,Cholera,campaign
+Cholera,OCV1,campaign
+Cholera,OCV2,campaign
 DTP,DTP3,routine
 HepB,HepB,routine
 HepB,HepB_BD,routine
@@ -16,6 +18,8 @@ Measles,Measles,campaign
 Measles,Measles,routine-intensified
 MenA,MenA,campaign
 MenA,MenA,routine
+MenA,MenACWYX,campaign
+MenA,MenACWYX,routine
 MenA,MenA,routine-intensified
 PCV,PCV3,routine
 Rota,Rota,routine
@@ -28,3 +32,9 @@ Typhoid,Typhoid,routine
 YF,YF,campaign
 YF,YF,routine
 YF,YF,routine-intensified
+Malaria,R3,routine
+Malaria,R4,routine
+Malaria,RTS3,routine
+Malaria,RTS4,routine
+COVID,COVID,campaign
+COVID,COVID,routine
