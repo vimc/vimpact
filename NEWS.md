@@ -1,3 +1,7 @@
+# vimpact 0.1.6
+
+* deal with multi-cohort routine for pulling coverage fvps.
+
 # vimpact 0.1.5
 
 * resolve a previous update that matches burden outcome to burden outcome code which did not capture the special case of rubella outcomes.
