@@ -206,8 +206,8 @@ extract_vaccination_history <- function(con, touchstone_cov = "201710gavi", touc
     message("---> swaped age_from and age_to as a correction")
   }
 
-  ## spliting coverage data by age groups
-  ll <- grepl("campaign", cov$activity_type)
+  ## splitting coverage data by age groups
+  ll <- cov$age_from != cov$age_to
   cov1 <- cov[!ll,]
   cov1$age <- cov1$age_from
   cov2 <- cov[ll,]
