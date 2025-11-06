@@ -85,3 +85,13 @@ test_that("test sql_constrain",{
   dat <- sql_constrains(country_ = "PAK", year_ = 2019, age_ = 0, burden_estimate_table = TRUE)
   expect_equal("AND country.id IN ('PAK') AND year IN (2019) AND age IN (0)", dat)
 })
+
+test_that("test routine multiple cohorts",{
+  con <- test_montagu_readonly_connection()
+  dat <- extract_vaccination_history(con, touchstone_cov = "202310gavi", year_min = 2023, year_max = 2023,
+                                     countries_to_extract = "NGA", scenario_type = "default",
+                                     disease_to_extract = c("COVID"), full_description = FALSE)
+  dat <- dat[dat$activity_type == "routine", ]
+
+  expect_false(length(unique(dat$age)) == 1L)
+})
