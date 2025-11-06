@@ -1,6 +1,6 @@
 # vimpact 0.1.6
 
-* deal with multi-cohort routine for pulling coverage fvps.
+* deal with multi-cohort routine for pulling coverage fvps. For details, see youtrack: https://mrc-ide.myjetbrains.com/youtrack/issue/VIMC-8760/fix-vimpact-for-routines-with-multiple-cohorts
 
 # vimpact 0.1.5
 
