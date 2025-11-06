@@ -93,5 +93,5 @@ test_that("test routine multiple cohorts",{
                                      disease_to_extract = c("COVID"), full_description = FALSE)
   dat <- dat[dat$activity_type == "routine", ]
 
-  expect_false(length(unique(dat$age)) == 1L)
+  expect_gt(length(unique(dat$age)), 1L)
 })
