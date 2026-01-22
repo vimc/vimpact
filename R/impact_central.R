@@ -1,4 +1,4 @@
-get_raw_impact_details <- function(con, meta1, burden_outcome, is_under5 = FALSE, countries_to_extract = NULL, age_specific = FALSE){
+get_raw_impact_details <- function(con, meta1, burden_outcome, is_under5 = FALSE, countries_to_extract = NULL, age_specific = FALSE, year_limit = 2100){
   #verify parameters
   stopifnot(nrow(meta1) == 2L)
   stopifnot(burden_outcome %in% c("deaths", "cases", "dalys", "yll",
@@ -41,6 +41,7 @@ get_raw_impact_details <- function(con, meta1, burden_outcome, is_under5 = FALSE
                    "FROM burden_estimate",
                    "WHERE burden_estimate_set = %s",
                    "AND burden_outcome IN %s",
+                   sprintf("AND year <= %d", year_limit),
                    age_constrain,
                    country_constrain)
     } else {
@@ -48,6 +49,7 @@ get_raw_impact_details <- function(con, meta1, burden_outcome, is_under5 = FALSE
                    "FROM burden_estimate",
                    "WHERE burden_estimate_set = %s",
                    "AND burden_outcome IN %s",
+                   sprintf("AND year <= %d", year_limit),
                    age_constrain,
                    country_constrain,
                    "GROUP BY country, year")
@@ -57,6 +59,7 @@ get_raw_impact_details <- function(con, meta1, burden_outcome, is_under5 = FALSE
                  "FROM burden_estimate",
                  "WHERE burden_estimate_set = %s",
                  "AND burden_outcome IN %s",
+                 sprintf("AND year <= %d", year_limit),
                  age_constrain,
                  country_constrain,
                  "GROUP BY country, (year-age)")
